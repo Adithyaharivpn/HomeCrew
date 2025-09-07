@@ -1,6 +1,7 @@
 import { AppBar,Avatar,Box,Button,Container,Divider,IconButton,List,ListItem,ListItemButton,ListItemText,Menu,MenuItem,Toolbar,Tooltip,Typography,Drawer,} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AdbIcon from "@mui/icons-material/Adb";
+import { Link } from "react-router-dom";
 import React from "react";
 
 const pages = ["Post a Job", "Signup", "Login"];
@@ -142,7 +143,9 @@ const NavBar = (props) => {
             <Button color="secondary" variant="contained">
               Post a Job
             </Button>
-            <Button color="inherit">Sign up</Button>
+            <Button color="inherit" component={Link} to="/signup">
+              Sign up
+            </Button>
             <Button color="inherit">Login</Button>
           </Box>
           {/* profile */}

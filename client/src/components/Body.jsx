@@ -111,7 +111,7 @@ const Body = () => {
             />
           </Box>
         </Grid>
-        {/* <Grid size={{xs:12,md:6}} sx={{ textAlign: "right", height: "100%" }}>
+        <Grid size={{xs:12,md:6}} sx={{ textAlign: "right", height: "100%" }}>
           <Box
             component="img"
             src={workerImage}
@@ -125,24 +125,8 @@ const Body = () => {
               objectFit: "contain",
             }}
           />
-        </Grid> */}
+        </Grid>
       </Grid>
-    </Box>
-   <Box
-        component="img"
-        src={workerImage}
-        alt="Worker with toolbox"
-        sx={{
-          position: 'absolute', 
-          top: '50%',            
-          right: '10%',            
-          transform: 'translateY(-50%)', 
-          filter: "drop-shadow(0 0 15px rgba(0,0,0,0.1))",
-          width: '1440px',
-          height: '1080px',
-          display: { xs: 'none', lg: 'block' },
-        }}
-      >
     </Box>
     </>
   );
