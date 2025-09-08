@@ -7,6 +7,9 @@ import Hero from './components/Hero.jsx'
 import HowItWorks from './components/HowItWorks.jsx'
 import WhyChooseUs from './components/WhyChooseUs.jsx'
 import Review from './components/Review.jsx'
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
+import Footer from './components/Footer.jsx'
 
 function App() {
 
@@ -19,6 +22,7 @@ function App() {
       <HowItWorks/>
       <WhyChooseUs/>
       <Review/>
+      <Footer/>
     </main>
     </ThemeProvider>
     
