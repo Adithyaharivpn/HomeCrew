@@ -3,7 +3,7 @@ import { ThemeProvider } from '@emotion/react'
 import './App.css'
 import NavBar from './components/NavBar'
 import theme from './theme'
-import Body from './components/Body.jsx'
+import Hero from './components/Hero.jsx'
 
 function App() {
 
@@ -12,7 +12,7 @@ function App() {
     <ThemeProvider theme={theme}>
     <NavBar/>
     <main>
-      <Body/>
+      <Hero/>
     </main>
     </ThemeProvider>
     
