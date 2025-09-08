@@ -27,7 +27,7 @@ const Footer = () => {
       }}
     >
       <Grid container spacing={4} justifyContent="space-between">
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12 ,md:4}} >
           <Typography variant="h6" fontWeight="bold" color="white" gutterBottom>
             HomeCrew
           </Typography>
@@ -58,9 +58,9 @@ const Footer = () => {
           </Stack>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid size={{xs:12 ,md:6}}>
           <Grid container spacing={4}>
-            <Grid item xs={6} sm={4}>
+            <Grid size={{xs:6 ,md:4}}>
               <Typography
                 variant="body1"
                 fontWeight="bold"
@@ -119,7 +119,7 @@ const Footer = () => {
               </Link>
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid size={{xs:12 ,md:4}}>
               <Typography
                 variant="body1"
                 fontWeight="bold"
