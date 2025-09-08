@@ -1,9 +1,9 @@
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import React from "react";
-import PlaceHolder from "../assets/job.jpg";
-import VerifiedIcon from '@mui/icons-material/Verified';
-import PermIdentityIcon from '@mui/icons-material/PermIdentity';
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+import PlaceHolder from "../assets/Job.jpg";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import PermIdentityIcon from "@mui/icons-material/PermIdentity";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 const WhyChooseUs = () => {
   return (
@@ -42,7 +42,7 @@ const WhyChooseUs = () => {
               boxShadow: "0 6px 32px 0 rgba(40,41,61,0.12)",
               borderRadius: 3,
               p: 4,
-              width:{sm:'500px',md:'1000px'},
+              width: { sm: "500px", md: "1000px" },
               backdropFilter: "blur(8px)",
             }}
           >
@@ -61,21 +61,21 @@ const WhyChooseUs = () => {
             </Typography>
             <Stack spacing={3} sx={{ color: "black" }}>
               <Stack direction="row" spacing={2} alignItems="center">
-                <VerifiedIcon  color="primary"/>
+                <VerifiedIcon color="primary" />
                 <Typography variant="body1">
                   Verified & Vetted Professionals: Every expert is
                   background-checked.
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={2} alignItems="center">
-                <PermIdentityIcon color="primary"/>
+                <PermIdentityIcon color="primary" />
                 <Typography variant="body1">
                   Satisfaction Guaranteed: We stand by our work until you're
                   happy.
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={2} alignItems="center">
-                <CurrencyRupeeIcon color="primary"/>
+                <CurrencyRupeeIcon color="primary" />
                 <Typography variant="body1">
                   Upfront Pricing: Compare quotes with no hidden fees.
                 </Typography>
