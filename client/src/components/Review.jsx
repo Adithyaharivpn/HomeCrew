@@ -1,4 +1,4 @@
-import { Box, Card, AspectRatio, Typography } from '@mui/material';
+import { Box, Card, Typography } from '@mui/material';
 import React from 'react'
 
 const Review = () => {
@@ -20,7 +20,7 @@ const Review = () => {
   },
 ];
   return (
-    
+    <></>
   )
 }
 
