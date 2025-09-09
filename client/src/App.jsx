@@ -10,7 +10,7 @@ import Review from "./components/Review.jsx";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Footer from "./components/Footer.jsx";
-import Signup from "./components/SignUp.jsx";
+import SignUp from "./components/SignUp.jsx";
 import Login from "./components/Login.jsx";
 import { Routes, Route } from "react-router-dom";
 function App() {
