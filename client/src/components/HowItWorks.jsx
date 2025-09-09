@@ -2,9 +2,6 @@ import {
   Avatar,
   Box,
   Card,
-  CardActionArea,
-  CardContent,
-  CardMedia,
   Typography,
 } from "@mui/material";
 import NoteAddOutlinedIcon from "@mui/icons-material/NoteAddOutlined";
@@ -43,6 +40,7 @@ const HowItWorks = () => {
         bgcolor: "#f8fafd",
         py: { xs: 5, md: 8 },
         px: { xs: 1, md: 0 },
+        boxShadow: "0 -100px 24px rgba(40,41,61,0.08)",
       }}
     >
       <Typography
@@ -65,7 +63,7 @@ const HowItWorks = () => {
       >
         {cards.map((card, index) => (
           <Card
-            key={card.id}
+            key={index}
             sx={{
               maxWidth: 340,
               flex: 1,

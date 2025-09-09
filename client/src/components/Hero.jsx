@@ -9,6 +9,7 @@ import {
 import LocationPinIcon from "@mui/icons-material/LocationPin";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import workerImage from "../assets/worker.png"
+import BgImage from "../assets/bg.jpg"
 
 const Hero = () => {
   return (
@@ -16,23 +17,27 @@ const Hero = () => {
     <Box
       component="section"
       sx={{
-        px: { xs: 2, md: 0 },
+        px: { xs: 2, md: 10 },
         py: { xs: 2, md: 40 },
         mx: "auto",
-        ml: { xs: 0, md: 10 },
-        maxWidth: "1440px",
-        position: "relative", 
-        zIndex: 1
+        
+        backgroundImage:`url(${BgImage})`, 
+        backgroundSize: 'cover', 
+        backgroundPosition: 'center', 
+        backgroundRepeat: 'no-repeat', 
+        minHeight: '70vh', 
+        
+        alignItems: 'center', 
+        // -----------------------------------------
       }}
     >
-      <Grid container spacing={4} alignItems="center">
+      <Grid container spacing={4} alignItems="center" sx={{ml: { xs: 0, md: 17 },}}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography
             variant="h4"
             component="h1"
             color="text.primary"
             fontWeight="bold"
-            sx={{ fontFamily: "t" }}
             gutterBottom
           >
             Reliable Home Services, On-Demand.
@@ -41,7 +46,7 @@ const Hero = () => {
             variant="h6"
             component="p"
             color="text.secondary"
-            sx={{ fontFamily: "cap", mb: 4 }}
+            sx={{ mb: 4 }}
           >
             Your one-stop platform to find and book verified experts for all
             your home service needs.
@@ -54,7 +59,7 @@ const Hero = () => {
               maxWidth: 780,
               bgcolor: "background.paper",
               borderRadius: 2,
-              boxShadow: 1,
+              boxShadow: "0 6px 32px 0 rgba(40,41,61,0.12)",
               px: 1,
               py: 1,
             }}
@@ -130,7 +135,7 @@ const Hero = () => {
         </Grid> */}
       </Grid>
     </Box>
-   <Box
+   {/* <Box
         component="img"
         src={workerImage}
         alt="Worker with toolbox"
@@ -147,7 +152,7 @@ const Hero = () => {
           display: { xs: 'none', lg: 'block' },
         }}
       >
-    </Box>
+    </Box> */}
     </>
   );
 };
