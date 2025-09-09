@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import LocationPinIcon from "@mui/icons-material/LocationPin";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import workerImage from "../assets/worker.png"
 import BgImage from "../assets/bg.jpg"
 
 const Hero = () => {
