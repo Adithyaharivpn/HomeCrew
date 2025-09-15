@@ -4,9 +4,18 @@ dotenv.config();
 const express = require('express');
 const cors = require('cors');
 
-const cors = require('cors');
+require('./database')
 
-// Replace this with your actual Vercel app's URL once it's deployed
+
+const authRoutes = require('./routes/auth');
+const jobs = require('./routes/jobs');
+const services = require('./routes/service');
+
+const PORT = process.env.PORT || 8080;
+
+const app = express();
+
+//cors
 const allowedOrigins = ['https://college-project-git-feature-jobpage-adithyaharivpns-projects.vercel.app/', 'http://localhost:5173'];
 
 const corsOptions = {
@@ -20,18 +29,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-
-require('./database')
-
-
-const authRoutes = require('./routes/auth');
-const jobs = require('./routes/jobs');
-const services = require('./routes/service');
-
-const PORT = process.env.PORT || 8080;
-
-const app = express();
 
 // Middleware
 app.use(cors());
