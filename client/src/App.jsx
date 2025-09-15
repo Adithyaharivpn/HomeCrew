@@ -14,26 +14,28 @@ import SignUp from "./components/Homepage/SignUp.jsx";
 import Footer from "./components/Homepage/Footer.jsx";
 import Login from "./components/Homepage/Login.jsx";
 import JobPosting from "./components/User/JobPosting.jsx";
+import JobsPage from "./components/User/JobsPage.jsx";
 function App() {
   const HomePage = () => (
     <>
-      <Hero/>
-      <HowItWorks/>
-      <WhyChooseUs/>
-      <Review/>
+      <Hero />
+      <HowItWorks />
+      <WhyChooseUs />
+      <Review />
     </>
   );
   return (
     <>
       <ThemeProvider theme={theme}>
-        <NavBar/>
+        <NavBar />
         <Routes>
-          <Route path="/" element={<HomePage/>} />
-          <Route path="/signup" element={<SignUp/>} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/jobposting" element={<JobPosting/>} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/jobposting" element={<JobPosting />} />
+          <Route path="/jobspage" element={<JobsPage />} />
         </Routes>
-        <Footer/>
+        <Footer />
       </ThemeProvider>
     </>
   );
