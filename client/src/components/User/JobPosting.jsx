@@ -37,7 +37,10 @@ const JobPosting = () => {
     setIsLoading(true);
 
     try {
-      await axios.post("${import.meta.env.VITE_API_BASE_URL}/api/jobs/", jobDetails);
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/jobs/`,
+        jobDetails
+      );
 
       alert("Job posted successfully!");
 
@@ -54,7 +57,9 @@ const JobPosting = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get("${import.meta.env.VITE_API_BASE_URL}/api/service/");
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/service/`
+        );
         setServices(response.data);
       } catch (error) {
         console.error("Failed to fetch services:", error);

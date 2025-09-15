@@ -100,7 +100,7 @@ const Hero = () => {
                             color: "white",
                             borderTopLeftRadius: 0,
                             borderBottomLeftRadius: 0,
-                            p: 1.9,
+                            p: 1.6,
                             mr: -1.7,
                             flex: 2,
                           }}
