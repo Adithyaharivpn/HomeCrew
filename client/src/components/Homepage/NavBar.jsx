@@ -142,7 +142,7 @@ const NavBar = (props) => {
 
           <Box sx={{ flexGrow: 0, display: { xs: "none", md: "flex" } }}>
             <Button color="secondary" variant="contained">
-              Post a Job
+              <Link  style={{color:"black",textDecoration:"none"}}  to={'/jobposting'}>Post a Job</Link>
             </Button>
             <Button color="inherit"><Link  style={{color:"white",textDecoration:"none"}}  to={'/Signup'}>Signup</Link></Button>
             <Button color="inherit"><Link  style={{color:"white",textDecoration:"none"}}  to={'/Login'}>Login</Link></Button>

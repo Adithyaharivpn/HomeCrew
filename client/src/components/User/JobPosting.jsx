@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Box,
   Typography,
@@ -12,6 +13,7 @@ import {
   IconButton,
 } from "@mui/material";
 import LocationPinIcon from "@mui/icons-material/LocationPin";
+import { useEffect } from "react";
 
 const JobPosting = () => {
   const [jobDetails, setJobDetails] = useState({
@@ -20,21 +22,51 @@ const JobPosting = () => {
     description: "",
     city: "",
   });
+  const [services, setServices] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
   const handleChange = (e) => {
     setJobDetails({
       ...jobDetails,
       [e.target.name]: e.target.value,
     });
   };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Submitted:", jobDetails);
-    
+    setIsLoading(true);
+
+    try {
+      await axios.post("http://localhost:3000/api/jobs/", jobDetails);
+
+      alert("Job posted successfully!");
+
+      setJobDetails({ title: "", category: "", description: "", city: "" });
+    } catch (error) {
+      console.error("Failed to post job:", error);
+
+      alert("There was an error posting your job. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/service/");
+        setServices(response.data);
+      } catch (error) {
+        console.error("Failed to fetch services:", error);
+      }
+    };
+
+    fetchServices();
+  }, []);
   return (
     <Box
       sx={{
-        p: {xs:6,md:3},
+        p: { xs: 6, md: 3 },
         maxWidth: "700px",
         mx: "auto",
         mt: "100px",
@@ -67,10 +99,11 @@ const JobPosting = () => {
             value={jobDetails.category}
             onChange={handleChange}
           >
-            <MenuItem value="plumbing">Plumbing</MenuItem>
-            <MenuItem value="electrical">Electrical</MenuItem>
-            <MenuItem value="carpentry">Carpentry</MenuItem>
-            <MenuItem value="painting">Painting</MenuItem>
+            {services.map((service) => (
+              <MenuItem key={service.id} value={service.service_name}>
+                {service.service_name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
@@ -103,8 +136,14 @@ const JobPosting = () => {
           }}
         />
 
-        <Button variant="contained" type="submit" size="large" fullWidth>
-          Post Job
+        <Button
+          variant="contained"
+          type="submit"
+          size="large"
+          fullWidth
+          disabled={isLoading}
+        >
+          {isLoading ? "Posting..." : "Post Job"}
         </Button>
       </form>
     </Box>

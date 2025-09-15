@@ -8,7 +8,7 @@ require('./database')
 
 const authRoutes = require('./routes/auth');
 const jobs = require('./routes/jobs');
-
+const services = require('./routes/service');
 
 const PORT = process.env.PORT || 8080;
 
@@ -21,6 +21,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobs);
+app.use('/api/service', services);
 
 app.get('/', (req, res) => {
   res.send('College Project API Server - Running!');
