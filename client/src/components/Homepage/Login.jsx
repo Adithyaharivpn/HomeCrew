@@ -1,11 +1,7 @@
 import { Alert, Box, Button, Grid, IconButton, InputAdornment, Paper, TextField, Typography } from '@mui/material'
 import EmailIcon from "@mui/icons-material/Email";
-import PersonIcon from "@mui/icons-material/Person";    
 import LockIcon from "@mui/icons-material/Lock";
-import PhoneIcon from "@mui/icons-material/Phone";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import React from 'react'
+
 
 const Login = () => {
   return (

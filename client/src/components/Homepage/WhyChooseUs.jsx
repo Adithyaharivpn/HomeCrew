@@ -1,6 +1,6 @@
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import React from "react";
-import PlaceHolder from "../../assets/bg.jpg";
+import PlaceHolder from "../../assets/Job.jpg";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import PermIdentityIcon from "@mui/icons-material/PermIdentity";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";

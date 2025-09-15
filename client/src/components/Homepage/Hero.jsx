@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import LocationPinIcon from "@mui/icons-material/LocationPin";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import BgImage from "../../assets/Job.jpg"
+import BgImage from "../../assets/bg.jpg"
 
 const Hero = () => {
   return (

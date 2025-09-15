@@ -1,27 +1,31 @@
-const express = require('express')
-const cors = require('cors')
-var dotenv = require('dotenv')
+const dotenv = require('dotenv');
+dotenv.config();
+
+const express = require('express');
+const cors = require('cors');
 require('./database')
-dotenv.config()
 
-const authRoutes = require('./routes/auth')
 
-const port = process.env.port || 8080
+const authRoutes = require('./routes/auth');
+const jobs = require('./routes/jobs');
 
-const app = express()
+
+const PORT = process.env.PORT || 8080;
+
+const app = express();
 
 // Middleware
-app.use(cors())
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(cors());
+app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes)
+app.use('/api/auth', authRoutes);
+app.use('/api/jobs', jobs);
 
 app.get('/', (req, res) => {
-  res.send('College Project API Server - Running!')
-})
+  res.send('College Project API Server - Running!');
+});
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});

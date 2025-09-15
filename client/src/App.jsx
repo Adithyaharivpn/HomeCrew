@@ -11,6 +11,9 @@ import WhyChooseUs from "./components/Homepage/WhyChooseUs.jsx";
 import Review from "./components/Homepage/Review.jsx";
 import NavBar from "./components/Homepage/NavBar.jsx";
 import SignUp from "./components/Homepage/SignUp.jsx";
+import Footer from "./components/Homepage/Footer.jsx";
+import Login from "./components/Homepage/Login.jsx";
+import JobPosting from "./components/User/JobPosting.jsx";
 function App() {
   const HomePage = () => (
     <>
@@ -28,8 +31,9 @@ function App() {
           <Route path="/" element={<HomePage/>} />
           <Route path="/signup" element={<SignUp/>} />
           <Route path="/login" element={<Login/>} />
+          <Route path="/jobposting" element={<JobPosting/>} />
         </Routes>
-        <Footer />
+        <Footer/>
       </ThemeProvider>
     </>
   );
