@@ -107,7 +107,7 @@ const Hero = () => {
                         >
                           <Link
                             style={{ color: "white", textDecoration: "none" }}
-                            to={"/jobs"}   //temp
+                            to={"/jobspage"}   //temp
                           >
                             <SearchOutlinedIcon />
                           </Link>
