@@ -50,14 +50,14 @@ const HowItWorks = () => {
     () => {
       ScrollTrigger.create({
         trigger: main.current,
-        start: "top top", 
-        end: "bottom", 
-        pin: true, 
+        start: "top top",
+        end: "bottom",
+        pin: true,
         // markers: true,
       });
 
       gsap.from(".timeline-item", {
-        y: 200,
+        y: 150,
         opacity: 0,
         stagger: 0.3,
         scrollTrigger: {

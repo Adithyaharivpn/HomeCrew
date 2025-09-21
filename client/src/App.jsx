@@ -16,14 +16,15 @@ import Login from "./components/Homepage/Login.jsx";
 import JobPosting from "./components/User/JobPosting.jsx";
 import JobsPage from "./components/User/JobsPage.jsx";
 import Test from "./components/Homepage/Test.jsx";
+import PopularJobs from "./components/Homepage/PopularJobs.jsx";
 function App() {
   const HomePage = () => (
     <>
       <Hero />
+      <PopularJobs/>
       <HowItWorks />
       <WhyChooseUs />
       <Review />
-      
     </>
   );
   return (

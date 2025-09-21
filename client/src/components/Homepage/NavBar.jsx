@@ -59,7 +59,7 @@ const NavBar = (props) => {
       <Typography variant="h6" sx={{ my: 2 }}>
         Pages
       </Typography>
-      <Divider />
+      <Divider sx={{ bgcolor: "white" }} />
       <List>
         <ListItem
           disablePadding
@@ -75,7 +75,7 @@ const NavBar = (props) => {
           </Button>
         </ListItem>
 
-        <Divider />
+        <Divider sx={{ bgcolor: "white" }} />
 
         <ListItem
           disablePadding
@@ -86,7 +86,7 @@ const NavBar = (props) => {
           </Button>
         </ListItem>
 
-        <Divider />
+        <Divider sx={{ bgcolor: "white" }} />
 
         <ListItem
           disablePadding
@@ -97,7 +97,7 @@ const NavBar = (props) => {
           </Button>
         </ListItem>
 
-        <Divider />
+        <Divider sx={{ bgcolor: "white" }} />
       </List>
     </Box>
   );
@@ -148,6 +148,8 @@ const NavBar = (props) => {
                 "& .MuiDrawer-paper": {
                   boxSizing: "border-box",
                   width: drawerWidth,
+                  backgroundColor: "#1E1E1E",
+                  color: "white",
                 },
               }}
             >
@@ -178,7 +180,7 @@ const NavBar = (props) => {
           </Typography>
 
           {/* Spacer */}
-          <Box sx={{ flexGrow: 1 }}  />  
+          <Box sx={{ flexGrow: 1 }} />
 
           {/* Pages */}
 
@@ -186,13 +188,13 @@ const NavBar = (props) => {
             <Button
               color="secondary"
               variant="contained"
-              component={Link} // Use the improved pattern
+              component={Link}
               to="/jobposting"
             >
               Post a Job
             </Button>
             <Button
-              sx={{ ml: 2 }} // Add a little margin between buttons
+              sx={{ ml: 2 }}
               color="inherit"
               component={Link}
               to="/Signup"

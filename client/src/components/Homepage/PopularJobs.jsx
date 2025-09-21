@@ -1,0 +1,72 @@
+import React from 'react';
+import { Box, Container, Grid, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
+
+// Import the icons you need
+import PlumbingIcon from '@mui/icons-material/Plumbing';
+import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
+import CarpenterIcon from '@mui/icons-material/Carpenter';
+import FormatPaintIcon from '@mui/icons-material/FormatPaint';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+
+// 1. Data for the popular services
+const servicesData = [
+  { name: 'Plumbing', icon: <PlumbingIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=plumbing' },
+  { name: 'Electrical', icon: <ElectricalServicesIcon sx={{ fontSize: 40 }} />, link: '/jobs/electrical' },
+  { name: 'Carpentry', icon: <CarpenterIcon sx={{ fontSize: 40 }} />, link: '/jobs/carpentry' },
+  { name: 'Painting', icon: <FormatPaintIcon sx={{ fontSize: 40 }} />, link: '/jobs/painting' },
+  { name: 'AC Service', icon: <AcUnitIcon sx={{ fontSize: 40 }} />, link: '/jobs/ac-service' },
+  { name: 'Cleaning', icon: <CleaningServicesIcon sx={{ fontSize: 40 }} />, link: '/jobs/cleaning' },
+];
+
+const PopularJobs = () => {
+  return (
+    <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+      <Container maxWidth="lg">
+        <Typography variant="h4" fontWeight="bold" textAlign="center" mb={6}>
+          Browse by Category
+        </Typography>
+        
+        {/* 2. The responsive grid container */}
+        <Grid container spacing={3} justifyContent="center">
+          {servicesData.map((service) => (
+            <Grid item key={service.name} xs={6} sm={4} md={2}>
+              
+              {/* 3. The clickable card */}
+              <Box
+                component={Link}
+                to={service.link}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 3,
+                  borderRadius: 2,
+                  textAlign: 'center',
+                  textDecoration: 'none',
+                  color: 'text.primary',
+                  bgcolor: '#f5f5f5',
+                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: 3,
+                    bgcolor: 'white',
+                  },
+                }}
+              >
+                {/* 4. The Icon and Text */}
+                <Box sx={{ color: 'primary.main', mb: 1 }}>{service.icon}</Box>
+                <Typography fontWeight="medium">{service.name}</Typography>
+              </Box>
+
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    </Box>
+  );
+};
+
+export default PopularJobs;
