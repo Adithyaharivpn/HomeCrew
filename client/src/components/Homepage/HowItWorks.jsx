@@ -14,29 +14,62 @@ import {
 import NoteAddOutlinedIcon from "@mui/icons-material/NoteAddOutlined";
 import QuestionAnswerOutlinedIcon from "@mui/icons-material/QuestionAnswerOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import Post from "../../assets/post.gif";
+import Hire from "../../assets/hired.gif";
+import Mail from "../../assets/mail.gif";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const cardsData = [
   {
     id: 1,
-    icon: <NoteAddOutlinedIcon fontSize="large" sx={{ color: "#1976d2" }} />,
+    icon: (
+      <Box
+        component="img"
+        src={Post}
+        alt=""
+        loading="lazy"
+        sx={{
+          width: "64px",
+          height: "64px",
+          borderRadius: 4,
+        }}
+      />
+    ),
     title: "Step 1",
     subtitle: "Post Your Request for Free",
     description: "Describe your project to get matched with pros",
   },
   {
     id: 2,
-    icon: (
-      <QuestionAnswerOutlinedIcon fontSize="large" sx={{ color: "#1976d2" }} />
-    ),
+    icon:  <Box
+        component="img"
+        src={Mail}
+        alt=""
+        loading="lazy"
+        sx={{
+          width: "64px",
+          height: "64px",
+          borderRadius: 4,
+        }}
+      />,
     title: "Step 2",
     subtitle: "Receive Quotes from Pros",
     description: "Get estimates from vetted experts nearby.",
   },
   {
     id: 3,
-    icon: <HandshakeOutlinedIcon fontSize="large" sx={{ color: "#1976d2" }} />,
+    icon:      <Box
+        component="img"
+        src={Hire}
+        alt=""
+        loading="lazy"
+        sx={{
+          width: "64px",
+          height: "64px",
+          borderRadius: 4,
+        }}
+      />,
     title: "Step 3",
     subtitle: "Hire With Confidence",
     description: "Compare, chat, and hire your best match.",

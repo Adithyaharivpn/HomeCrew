@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-// Import the icons you need
 import PlumbingIcon from '@mui/icons-material/Plumbing';
 import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
 import CarpenterIcon from '@mui/icons-material/Carpenter';
@@ -10,7 +9,7 @@ import FormatPaintIcon from '@mui/icons-material/FormatPaint';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 
-// 1. Data for the popular services
+
 const servicesData = [
   { name: 'Plumbing', icon: <PlumbingIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=plumbing' },
   { name: 'Electrical', icon: <ElectricalServicesIcon sx={{ fontSize: 40 }} />, link: '/jobs/electrical' },
@@ -22,18 +21,17 @@ const servicesData = [
 
 const PopularJobs = () => {
   return (
-    <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+    <Box sx={{ bgcolor: 'background.paper', py: 15 }}>
       <Container maxWidth="lg">
-        <Typography variant="h4" fontWeight="bold" textAlign="center" mb={6}>
+        <Typography variant="h4" fontWeight="bold" textAlign="center" color='primary' mb={6}>
           Browse by Category
         </Typography>
         
-        {/* 2. The responsive grid container */}
         <Grid container spacing={3} justifyContent="center">
           {servicesData.map((service) => (
             <Grid item key={service.name} xs={6} sm={4} md={2}>
               
-              {/* 3. The clickable card */}
+              
               <Box
                 component={Link}
                 to={service.link}
@@ -42,7 +40,7 @@ const PopularJobs = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  p: 3,
+                  p: 5,
                   borderRadius: 2,
                   textAlign: 'center',
                   textDecoration: 'none',
@@ -56,7 +54,6 @@ const PopularJobs = () => {
                   },
                 }}
               >
-                {/* 4. The Icon and Text */}
                 <Box sx={{ color: 'primary.main', mb: 1 }}>{service.icon}</Box>
                 <Typography fontWeight="medium">{service.name}</Typography>
               </Box>
