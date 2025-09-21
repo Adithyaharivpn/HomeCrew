@@ -42,7 +42,8 @@ const cardsData = [
   },
   {
     id: 2,
-    icon:  <Box
+    icon: (
+      <Box
         component="img"
         src={Mail}
         alt=""
@@ -52,14 +53,16 @@ const cardsData = [
           height: "64px",
           borderRadius: 4,
         }}
-      />,
+      />
+    ),
     title: "Step 2",
     subtitle: "Receive Quotes from Pros",
     description: "Get estimates from vetted experts nearby.",
   },
   {
     id: 3,
-    icon:      <Box
+    icon: (
+      <Box
         component="img"
         src={Hire}
         alt=""
@@ -69,7 +72,8 @@ const cardsData = [
           height: "64px",
           borderRadius: 4,
         }}
-      />,
+      />
+    ),
     title: "Step 3",
     subtitle: "Hire With Confidence",
     description: "Compare, chat, and hire your best match.",
