@@ -48,8 +48,9 @@ const Hero = () => {
             zIndex: 2,
             ml: { xs: 0, md: 17 },
           }}
+          
         >
-          <Grid item xs={12} md={6}>
+          <Grid size={{xs:12,md:10}}>
             <Typography
               variant="h4"
               component="h1"

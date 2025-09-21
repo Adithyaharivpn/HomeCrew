@@ -29,7 +29,7 @@ const PopularJobs = () => {
         
         <Grid container spacing={3} justifyContent="center">
           {servicesData.map((service) => (
-            <Grid item key={service.name} xs={6} sm={4} md={2}>
+            <Grid key={service.name} size={{xs:6,sm:4,md:2}}>
               
               
               <Box
