@@ -1,9 +1,26 @@
-import { AppBar,Avatar,Box,Button,Container,Divider,IconButton,List,ListItem,ListItemButton,ListItemText,Menu,MenuItem,Toolbar,Tooltip,Typography,Drawer,} from "@mui/material";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Container,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Tooltip,
+  Typography,
+  Drawer,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AdbIcon from "@mui/icons-material/Adb";
 import React from "react";
 import { Link } from "react-router-dom";
-
 
 const pages = ["Post a Job", "Signup", "Login"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
@@ -44,13 +61,43 @@ const NavBar = (props) => {
       </Typography>
       <Divider />
       <List>
-        {pages.map((item) => (
-          <ListItem key={item} disablePadding>
-            <ListItemButton sx={{ textAlign: "center" }}>
-              <ListItemText primary={item} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        <ListItem
+          disablePadding
+          sx={{ display: "flex", justifyContent: "center", py: 1 }}
+        >
+          <Button
+            variant="contained"
+            color="secondary"
+            component={Link}
+            to="/jobposting"
+          >
+            Post a Job
+          </Button>
+        </ListItem>
+
+        <Divider />
+
+        <ListItem
+          disablePadding
+          sx={{ display: "flex", justifyContent: "center", py: 1 }}
+        >
+          <Button color="inherit" component={Link} to="/Signup">
+            Signup
+          </Button>
+        </ListItem>
+
+        <Divider />
+
+        <ListItem
+          disablePadding
+          sx={{ display: "flex", justifyContent: "center", py: 1 }}
+        >
+          <Button color="inherit" component={Link} to="/Login">
+            Login
+          </Button>
+        </ListItem>
+
+        <Divider />
       </List>
     </Box>
   );
@@ -107,13 +154,15 @@ const NavBar = (props) => {
               {drawer}
             </Drawer>
           </nav>
+
           {/* Desktop */}
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+
           <Typography
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/"
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },
@@ -127,25 +176,32 @@ const NavBar = (props) => {
           >
             LOGO
           </Typography>
+
+          {/* Spacer */}
+          <Box sx={{ flexGrow: 1 }}  />  
+
           {/* Pages */}
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {/* {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page}
-              </Button> 
-             ))} */}
-          </Box>
 
           <Box sx={{ flexGrow: 0, display: { xs: "none", md: "flex" } }}>
-            <Button color="secondary" variant="contained">
-              <Link  style={{color:"black",textDecoration:"none"}}  to={'/jobposting'}>Post a Job</Link>
+            <Button
+              color="secondary"
+              variant="contained"
+              component={Link} // Use the improved pattern
+              to="/jobposting"
+            >
+              Post a Job
             </Button>
-            <Button color="inherit"><Link  style={{color:"white",textDecoration:"none"}}  to={'/Signup'}>Signup</Link></Button>
-            <Button color="inherit"><Link  style={{color:"white",textDecoration:"none"}}  to={'/Login'}>Login</Link></Button>
+            <Button
+              sx={{ ml: 2 }} // Add a little margin between buttons
+              color="inherit"
+              component={Link}
+              to="/Signup"
+            >
+              Signup
+            </Button>
+            <Button sx={{ ml: 2 }} color="inherit" component={Link} to="/Login">
+              Login
+            </Button>
           </Box>
           {/* profile */}
           <Box sx={{ flexGrow: 0 }}>

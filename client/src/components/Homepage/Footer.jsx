@@ -27,7 +27,7 @@ const Footer = () => {
       }}
     >
       <Grid container spacing={4} justifyContent="space-between">
-        <Grid size={{xs:12 ,md:4}} >
+        <Grid size={{ xs: 12, md: 4 }}>
           <Typography variant="h6" fontWeight="bold" color="white" gutterBottom>
             HomeCrew
           </Typography>
@@ -58,9 +58,9 @@ const Footer = () => {
           </Stack>
         </Grid>
 
-        <Grid size={{xs:12 ,md:6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Grid container spacing={4}>
-            <Grid size={{xs:6 ,md:4}}>
+            <Grid size={{ xs: 6, md: 4 }}>
               <Typography
                 variant="body1"
                 fontWeight="bold"
@@ -119,7 +119,7 @@ const Footer = () => {
               </Link>
             </Grid>
 
-            <Grid size={{xs:12 ,md:4}}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Typography
                 variant="body1"
                 fontWeight="bold"
@@ -163,6 +163,40 @@ const Footer = () => {
                 }}
               >
                 Careers
+              </Link>
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography
+                variant="body1"
+                fontWeight="bold"
+                color="white"
+                gutterBottom
+              >
+                Credits
+              </Typography>
+              <Link
+                href="https://www.flaticon.com/free-animated-icons/activity-feed"
+                color="inherit"
+                display="block"
+                sx={{
+                  mb: 1,
+                  textDecoration: "none",
+                  "&:hover": { color: "primary.main" },
+                }}
+              >
+                Flaticon
+              </Link>
+              <Link
+                href="https://unsplash.com/"
+                color="inherit"
+                display="block"
+                sx={{
+                  mb: 1,
+                  textDecoration: "none",
+                  "&:hover": { color: "primary.main" },
+                }}
+              >
+                Unsplash
               </Link>
             </Grid>
           </Grid>

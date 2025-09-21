@@ -25,8 +25,8 @@ const Hero = () => {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          minHeight: "70vh",
-
+          minHeight: "45vh",
+          display: "flex",
           alignItems: "center",
         }}
       >
@@ -34,6 +34,7 @@ const Hero = () => {
           container
           spacing={4}
           alignItems="center"
+          columns={{ xs: 12, md: 6 }}
           sx={{ ml: { xs: 0, md: 17 } }}
         >
           <Grid size={{ xs: 12, md: 6 }}>
@@ -107,7 +108,7 @@ const Hero = () => {
                         >
                           <Link
                             style={{ color: "white", textDecoration: "none" }}
-                            to={"/jobspage"}   //temp
+                            to={"/jobspage"} //temp
                           >
                             <SearchOutlinedIcon />
                           </Link>

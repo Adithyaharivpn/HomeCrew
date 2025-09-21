@@ -1,32 +1,42 @@
+import React, { useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { Box, Typography, Container } from "@mui/material";
 import {
-  Avatar,
-  Box,
-  Card,
-  Typography,
-} from "@mui/material";
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+} from "@mui/lab";
 import NoteAddOutlinedIcon from "@mui/icons-material/NoteAddOutlined";
 import QuestionAnswerOutlinedIcon from "@mui/icons-material/QuestionAnswerOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
 
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const cards = [
+const cardsData = [
   {
     id: 1,
-    icon: <NoteAddOutlinedIcon fontSize="large" color="primary" />,
+    icon: <NoteAddOutlinedIcon fontSize="large" sx={{ color: "#1976d2" }} />,
     title: "Step 1",
     subtitle: "Post Your Request for Free",
     description: "Describe your project to get matched with pros",
   },
   {
     id: 2,
-    icon: <QuestionAnswerOutlinedIcon fontSize="large" color="primary" />,
+    icon: (
+      <QuestionAnswerOutlinedIcon fontSize="large" sx={{ color: "#1976d2" }} />
+    ),
     title: "Step 2",
     subtitle: "Receive Quotes from Pros",
     description: "Get estimates from vetted experts nearby.",
   },
   {
     id: 3,
-    icon: <HandshakeOutlinedIcon fontSize="large" color="primary" />,
+    icon: <HandshakeOutlinedIcon fontSize="large" sx={{ color: "#1976d2" }} />,
     title: "Step 3",
     subtitle: "Hire With Confidence",
     description: "Compare, chat, and hire your best match.",
@@ -34,90 +44,83 @@ const cards = [
 ];
 
 const HowItWorks = () => {
+  const main = useRef();
+
+  useGSAP(
+    () => {
+      ScrollTrigger.create({
+        trigger: main.current,
+        start: "top top", 
+        end: "bottom", 
+        pin: true, 
+        // markers: true,
+      });
+
+      gsap.from(".timeline-item", {
+        y: 200,
+        opacity: 0,
+        stagger: 0.3,
+        scrollTrigger: {
+          trigger: main.current,
+          ease: "power1.inOut",
+          start: "top top",
+          end: "bottom",
+          scrub: 1,
+          // markers: true,
+        },
+      });
+    },
+    { scope: main }
+  );
+
   return (
     <Box
+      ref={main}
       sx={{
         bgcolor: "#f8fafd",
-        py: { xs: 5, md: 8 },
-        px: { xs: 1, md: 0 },
-        boxShadow: "0 -100px 24px rgba(40,41,61,0.08)",
+        py: { xs: 8, md: 15 },
+        px: { xs: 2, md: 3 },
       }}
     >
-      <Typography
-        variant="h4"
-        component="h2"
-        fontWeight="bold"
-        textAlign="center"
-        mb={6}
-        color="primary"
-      >
-        How It Works
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 3,
-          justifyContent: "center",
-        }}
-      >
-        {cards.map((card, index) => (
-          <Card
-            key={index}
-            sx={{
-              maxWidth: 340,
-              flex: 1,
-              p: 3,
-              borderRadius: 4,
-              boxShadow: "0 4px 24px rgba(40,41,61,0.08)",
-              border: "none",
-              bgcolor: "#fff",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              minHeight: 260,
-              transition:
-                "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
-              "&:hover": {
-                transform: "translateY(-5px)",
-                boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.08)",
-              },
-            }}
-          >
-            <Avatar
-              sx={{
-                bgcolor: "#e3f2fd",
-                width: 64,
-                height: 64,
-                mx: "auto",
-                mb: 3,
-              }}
-            >
-              {card.icon}
-            </Avatar>
-            <Typography
-              variant="subtitle2"
-              color="primary"
-              fontWeight={700}
-              mb={0.5}
-            >
-              {card.title}
-            </Typography>
-            <Typography
-              variant="h6"
-              color="text.primary"
-              fontWeight="bold"
-              mb={1}
-              align="center"
-            >
-              {card.subtitle}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" align="center">
-              {card.description}
-            </Typography>
-          </Card>
-        ))}
-      </Box>
+      <Container maxWidth="lg">
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          textAlign="center"
+          mb={10}
+          color="primary.main"
+        >
+          How It Works
+        </Typography>
+        <Timeline position="alternate">
+          {cardsData.map((card, index) => (
+            <TimelineItem key={card.id} className="timeline-item">
+              <TimelineSeparator>
+                <TimelineDot sx={{ bgcolor: "white", p: 1, boxShadow: 3 }}>
+                  {card.icon}
+                </TimelineDot>
+                {index < cardsData.length - 1 && <TimelineConnector />}
+              </TimelineSeparator>
+              <TimelineContent sx={{ py: "12px", px: 2 }}>
+                <Typography variant="h6" color="primary.main" fontWeight="600">
+                  {card.title}
+                </Typography>
+                <Typography
+                  variant="h5"
+                  component="h2"
+                  fontWeight="bold"
+                  color="text.primary"
+                >
+                  {card.subtitle}
+                </Typography>
+                <Typography color="text.secondary">
+                  {card.description}
+                </Typography>
+              </TimelineContent>
+            </TimelineItem>
+          ))}
+        </Timeline>
+      </Container>
     </Box>
   );
 };

@@ -26,6 +26,7 @@ const WhyChooseUs = () => {
             component="img"
             src={PlaceHolder}
             alt="A happy customer with a service professional"
+            loading="lazy"
             sx={{
               width: "100%",
               height: "auto",
