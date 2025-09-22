@@ -53,13 +53,14 @@ const JobPosting = () => {
       setIsLoading(false);
     }
   };
-
+console.log("VITE_API_BASE_URL =", import.meta.env.VITE_API_BASE_URL);
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/service/`
         );
+        console.log("Services API Response:", response.data);
         setServices(response.data);
       } catch (error) {
         console.error("Failed to fetch services:", error);
@@ -96,21 +97,23 @@ const JobPosting = () => {
           sx={{ mb: 2 }}
         />
 
-        <FormControl fullWidth required sx={{ mb: 2 }}>
-          <InputLabel>Category</InputLabel>
-          <Select
-            name="category"
-            label="Category"
-            value={jobDetails.category}
-            onChange={handleChange}
-          >
-            {services.map((service) => (
-              <MenuItem key={service.id} value={service.service_name}>
-                {service.service_name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+<FormControl fullWidth required sx={{ mb: 2 }}>
+  <InputLabel>Category</InputLabel>
+  <Select
+    name="category"
+    label="Category"
+    value={jobDetails.category}
+    onChange={handleChange}
+  >
+    {Array.isArray(services) &&
+      services.map((service) => (
+        <MenuItem key={service.id} value={service.service_name}>
+          {service.service_name}
+        </MenuItem>
+      ))}
+  </Select>
+</FormControl>
+
 
         <TextField
           label="Job Description"
