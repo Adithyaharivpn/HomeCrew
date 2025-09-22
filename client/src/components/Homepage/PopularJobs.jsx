@@ -12,11 +12,11 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 
 const servicesData = [
   { name: 'Plumbing', icon: <PlumbingIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=plumbing' },
-  { name: 'Electrical', icon: <ElectricalServicesIcon sx={{ fontSize: 40 }} />, link: '/jobs/electrical' },
-  { name: 'Carpentry', icon: <CarpenterIcon sx={{ fontSize: 40 }} />, link: '/jobs/carpentry' },
-  { name: 'Painting', icon: <FormatPaintIcon sx={{ fontSize: 40 }} />, link: '/jobs/painting' },
-  { name: 'AC Service', icon: <AcUnitIcon sx={{ fontSize: 40 }} />, link: '/jobs/ac-service' },
-  { name: 'Cleaning', icon: <CleaningServicesIcon sx={{ fontSize: 40 }} />, link: '/jobs/cleaning' },
+  { name: 'Electrical', icon: <ElectricalServicesIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=electrical' },
+  { name: 'Carpentry', icon: <CarpenterIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=carpentry' },
+  { name: 'Painting', icon: <FormatPaintIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=painting' },
+  { name: 'AC Service', icon: <AcUnitIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=ac-service' },
+  { name: 'Cleaning', icon: <CleaningServicesIcon sx={{ fontSize: 40 }} />, link: '/jobspage?category=cleaning' },
 ];
 
 const PopularJobs = () => {

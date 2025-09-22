@@ -1,4 +1,4 @@
-// import { useState } from 'react'
+import React, { useLayoutEffect, useRef } from 'react';
 import { ThemeProvider } from "@emotion/react";
 import "./App.css";
 import theme from "./theme";
@@ -16,30 +16,57 @@ import Login from "./components/Homepage/Login.jsx";
 import JobPosting from "./components/User/JobPosting.jsx";
 import JobsPage from "./components/User/JobsPage.jsx";
 import PopularJobs from "./components/Homepage/PopularJobs.jsx";
+// import gsap from 'gsap';
+// import { ScrollTrigger } from 'gsap/ScrollTrigger';
+// import { ScrollSmoother } from 'gsap/ScrollSmoother';
+// import { useGSAP } from '@gsap/react';
+
+
+// gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother);
+
+
+const HomePage = () => (
+  <>
+    <Hero />
+    <PopularJobs />
+    <HowItWorks />
+    <WhyChooseUs />
+    <Review />
+  </>
+);
+
 function App() {
-  const HomePage = () => (
-    <>
-      <Hero />
-      <PopularJobs/>
-      <HowItWorks />
-      <WhyChooseUs />
-      <Review />
-    </>
-  );
+
+  // const main = useRef();
+  // const smoother = useRef();
+
+  // useGSAP(
+  //   () => {
+  //     smoother.current = ScrollSmoother.create({
+  //       smooth: 3, 
+  //       effects: true, 
+  //     });
+  //   },
+  //   { scope: main }
+  // );
+
   return (
-    <>
-      <ThemeProvider theme={theme}>
-        <NavBar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/jobposting" element={<JobPosting />} />
-          <Route path="/jobspage" element={<JobsPage />} />
-        </Routes>
-        <Footer />
-      </ThemeProvider>
-    </>
+    <ThemeProvider theme={theme}>
+      {/* ref={main} */}
+      <div id="smooth-wrapper" > 
+        <div id="smooth-content">
+          <NavBar />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/jobposting" element={<JobPosting />} />
+            <Route path="/jobspage" element={<JobsPage />} />
+          </Routes>
+          <Footer />
+        </div>
+      </div>
+    </ThemeProvider>
   );
 }
 

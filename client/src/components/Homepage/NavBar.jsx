@@ -115,7 +115,9 @@ const NavBar = (props) => {
           >
             <MenuIcon />
           </IconButton>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+
+          {/* icon */}
+
           <Typography
             variant="h6"
             noWrap
@@ -125,13 +127,12 @@ const NavBar = (props) => {
               mr: 2,
               display: { xs: "none", md: "flex" },
               fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
+              fontWeight: 700,  
               color: "inherit",
               textDecoration: "none",
             }}
           >
-            LOGO
+            HomeCrew
           </Typography>
 
           <nav>
