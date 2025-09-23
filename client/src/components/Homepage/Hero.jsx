@@ -17,30 +17,44 @@ const Hero = () => {
       <Box
         component="section"
         sx={{
+          position: "relative",
           px: { xs: 2, md: 10 },
-          py: { xs: 3, md: 30 },
-          mx: "auto",
-
+          py: { xs: 10, md: 20 },
+          minHeight: "50vh",
+          display: "flex",
+          alignItems: "center",
           backgroundImage: `url(${BgImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          minHeight: "70vh",
-
-          alignItems: "center",
         }}
       >
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1,
+          }}
+        />
+
         <Grid
           container
-          spacing={4}
           alignItems="center"
-          sx={{ ml: { xs: 0, md: 17 } }}
+          sx={{
+            position: "relative",
+            zIndex: 2,
+            ml: { xs: 0, md: 17 },
+          }}
+          
         >
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid size={{xs:12,md:10}}>
             <Typography
               variant="h4"
               component="h1"
-              color="text.primary"
+              color="white"
               fontWeight="bold"
               gutterBottom
             >
@@ -49,7 +63,7 @@ const Hero = () => {
             <Typography
               variant="h6"
               component="p"
-              color="text.secondary"
+              color="rgba(255, 255, 255, 0.85)"
               sx={{ mb: 4 }}
             >
               Your one-stop platform to find and book verified experts for all
@@ -107,7 +121,7 @@ const Hero = () => {
                         >
                           <Link
                             style={{ color: "white", textDecoration: "none" }}
-                            to={"/jobspage"}   //temp
+                            to={"/jobspage"} //temp
                           >
                             <SearchOutlinedIcon />
                           </Link>
@@ -127,41 +141,8 @@ const Hero = () => {
               />
             </Box>
           </Grid>
-          {/* <Grid size={{xs:12,md:6}} sx={{ textAlign: "right", height: "100%" }}>
-          <Box
-            component="img"
-            src={workerImage}
-            alt="Worker with toolbox"
-            sx={{
-              width: "100%",
-              height: "auto",
-              maxHeight: 500,
-              filter: "drop-shadow(0 0 15px rgba(0,0,0,0.1))",
-              borderRadius: 2,
-              objectFit: "contain",
-            }}
-          />
-        </Grid> */}
         </Grid>
       </Box>
-      {/* <Box
-        component="img"
-        src={workerImage}
-        alt="Worker with toolbox"
-        sx={{
-          position: 'absolute', 
-          zIndex: -1,
-          top: '60%',            
-          right: '5%',            
-          transform: 'translateY(-50%)', 
-          filter: "drop-shadow(0 0 200px rgba(0,0,0,0.1))",
-          width: 'auto',
-          height: { lg: "100vh", xl: "100vh" },
-          maxHeight:'900px',
-          display: { xs: 'none', lg: 'block' },
-        }}
-      >
-    </Box> */}
     </>
   );
 };

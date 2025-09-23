@@ -1,4 +1,22 @@
-import { AppBar,Avatar,Box,Button,Container,Divider,IconButton,List,ListItem,ListItemButton,ListItemText,Menu,MenuItem,Toolbar,Tooltip,Typography,Drawer,} from "@mui/material";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Container,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Tooltip,
+  Typography,
+  Drawer,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AdbIcon from "@mui/icons-material/Adb";
 import React from "react";
@@ -38,15 +56,45 @@ const navigate = useNavigate();
       <Typography variant="h6" sx={{ my: 2 }}>
         Pages
       </Typography>
-      <Divider />
+      <Divider sx={{ bgcolor: "white" }} />
       <List>
-        {pages.map((item) => (
-          <ListItem key={item} disablePadding>
-            <ListItemButton sx={{ textAlign: "center" }}>
-              <ListItemText primary={item} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        <ListItem
+          disablePadding
+          sx={{ display: "flex", justifyContent: "center", py: 1 }}
+        >
+          <Button
+            variant="contained"
+            color="secondary"
+            component={Link}
+            to="/jobposting"
+          >
+            Post a Job
+          </Button>
+        </ListItem>
+
+        <Divider sx={{ bgcolor: "white" }} />
+
+        <ListItem
+          disablePadding
+          sx={{ display: "flex", justifyContent: "center", py: 1 }}
+        >
+          <Button color="inherit" component={Link} to="/Signup">
+            Signup
+          </Button>
+        </ListItem>
+
+        <Divider sx={{ bgcolor: "white" }} />
+
+        <ListItem
+          disablePadding
+          sx={{ display: "flex", justifyContent: "center", py: 1 }}
+        >
+          <Button color="inherit" component={Link} to="/Login">
+            Login
+          </Button>
+        </ListItem>
+
+        <Divider sx={{ bgcolor: "white" }} />
       </List>
     </Box>
   );
@@ -64,7 +112,9 @@ const navigate = useNavigate();
           >
             <MenuIcon />
           </IconButton>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+
+          {/* icon */}
+
           <Typography
             variant="h6"
             noWrap
@@ -74,13 +124,12 @@ const navigate = useNavigate();
               mr: 2,
               display: { xs: "none", md: "flex" },
               fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
+              fontWeight: 700,  
               color: "inherit",
               textDecoration: "none",
             }}
           >
-            LOGO
+            HomeCrew
           </Typography>
 
           <nav>
@@ -97,19 +146,23 @@ const navigate = useNavigate();
                 "& .MuiDrawer-paper": {
                   boxSizing: "border-box",
                   width: drawerWidth,
+                  backgroundColor: "#1E1E1E",
+                  color: "white",
                 },
               }}
             >
               {drawer}
             </Drawer>
           </nav>
+
           {/* Desktop */}
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+
           <Typography
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/"
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },
@@ -123,6 +176,7 @@ const navigate = useNavigate();
           >
             LOGO
           </Typography>
+
 
           {/* Pages */}
         <Box sx={{ flexGrow: 1 }} /> {/* This is a spacer */}
@@ -151,6 +205,8 @@ const navigate = useNavigate();
                 Browse Jobs
               </Button>
             )}
+
+          
           </Box>
 
           {user && (

@@ -26,6 +26,7 @@ const WhyChooseUs = () => {
             component="img"
             src={PlaceHolder}
             alt="A happy customer with a service professional"
+            loading="lazy"
             sx={{
               width: "100%",
               height: "auto",
@@ -42,7 +43,7 @@ const WhyChooseUs = () => {
               boxShadow: "0 6px 32px 0 rgba(40,41,61,0.12)",
               borderRadius: 3,
               p: 4,
-              width: { sm: "500px", md: "1000px" },
+              width: { sm: "500px", md: "650px" },
               backdropFilter: "blur(8px)",
             }}
           >
