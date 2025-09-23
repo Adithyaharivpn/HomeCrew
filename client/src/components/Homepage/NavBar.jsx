@@ -2,37 +2,33 @@ import { AppBar,Avatar,Box,Button,Container,Divider,IconButton,List,ListItem,Lis
 import MenuIcon from "@mui/icons-material/Menu";
 import AdbIcon from "@mui/icons-material/Adb";
 import React from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from '../../api/useAuth';
 
 const pages = ["Post a Job", "Signup", "Login"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+// const settings = ["Profile", "Account", "Dashboard", "Logout"];
 const drawerWidth = 240;
 
+
 const NavBar = (props) => {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+const { user, logout } = useAuth(); // ✅ 2. Get user data and logout function
+const navigate = useNavigate();
+
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
+  const handleDrawerToggle = () => setMobileOpen((prevState) => !prevState);
+  const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
+  const handleCloseUserMenu = () => setAnchorElUser(null);
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
+  const handleLogout = () => {
+    logout();
+    handleCloseUserMenu();
+    navigate('/'); 
   };
   const { window } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+ 
 
-  const handleDrawerToggle = () => {
-    setMobileOpen((prevState) => !prevState);
-  };
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
@@ -127,58 +123,74 @@ const NavBar = (props) => {
           >
             LOGO
           </Typography>
+
           {/* Pages */}
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {/* {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page}
-              </Button> 
-             ))} */}
+        <Box sx={{ flexGrow: 1 }} /> {/* This is a spacer */}
+
+         
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: 'center', gap: 1 }}>
+            
+            {!user && (
+              <>
+                <Button color="secondary" variant="contained" component={Link} to="/jobposting">
+                  Post a Job
+                </Button>
+                <Button color="inherit" component={Link} to="/signup">Signup</Button>
+                <Button color="inherit" component={Link} to="/login">Login</Button>
+              </>
+            )}
+
+            
+            {user && user.role === 'customer' && (
+              <Button color="secondary" variant="contained" component={Link} to="/jobposting">
+                Post a Job
+              </Button>
+            )}
+            {user && (
+              <Button color="inherit" component={Link} to="/jobspage">
+                Browse Jobs
+              </Button>
+            )}
           </Box>
 
-          <Box sx={{ flexGrow: 0, display: { xs: "none", md: "flex" } }}>
-            <Button color="secondary" variant="contained">
-              <Link  style={{color:"black",textDecoration:"none"}}  to={'/jobposting'}>Post a Job</Link>
-            </Button>
-            <Button color="inherit"><Link  style={{color:"white",textDecoration:"none"}}  to={'/Signup'}>Signup</Link></Button>
-            <Button color="inherit"><Link  style={{color:"white",textDecoration:"none"}}  to={'/Login'}>Login</Link></Button>
-          </Box>
-          {/* profile */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: "center" }}>
-                    {setting}
-                  </Typography>
+          {user && (
+            <Box sx={{ ml: 2 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt={user.name || 'User'} src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                anchorEl={anchorElUser}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {/* --- Menu Items for ALL Logged-In Users --- */}
+                <MenuItem onClick={() => { navigate('/profile'); handleCloseUserMenu(); }}>
+                  <Typography>Profile</Typography>
                 </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+                
+                {/* --- Role-Specific Menu Items --- */}
+                {user.role === 'admin' && (
+                  <MenuItem onClick={() => { navigate('/admin-dashboard'); handleCloseUserMenu(); }}>
+                    <Typography>Admin Dashboard</Typography>
+                  </MenuItem>
+                )}
+                {user.role === 'tradesperson' && (
+                  <MenuItem onClick={() => { navigate('/tradesperson-dashboard'); handleCloseUserMenu(); }}>
+                    <Typography>My Dashboard</Typography>
+                  </MenuItem>
+                )}
+                
+                {/* --- Logout Button --- */}
+                <MenuItem onClick={handleLogout}>
+                  <Typography>Logout</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+
         </Toolbar>
       </Container>
     </AppBar>

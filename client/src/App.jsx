@@ -1,7 +1,5 @@
 // import { useState } from 'react'
-import { ThemeProvider } from "@emotion/react";
 import "./App.css";
-import theme from "./theme";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Routes, Route } from "react-router-dom";
@@ -26,7 +24,7 @@ function App() {
   );
   return (
     <>
-      <ThemeProvider theme={theme}>
+    
         <NavBar />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -36,7 +34,7 @@ function App() {
           <Route path="/jobspage" element={<JobsPage />} />
         </Routes>
         <Footer />
-      </ThemeProvider>
+    
     </>
   );
 }

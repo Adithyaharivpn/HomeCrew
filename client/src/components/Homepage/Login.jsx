@@ -5,6 +5,8 @@ import { Box, Button, Paper, TextField, Typography, CircularProgress, InputAdorn
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 
+
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -26,12 +28,12 @@ const Login = () => {
         formData
       );
       
-      // Store the token in the browser's local storage
+    
       localStorage.setItem('token', response.data.token);
       
       // Redirect to the homepage after successful login
       navigate('/');
-      window.location.reload(); // Optional: force a reload to update NavBar state
+      window.location.reload(); 
 
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from '../../api/axiosConfig.js';
 import {
   Box,
   Typography,
@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import LocationPinIcon from "@mui/icons-material/LocationPin";
 import { useEffect } from "react";
+// import { useAuth } from '../../api/Auth.jsx';
 
 const JobPosting = () => {
   const [jobDetails, setJobDetails] = useState({
@@ -37,8 +38,8 @@ const JobPosting = () => {
     setIsLoading(true);
 
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/jobs/`,
+      await api.post(
+        '/api/jobs/',
         jobDetails
       );
 
@@ -53,14 +54,14 @@ const JobPosting = () => {
       setIsLoading(false);
     }
   };
-console.log("VITE_API_BASE_URL =", import.meta.env.VITE_API_BASE_URL);
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/api/service/`
+        const response = await api.get(
+          '/api/service/'
         );
-        console.log("Services API Response:", response.data);
+        // console.log("Services API Response:", response.data);
         setServices(response.data);
       } catch (error) {
         console.error("Failed to fetch services:", error);
