@@ -1,6 +1,6 @@
 
 // import { useState } from 'react'
-import React, /*{ useLayoutEffect, useRef }*/ from 'react';
+// import React ,{ useLayoutEffect, useRef } from 'react';
 import "./App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
