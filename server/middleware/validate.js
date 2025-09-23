@@ -4,7 +4,7 @@ const SignupvalidateRules = () => {
   return [
     check('name', 'Name is required').notEmpty(),
     check('email', 'Email is required').isEmail(),
-    check('password', 'Password must be 6+ characters').isLength({ min: 6 }),
+    check('password', 'Password must be 8+ characters').isLength({ min: 8 }),
     check('role', 'Role is required').notEmpty().isIn(['customer', 'tradesperson']),
     
     check('tradeCategory')

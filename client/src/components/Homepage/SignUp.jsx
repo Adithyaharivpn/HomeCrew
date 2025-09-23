@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -11,121 +11,131 @@ import {
   Select,
   FormControl,
   InputLabel,
-} from '@mui/material';
-import EmailIcon from '@mui/icons-material/Email';
-import LockIcon from '@mui/icons-material/Lock';
-import PersonIcon from '@mui/icons-material/Person';
-import axios from 'axios';
+} from "@mui/material";
+import EmailIcon from "@mui/icons-material/Email";
+import LockIcon from "@mui/icons-material/Lock";
+import PersonIcon from "@mui/icons-material/Person";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-  // State for form inputs
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('');
-  const [tradeCategory, setTradeCategory] = useState('');
-  const [experience, setExperience] = useState('');
-  const [location, setLocation] = useState('');
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
+    tradeCategory: "",
+    experience: "",
+    location: "",
+  });
 
-  // Trade categories from backend
   const [tradeCategories, setTradeCategories] = useState([]);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  // Feedback messages
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  // Fetch trade categories from backend once on mount
   useEffect(() => {
     const fetchTradeCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/service'); // replace with your API URL
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/service`
+        );
         setTradeCategories(response.data);
       } catch (error) {
-        console.error('Failed to fetch trade categories:', error);
+        console.error("Failed to fetch trade categories:", error);
       }
     };
     fetchTradeCategories();
   }, []);
 
-  const handleRoleChange = (event) => {
-    setRole(event.target.value);
-    // Reset tradeCategory if role changes
-    if (event.target.value !== 'tradesperson') {
-      setTradeCategory('');
-      setExperience('');
-      setLocation('');
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
-  const handleTradeCategoryChange = (event) => {
-    setTradeCategory(event.target.value);
+  const handleRoleChange = (e) => {
+    const { name, value } = e.target;
+    const newFormData = {
+      ...formData,
+      [name]: value,
+    };
+
+    if (value !== "tradesperson") {
+      newFormData.tradeCategory = "";
+      newFormData.experience = "";
+      newFormData.location = "";
+    }
+    setFormData(newFormData);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
-    // Simple validation
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
       return;
     }
 
-    const payload = {
-      name,
-      email,
-      password,
-      role,
-    };
-
-    if (role === 'tradesperson') {
-      payload.tradeCategory = tradeCategory;
-      payload.experience = experience;
-      payload.location = location;
-    }
+    // You can destructure here for cleaner payload creation
+    const { confirmPassword, ...payload } = formData;
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', payload);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`,
+        payload
+      );
       setSuccess(response.data.message);
-      // Clear fields on success
-      setName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setRole('');
-      setTradeCategory('');
-      setExperience('');
-      setLocation('');
+      // Clear all fields on success
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "",
+        tradeCategory: "",
+        experience: "",
+        location: "",
+      });
+
+      setTimeout(() => {
+        console.log("Attempting to redirect to /login...");
+        navigate("/login");
+      }, 2000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Signup failed');
+      if (err.response && err.response.data && err.response.data.errors) {
+        const firstError = err.response.data.errors[0];
+        setError(firstError.msg);
+      } else {
+        setError(err.response?.data?.error || "An unexpected error occurred.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'gray.100',
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "grey.100",
         p: 2,
       }}
     >
       <Paper
         elevation={8}
-        sx={{
-          maxWidth: 500,
-          width: '100%',
-          p: 4,
-          borderRadius: 3,
-        }}
+        sx={{ maxWidth: 500, width: "100%", p: 4, borderRadius: 3 }}
       >
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h4" fontWeight="bold" color="text.primary">
+        <Box sx={{ textAlign: "center", mb: 4 }}>
+          <Typography variant="h4" fontWeight="bold">
             Sign Up
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
@@ -133,137 +143,136 @@ const SignUp = () => {
           </Typography>
         </Box>
 
-        {/* Show error or success messages */}
         {error && (
           <Typography color="error" sx={{ mb: 2 }}>
             {error}
           </Typography>
         )}
         {success && (
-          <Typography color="primary" sx={{ mb: 2 }}>
+          <Typography color="success.main" sx={{ mb: 2 }}>
             {success}
           </Typography>
         )}
 
-        {/* Form */}
         <Box component="form" onSubmit={handleSubmit}>
-          <Grid container spacing={3} direction="column" alignItems="stretch">
-            {/* Full Name */}
-            <Grid item xs={12}>
+          <Grid container spacing={2} direction="column">
+            {/* Name */}
+            <Grid>
               <TextField
                 fullWidth
                 name="name"
                 placeholder="Full Name"
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon color="primary" />
-                    </InputAdornment>
-                  ),
+                value={formData.name}
+                onChange={handleChange}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             </Grid>
-
             {/* Email */}
-            <Grid item xs={12}>
+            <Grid>
               <TextField
                 fullWidth
                 name="email"
                 type="email"
                 placeholder="Email Address"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon color="primary" />
-                    </InputAdornment>
-                  ),
+                value={formData.email}
+                onChange={handleChange}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             </Grid>
-
             {/* Password */}
-            <Grid item xs={12}>
+            <Grid>
               <TextField
                 fullWidth
                 name="password"
                 type="password"
                 placeholder="Password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon color="primary" />
-                    </InputAdornment>
-                  ),
+                value={formData.password}
+                onChange={handleChange}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             </Grid>
-
             {/* Confirm Password */}
-            <Grid item xs={12}>
+            <Grid>
               <TextField
                 fullWidth
                 name="confirmPassword"
                 type="password"
                 placeholder="Confirm Password"
                 required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon color="primary" />
-                    </InputAdornment>
-                  ),
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             </Grid>
-
-            {/* Role Selection */}
-            <Grid item xs={12}>
+            {/* Role */}
+            <Grid>
               <FormControl fullWidth required>
-                <InputLabel>Role</InputLabel>
+                <InputLabel>I am a...</InputLabel>
                 <Select
                   name="role"
-                  value={role}
+                  value={formData.role}
                   onChange={handleRoleChange}
-                  label="Role"
-                  fullWidth
+                  label="I am a..."
                 >
                   <MenuItem value="customer">Customer</MenuItem>
                   <MenuItem value="tradesperson">Tradesperson</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
-
-            {/* Show tradesperson fields if role is tradesperson */}
-            {role === 'tradesperson' && (
+            {/* Tradesperson Fields */}
+            {formData.role === "tradesperson" && (
               <>
-                {/* Trade Category loaded from backend */}
-                <Grid item xs={12}>
+                <Grid>
                   <FormControl fullWidth required>
                     <InputLabel>Trade Category</InputLabel>
                     <Select
                       name="tradeCategory"
-                      value={tradeCategory}
-                      onChange={handleTradeCategoryChange}
+                      value={formData.tradeCategory}
+                      onChange={handleChange}
                       label="Trade Category"
                     >
                       {tradeCategories.length > 0 ? (
                         tradeCategories.map((category) => (
                           <MenuItem
-                            key={category.id || category._id || category.value}
-                            value={category.service_name || category.value || category.label}
+                            key={category._id}
+                            value={category.service_name}
                           >
-                            {category.service_name || category.label}
+                            {category.service_name}
                           </MenuItem>
                         ))
                       ) : (
@@ -272,50 +281,44 @@ const SignUp = () => {
                     </Select>
                   </FormControl>
                 </Grid>
-
-                {/* Years of Experience */}
-                <Grid item xs={12}>
+                <Grid>
                   <TextField
                     fullWidth
                     name="experience"
                     type="number"
                     placeholder="Years of Experience"
                     required
-                    value={experience}
-                    onChange={(e) => setExperience(e.target.value)}
+                    value={formData.experience}
+                    onChange={handleChange}
                   />
                 </Grid>
-
-                {/* Service Area / Location */}
-                <Grid item xs={12}>
+                <Grid>
                   <TextField
                     fullWidth
                     name="location"
                     placeholder="City or Area of Service"
                     required
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={formData.location}
+                    onChange={handleChange}
                   />
                 </Grid>
               </>
             )}
-
-            {/* Submit Button */}
-            <Grid item xs={12}>
+            <Grid>
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 size="large"
-                sx={{
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                  fontSize: '1.1rem',
-                }}
+                sx={{ py: 1.5, fontWeight: "bold" }}
               >
                 Sign Up
               </Button>
+            </Grid>
+            <Grid>
+              <Typography sx={{ mt: 2, textAlign: "center" }}>
+                Already a User?<Link to={"/login"}>Login</Link>
+              </Typography>
             </Grid>
           </Grid>
         </Box>

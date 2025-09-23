@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const Userschema = new mongoose.Schema({
+
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -12,35 +13,27 @@ const Userschema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-      // only one user per email
   },
   role: {
     type: String,
-    enum: ["customer", "tradesperson"],
+    enum: ["customer", "tradesperson", "admin"],
     required: true,
   },
+  // These fields are only for tradespeople
   tradeCategory: {
     type: String,
-    default: null, // only one user per email
   },
   experience: {
-    type: String,
-    type: Number,
-    default: null //
+   
+    type: Number, 
   },
   location: {
     type: String,
-    default: null 
   },
-  createdat: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
+}, { 
+  
+  timestamps: true 
 });
 
-
-const User =mongoose.model('User',Userschema)
-module.exports=User;
-
-
+const User = mongoose.model('User', userSchema);
+module.exports = User;
