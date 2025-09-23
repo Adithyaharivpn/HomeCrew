@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 
 //cors
-const allowedOrigins = ['https://college-project-git-feature-jobpage-adithyaharivpns-projects.vercel.app/', 'http://localhost:5173' ,'http://localhost:5173']; // frontend URLs here
+const allowedOrigins = ['https://college-project-git-feature-jobpage-adithyaharivpns-projects.vercel.app', 'http://localhost:3000' ,'http://localhost:5173']; // frontend URLs here
 
 const corsOptions = {
   origin: (origin, callback) => {
