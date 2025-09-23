@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from '../../api/axiosConfig.js';
+import { useAuth } from '../../api/useAuth.js'
 import {
   Container,
   Grid,
@@ -16,25 +17,48 @@ import {
 const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+const { user,logout } = useAuth();
 
   useEffect(() => {
     const fetchJobs = async () => {
+      setLoading(true);
+      let url = '/api/jobs/'; // Default URL for public users
+
+      // 3. Determine the correct URL based on the user's role
+      if (user) {
+        if (user.role === 'customer') {
+          url = '/api/jobs/my-jobs';
+        } else if (user.role === 'tradesperson') {
+          url = '/api/jobs/feed';
+        }
+      }
+      
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/jobs/`);
+        const response = await api.get(url);
         setJobs(response.data);
-        setLoading(false);
       } catch (error) {
         console.error("Failed to fetch jobs:", error);
+        if (error.response && error.response.status === 401) {
+          logout(); 
+        }
+      } finally {
+        setLoading(false);
       }
     };
-    fetchJobs();
-  }, []);
 
+    fetchJobs();
+  }, [user]);
+
+const getTitle = () => {
+    if (user?.role === 'customer') return 'My Posted Jobs';
+    if (user?.role === 'tradesperson') return 'My Job Feed';
+    return 'Open Job Listings';
+  };
   if (loading) {
     return (
       <Container sx={{ mt: 10, mb: 10 }}>
         <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
-          Open Job Listings
+          {getTitle()}
         </Typography>
         <Grid container spacing={3}>
           {Array.from(new Array(6)).map((item, index) => (
@@ -67,7 +91,7 @@ const BrowseJobsPage = () => {
   return (
     <Container sx={{ mt: 10, mb: 10 }}>
       <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
-        Open Job Listings
+         {getTitle()}
       </Typography>
       <Grid container spacing={3}>
         {jobs.map((job) => (
@@ -98,9 +122,7 @@ const BrowseJobsPage = () => {
                 </Typography>
                 <Typography variant="subtitle2">
                   Posted by:{" "}
-                  {job.user
-                    ? `${job.user.firstName} ${job.user.lastName}`
-                    : "A customer"}
+                  {job.user ? job.user.name  : "A customer"}
                 </Typography>
               </CardContent>
               <CardActions>

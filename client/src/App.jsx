@@ -1,7 +1,7 @@
-import React, { useLayoutEffect, useRef } from 'react';
-import { ThemeProvider } from "@emotion/react";
+
+// import { useState } from 'react'
+// import React ,{ useLayoutEffect, useRef } from 'react';
 import "./App.css";
-import theme from "./theme";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Routes, Route } from "react-router-dom";
@@ -51,7 +51,9 @@ function App() {
   // );
 
   return (
-    <ThemeProvider theme={theme}>
+
+    <>
+    
       {/* ref={main} */}
       <div id="smooth-wrapper" > 
         <div id="smooth-content">
@@ -66,7 +68,9 @@ function App() {
           <Footer />
         </div>
       </div>
-    </ThemeProvider>
+    
+    </>
+
   );
 }
 

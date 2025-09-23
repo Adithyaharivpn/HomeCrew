@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-// Define your routes
-router.get('/', (req, res) => {
-  res.send('This is the job route!');
-});
+const { signup , login } = require('../controller/authcontroller'); 
+const { SignupvalidateRules, validate } = require('../middleware/validate');
 
+router.post('/signup', SignupvalidateRules(), validate, signup);
+router.post('/login', login);
 
 module.exports = router;

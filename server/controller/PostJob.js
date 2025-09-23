@@ -1,12 +1,13 @@
 const Job = require('../models/JobsModel');
+const User = require('../models/User');
 
 const postJob = async (req, res) => {
   try {
     //Get data from the body(frontend)
     const { title, category, description, city } = req.body;
 
-    // const userId = req.user.id; 
-    const placeholderUserId = "60d0fe4f5311236168a109ca"; //temp chnage it once user route is done 
+    const userId = req.user.id; 
+    
 
     
     if (!title || !category || !description || !city) {
@@ -18,7 +19,7 @@ const postJob = async (req, res) => {
       category,
       description,
       city,
-      user: placeholderUserId, // Use the real userId once auth is ready
+      user: userId, 
     });
 
     
@@ -37,7 +38,7 @@ const getJobs = async (req, res) => {
   try {
     
     const jobs = await Job.find({ status: 'open' })
-      // .populate('user', 'firstName lastName') // Get the user's name from the User model
+      .populate('user', 'name') 
       .sort({ createdAt: -1 }); 
 
     res.status(200).json(jobs);
@@ -47,5 +48,41 @@ const getJobs = async (req, res) => {
   }
 };
 
+const getMyJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({ user: req.user.id })
+      .populate('user', 'name') 
+      .sort({ createdAt: -1 });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
 
-module.exports = { postJob,getJobs};
+const getTradespersonFeed = async (req, res) => {
+  try {
+    const tradesperson = await User.findById(req.user.id);
+    if (!tradesperson || !tradesperson.tradeCategory) {
+      return res.status(400).json({ error: 'User trade category not found.' });
+    }
+
+    const jobs = await Job.find({ 
+      category: tradesperson.tradeCategory, 
+      status: 'open' 
+    })
+    .populate('user') 
+    .sort({ createdAt: -1 });
+
+    res.json(jobs);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+module.exports = { 
+  postJob, 
+  getJobs, 
+  getMyJobs, 
+  getTradespersonFeed 
+};
