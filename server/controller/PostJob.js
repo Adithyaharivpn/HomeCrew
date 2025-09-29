@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 const postJob = async (req, res) => {
   try {
-    //Get data from the body(frontend)
+    
     const { title, category, description, city } = req.body;
 
     const userId = req.user.id; 

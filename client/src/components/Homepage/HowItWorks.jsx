@@ -96,7 +96,7 @@ const HowItWorks = () => {
       gsap.from(".timeline-item", {
         y: 150,
         opacity: 0,
-        stagger: 0.3,
+        stagger: 0.3, 
         scrollTrigger: {
           trigger: main.current,
           ease: "power1.inOut",
