@@ -51,7 +51,7 @@ const UserProfile = () => {
     }
 
     try {
-      const response = await api.put('/api/users/me', profileData);
+      const response = await api.put('/api/users/me', data);
       setProfileData(response.data);
       setEditMode(false);
       setNewProfilePicture(null);

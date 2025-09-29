@@ -3,10 +3,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const signup = async (req, res) => {
-  console.log("--- SIGNUP REQUEST RECEIVED ---");
-  console.log("REQUEST BODY:", req.body); // This should show your text fields
-  console.log("REQUEST FILE:", req.file);   // This should show your file from multer
-  console.log("-----------------------------");
   const { name, email, password, role, tradeCategory, experience, location } =
     req.body;
 
