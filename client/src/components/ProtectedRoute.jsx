@@ -1,10 +1,25 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../api/useAuth';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../api/useAuth";
+import { Box, CircularProgress } from "@mui/material";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
   // 1. First, check if the user is logged in at all.
   if (!user) {
     // If not, redirect to the login page.

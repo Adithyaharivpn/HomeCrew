@@ -6,6 +6,7 @@ import { AuthContext } from './authContext';
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     try {
@@ -19,6 +20,8 @@ export const AuthProvider = ({ children }) => {
       console.error("Invalid token:", error);
       setUser(null);
       localStorage.removeItem('token');
+    }finally {
+      setLoading(false);
     }
   }, [token]);
 
@@ -32,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
   };
   
-  const value = { token, user, login, logout };
+  const value = { token, user, loading,login, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

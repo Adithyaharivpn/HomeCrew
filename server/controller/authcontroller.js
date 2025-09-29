@@ -1,15 +1,20 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
 const signup = async (req, res) => {
-  const { name, email, password, role, tradeCategory, experience, location } = req.body;
+  console.log("--- SIGNUP REQUEST RECEIVED ---");
+  console.log("REQUEST BODY:", req.body); // This should show your text fields
+  console.log("REQUEST FILE:", req.file);   // This should show your file from multer
+  console.log("-----------------------------");
+  const { name, email, password, role, tradeCategory, experience, location } =
+    req.body;
 
   try {
     // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
+      return res.status(400).json({ error: "Email already registered" });
     }
 
     // Hash password
@@ -22,8 +27,11 @@ const signup = async (req, res) => {
       password: hashedPassword,
       role,
     };
+    if (req.file) {
+      userData.profilePictureUrl = req.file.path;
+    }
 
-    if (role === 'tradesperson') {
+    if (role === "tradesperson") {
       userData.tradeCategory = tradeCategory;
       userData.experience = experience;
       userData.location = location;
@@ -33,11 +41,31 @@ const signup = async (req, res) => {
     const user = new User(userData);
     await user.save();
 
-    res.status(201).json({ message: 'User registered successfully!' });
+    const payload = {
+      user: {
+        id: user.id,
+        role: user.role,
+        profilePictureUrl: user.profilePictureUrl
+      },
+    };
 
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: "3h" },
+      (err, token) => {
+        if (err) throw err;
+        // Send a success message AND the token
+        res
+          .status(201)
+          .json({ token, message: "User registered successfully!" });
+      }
+    );
+
+    
   } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Signup error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -48,35 +76,36 @@ const login = async (req, res) => {
     // 1. Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
     // 2. Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
     // 3. If credentials are correct, create a JWT
     const payload = {
       user: {
         id: user.id,
-        role: user.role, 
+        role: user.role,
+        profilePictureUrl: user.profilePictureUrl
       },
     };
 
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: '3h' }, 
+      { expiresIn: "3h" },
       (err, token) => {
         if (err) throw err;
-        res.json({ token, message: 'Logged in successfully' });
+        res.json({ token, message: "Logged in successfully" });
       }
     );
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).send("Server error");
   }
 };
 

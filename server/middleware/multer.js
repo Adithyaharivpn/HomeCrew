@@ -9,7 +9,6 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     // Create a unique filename to prevent overwriting
-    // It will be something like: 1678886400000-profile.jpg
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
@@ -17,7 +16,7 @@ const storage = multer.diskStorage({
 // 2. Configure File Filter
 const fileFilter = (req, file, cb) => {
   // Accept only image files
-  const allowedFileTypes = /jpeg|jpg|png|gif/;
+  const allowedFileTypes = /jpeg|jpg|png/;
   const mimetype = allowedFileTypes.test(file.mimetype);
   const extname = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
 
@@ -30,7 +29,7 @@ const fileFilter = (req, file, cb) => {
 // 3. Initialize Multer with the configurations
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
+  limits: { fileSize: 1024 * 1024 * 5 }, 
   fileFilter: fileFilter
 });
 

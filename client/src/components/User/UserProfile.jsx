@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../api/useAuth';
 import api from '../../api/axiosConfig';
-import { Container, Paper, Typography, Box, Button, TextField, CircularProgress, Alert } from '@mui/material';
+import { Container, Paper, Typography, Box, Button, TextField, CircularProgress, Alert, Avatar } from '@mui/material';
 
 const UserProfile = () => {
 
-  const { user, login } = useAuth(); // Get user and login function to update context
+  const { user, login } = useAuth(); 
   const [profileData, setProfileData] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [newProfilePicture, setNewProfilePicture] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -29,12 +30,31 @@ const UserProfile = () => {
   const handleChange = (e) => {
     setProfileData({ ...profileData, [e.target.name]: e.target.value });
   };
+  
+    const handleFileChange = (e) => {
+    setNewProfilePicture(e.target.files[0]);
+  };
 
   const handleSave = async () => {
+
+    const data = new FormData();
+    data.append('name', profileData.name);
+    
+    if (profileData.role === 'tradesperson') {
+      data.append('location', profileData.location);
+      data.append('experience', profileData.experience);
+      data.append('tradeCategory', profileData.tradeCategory);
+    }
+    
+    if (newProfilePicture) {
+      data.append('profilePicture', newProfilePicture);
+    }
+
     try {
       const response = await api.put('/api/users/me', profileData);
       setProfileData(response.data);
       setEditMode(false);
+      setNewProfilePicture(null);
     } catch (err) {
       setError('Failed to update profile.');
       console.error(err);
@@ -45,16 +65,27 @@ const UserProfile = () => {
   if (error) return <Alert severity="error">{error}</Alert>;
   if (!profileData) return <Typography>No profile found.</Typography>;
 
+   const profilePicUrl = profileData.profilePictureUrl 
+    ? `${import.meta.env.VITE_API_BASE_URL}/${profileData.profilePictureUrl}` 
+    : null;
+
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
+    <Box component={Container} sx={{ mt: 4 ,p: 15,}}>
       <Paper sx={{ p: 3 }}>
+        <Avatar src={profilePicUrl} sx={{ width: 80, height: 80, mr: 2 }} />
         <Typography variant="h4" gutterBottom>
           My Profile
         </Typography>
         
         {editMode ? (
           /* --- EDIT MODE --- */
+
           <Box component="form" noValidate autoComplete="off">
+            <Button variant="outlined" component="label" sx={{mb: 2}}>
+              Change Profile Picture
+            <input type="file" hidden onChange={handleFileChange} />
+            </Button>
+            {newProfilePicture && <Typography>{newProfilePicture.name}</Typography>}
             <TextField fullWidth margin="normal" label="Full Name" name="name" value={profileData.name} onChange={handleChange} />
             <TextField fullWidth margin="normal" label="Email" name="email" value={profileData.email} disabled />
             
@@ -93,7 +124,7 @@ const UserProfile = () => {
           </Box>
         )}
       </Paper>
-    </Container>
+    </Box>
   );
 };
 

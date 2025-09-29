@@ -3,8 +3,9 @@ const router = express.Router();
 
 const { signup , login } = require('../controller/authcontroller'); 
 const { SignupvalidateRules, validate } = require('../middleware/validate');
+const upload = require('../middleware/multer')
 
-router.post('/signup', SignupvalidateRules(), validate, signup);
+router.post('/signup',  upload.single('profilePicture'), SignupvalidateRules(), validate,signup);
 router.post('/login', login);
 
 module.exports = router;
