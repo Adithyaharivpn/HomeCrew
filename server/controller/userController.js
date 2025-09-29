@@ -1,0 +1,46 @@
+const User = require('../models/User');
+
+// Get current user's profile
+const getMyProfile = async (req, res) => {
+  try {
+    // req.user.id is available from the auth middleware
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// Update current user's profile
+const updateMyProfile = async (req, res) => {
+  // Pull fields from the request body
+  const { name, location, experience, tradeCategory } = req.body;
+  
+  const profileFields = {};
+  if (name) profileFields.name = name;
+  if (location) profileFields.location = location;
+  if (experience) profileFields.experience = experience;
+  if (tradeCategory) profileFields.tradeCategory = tradeCategory;
+  if (req.file) {
+    profileFields.profilePictureUrl = req.file.path;
+  }
+  
+  try {
+    let user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: profileFields },
+      { new: true } // Return the updated document
+    ).select('-password');
+
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+module.exports = { getMyProfile, updateMyProfile };

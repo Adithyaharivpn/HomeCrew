@@ -1,6 +1,5 @@
-// In client/src/hooks/useAuth.js
 import { useContext } from 'react';
-import { AuthContext } from '../api/authContext'; // This import will now work
+import { AuthContext } from '../api/authContext'; 
 
 export const useAuth = () => {
   return useContext(AuthContext);

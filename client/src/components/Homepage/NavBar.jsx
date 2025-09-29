@@ -23,7 +23,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../api/useAuth';
 
-const pages = ["Post a Job", "Signup", "Login"];
+// const pages = ["Post a Job", "Signup", "Login"];
 // const settings = ["Profile", "Account", "Dashboard", "Logout"];
 const drawerWidth = 240;
 
@@ -229,7 +229,7 @@ const navigate = useNavigate();
                 
                 {/* --- Role-Specific Menu Items --- */}
                 {user.role === 'admin' && (
-                  <MenuItem onClick={() => { navigate('/admin-dashboard'); handleCloseUserMenu(); }}>
+                  <MenuItem onClick={() => { navigate('/admin/admin-dashboard'); handleCloseUserMenu(); }}>
                     <Typography>Admin Dashboard</Typography>
                   </MenuItem>
                 )}

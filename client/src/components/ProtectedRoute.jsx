@@ -1,0 +1,24 @@
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../api/useAuth';
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { user } = useAuth();
+
+  // 1. First, check if the user is logged in at all.
+  if (!user) {
+    // If not, redirect to the login page.
+    return <Navigate to="/login" replace />;
+  }
+
+  // 2. Then, check if this route requires specific roles AND if the user has one of them.
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    // If the user's role is not in the allowed list, redirect them to the homepage.
+    return <Navigate to="/" replace />;
+  }
+
+  // If all checks pass, render the component.
+  return children;
+};
+
+export default ProtectedRoute;

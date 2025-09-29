@@ -1,4 +1,3 @@
-
 // import { useState } from 'react'
 // import React ,{ useLayoutEffect, useRef } from 'react';
 import "./App.css";
@@ -16,14 +15,15 @@ import Login from "./components/Homepage/Login.jsx";
 import JobPosting from "./components/User/JobPosting.jsx";
 import JobsPage from "./components/User/JobsPage.jsx";
 import PopularJobs from "./components/Homepage/PopularJobs.jsx";
+import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import UserProfile from "./components/User/UserProfile.jsx";
 // import gsap from 'gsap';
 // import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // import { ScrollSmoother } from 'gsap/ScrollSmoother';
 // import { useGSAP } from '@gsap/react';
 
-
 // gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother);
-
 
 const HomePage = () => (
   <>
@@ -36,41 +36,47 @@ const HomePage = () => (
 );
 
 function App() {
-
   // const main = useRef();
   // const smoother = useRef();
 
   // useGSAP(
   //   () => {
   //     smoother.current = ScrollSmoother.create({
-  //       smooth: 3, 
-  //       effects: true, 
+  //       smooth: 3,
+  //       effects: true,
   //     });
   //   },
   //   { scope: main }
   // );
 
   return (
-
     <>
-    
       {/* ref={main} */}
-      <div id="smooth-wrapper" > 
+      <div id="smooth-wrapper">
         <div id="smooth-content">
           <NavBar />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/jobposting" element={<JobPosting />} />
-            <Route path="/jobspage" element={<JobsPage />} />
+            <Route path="/jobposting" element={<ProtectedRoute allowedRoles={['customer']}>
+              <JobPosting />
+            </ProtectedRoute>} />
+            <Route path="/jobspage" element={<ProtectedRoute allowedRoles={['customer', 'tradesperson']}>
+              <JobsPage />
+            </ProtectedRoute>} />
+            <Route path="/admin/admin-dashboard" element={<ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute allowedRoles={['customer', 'tradesperson', 'admin']}>
+              <UserProfile />
+            </ProtectedRoute>} />
+            {/* Add more routes as needed */}
           </Routes>
           <Footer />
         </div>
       </div>
-    
     </>
-
   );
 }
 
