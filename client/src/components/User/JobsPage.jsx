@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import api from '../../api/axiosConfig.js';
-import { useAuth } from '../../api/useAuth.js'
+import api from "../../api/axiosConfig.js";
+import { useAuth } from "../../api/useAuth.js";
 import {
   Container,
   Grid,
@@ -13,33 +13,34 @@ import {
   Button,
   CardActions,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const BrowseJobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-const { user,logout } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
-      let url = '/api/jobs/'; // Default URL for public users
+      let url = "/api/jobs/"; // Default URL for public users
 
       // 3. Determine the correct URL based on the user's role
       if (user) {
-        if (user.role === 'customer') {
-          url = '/api/jobs/my-jobs';
-        } else if (user.role === 'tradesperson') {
-          url = '/api/jobs/feed';
+        if (user.role === "customer") {
+          url = "/api/jobs/my-jobs";
+        } else if (user.role === "tradesperson") {
+          url = "/api/jobs/feed";
         }
       }
-      
+
       try {
         const response = await api.get(url);
         setJobs(response.data);
       } catch (error) {
         console.error("Failed to fetch jobs:", error);
         if (error.response && error.response.status === 401) {
-          logout(); 
+          logout();
         }
       } finally {
         setLoading(false);
@@ -49,10 +50,10 @@ const { user,logout } = useAuth();
     fetchJobs();
   }, [user]);
 
-const getTitle = () => {
-    if (user?.role === 'customer') return 'My Posted Jobs';
-    if (user?.role === 'tradesperson') return 'My Job Feed';
-    return 'Open Job Listings';
+  const getTitle = () => {
+    if (user?.role === "customer") return "My Posted Jobs";
+    if (user?.role === "tradesperson") return "My Job Feed";
+    return "Open Job Listings";
   };
   if (loading) {
     return (
@@ -91,7 +92,7 @@ const getTitle = () => {
   return (
     <Container sx={{ mt: 10, mb: 10 }}>
       <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
-         {getTitle()}
+        {getTitle()}
       </Typography>
       <Grid container spacing={3}>
         {jobs.map((job) => (
@@ -100,7 +101,7 @@ const getTitle = () => {
               sx={{
                 height: "100%",
                 display: "flex",
-                p:"8px",
+                p: "8px",
                 flexDirection: "column",
                 borderRadius: "10px",
               }}
@@ -121,14 +122,15 @@ const getTitle = () => {
                   Location: {job.city}
                 </Typography>
                 <Typography variant="subtitle2">
-                  Posted by:{" "}
-                  {job.user ? job.user.name  : "A customer"}
+                  Posted by: {job.user ? job.user.name : "A customer"}
                 </Typography>
               </CardContent>
               <CardActions>
                 <Button
+                  component={Link}
                   size="small"
                   sx={{ bgcolor: "#0D47A1", color: "white" }}
+                  to={`/job/${job._id}`}
                 >
                   View Details
                 </Button>

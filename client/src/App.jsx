@@ -18,6 +18,7 @@ import PopularJobs from "./components/Homepage/PopularJobs.jsx";
 import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfile from "./components/User/UserProfile.jsx";
+import ViewDetails from "./components/User/ViewDetails.jsx";
 // import gsap from 'gsap';
 // import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -59,19 +60,52 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/jobposting" element={<ProtectedRoute allowedRoles={['customer']}>
-              <JobPosting />
-            </ProtectedRoute>} />
-            <Route path="/jobspage" element={<ProtectedRoute allowedRoles={['customer', 'tradesperson']}>
-              <JobsPage />
-            </ProtectedRoute>} />
-            <Route path="/admin/admin-dashboard" element={<ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute allowedRoles={['customer', 'tradesperson', 'admin']}>
-              <UserProfile />
-            </ProtectedRoute>} />
-            {/* Add more routes as needed */}
+            <Route
+              path="/jobposting"
+              element={
+                <ProtectedRoute allowedRoles={["customer"]}>
+                  <JobPosting />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobspage"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["customer", "tradesperson", "admin"]}
+                >
+                  <JobsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/admin-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["customer", "tradesperson", "admin"]}
+                >
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/job/:jobId"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["customer", "tradesperson", "admin"]}
+                ><ViewDetails /></ProtectedRoute>
+              }
+            >
+              
+            </Route>
           </Routes>
           <Footer />
         </div>

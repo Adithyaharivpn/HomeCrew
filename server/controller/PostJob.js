@@ -80,9 +80,26 @@ const getTradespersonFeed = async (req, res) => {
   }
 };
 
+const getJobById = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id).populate('user', 'name profilePictureUrl');
+    if (!job) {
+      return res.status(404).json({ msg: 'Job not found' });
+    }
+    res.json(job);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Job not found' });
+    }
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = { 
   postJob, 
   getJobs, 
   getMyJobs, 
-  getTradespersonFeed 
+  getTradespersonFeed,
+  getJobById
 };
