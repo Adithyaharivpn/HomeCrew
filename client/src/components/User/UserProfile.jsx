@@ -5,6 +5,7 @@ import { Container, Paper, Typography, Box, Button, TextField, CircularProgress,
 
 const UserProfile = () => {
 
+  // eslint-disable-next-line no-unused-vars
   const { user, login } = useAuth(); 
   const [profileData, setProfileData] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -49,7 +50,7 @@ const UserProfile = () => {
     if (newProfilePicture) {
       data.append('profilePicture', newProfilePicture);
     }
-
+    //Update profile API call
     try {
       const response = await api.put('/api/users/me', data);
       setProfileData(response.data);
@@ -78,6 +79,7 @@ const UserProfile = () => {
         </Typography>
         
         {editMode ? (
+
           /* --- EDIT MODE --- */
 
           <Box component="form" noValidate autoComplete="off">
@@ -104,6 +106,7 @@ const UserProfile = () => {
             </Box>
           </Box>
         ) : (
+          
           /* --- VIEW MODE --- */
           <Box>
             <Typography variant="h6"><strong>Name:</strong> {profileData.name}</Typography>

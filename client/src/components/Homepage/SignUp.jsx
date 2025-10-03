@@ -111,10 +111,9 @@ const SignUp = () => {
         data
       );
       setSuccess(response.data.message);
-      // Clear all fields on success
+      
       if (response.data.token) {
         login(response.data.token);
-        console.log(response.data.token);
       }
 
       setFormData({
@@ -350,8 +349,9 @@ const SignUp = () => {
                 variant="contained"
                 size="large"
                 sx={{ py: 1.5, fontWeight: "bold" }}
+                disabled={isLoading}
               >
-                Sign Up
+                 {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
               </Button>
             </Grid>
             <Grid>

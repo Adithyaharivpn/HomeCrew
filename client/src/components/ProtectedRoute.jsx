@@ -20,9 +20,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
       </Box>
     );
   }
-  // 1. First, check if the user is logged in at all.
+
   if (!user) {
-    // If not, redirect to the login page.
     return <Navigate to="/login" replace />;
   }
 
@@ -32,7 +31,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/" replace />;
   }
 
-  // If all checks pass, render the component.
+ 
   return children;
 };
 

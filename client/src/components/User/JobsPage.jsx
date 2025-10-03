@@ -28,7 +28,7 @@ const BrowseJobsPage = () => {
       // 3. Determine the correct URL based on the user's role
       if (user) {
         if (user.role === "customer") {
-          url = "/api/jobs/my-jobs";
+          url = "/api/jobs/userjob";
         } else if (user.role === "tradesperson") {
           url = "/api/jobs/feed";
         }
@@ -48,7 +48,7 @@ const BrowseJobsPage = () => {
     };
 
     fetchJobs();
-  }, [user]);
+  }, [user,logout]);
 
   const getTitle = () => {
     if (user?.role === "customer") return "My Posted Jobs";
@@ -63,7 +63,7 @@ const BrowseJobsPage = () => {
         </Typography>
         <Grid container spacing={3}>
           {Array.from(new Array(6)).map((item, index) => (
-            <Grid item key={index} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
               <Card sx={{ height: "100%" }}>
                 <CardContent>
                   <Skeleton
@@ -96,7 +96,7 @@ const BrowseJobsPage = () => {
       </Typography>
       <Grid container spacing={3}>
         {jobs.map((job) => (
-          <Grid item key={job._id} size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid key={job._id} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               sx={{
                 height: "100%",

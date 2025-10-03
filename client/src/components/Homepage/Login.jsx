@@ -12,12 +12,15 @@ import {
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
+import {jwtDecode} from "jwt-decode";
+import { useAuth } from "../../api/useAuth";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth()
 
   const handleChange = (e) => {
     if (error) setError("");
@@ -34,11 +37,22 @@ const Login = () => {
         formData
       );
 
-      localStorage.setItem("token", response.data.token);
+      const token = response.data.token;
+       login(token);
+      
+      const decodedUser = jwtDecode(token).user;
 
-      // Redirect to the homepage after successful login
-      navigate("/");
-      window.location.reload();
+      if (decodedUser.role === 'admin') {
+        navigate('/admin/admin-dashboard');
+      } else if (decodedUser.role === 'tradesperson') {
+        navigate('/jobspage'); // Redirects to their job feed
+      } else if (decodedUser.role === 'customer') {
+        navigate('/jobspage'); // Redirects to their "My Posted Jobs"
+      } else {
+        navigate('/'); // Fallback to homepage
+      }
+
+      
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
     } finally {

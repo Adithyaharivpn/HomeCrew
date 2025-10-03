@@ -53,6 +53,7 @@ const getMyJobs = async (req, res) => {
     const jobs = await Job.find({ user: req.user.id })
       .populate('user', 'name') 
       .sort({ createdAt: -1 });
+       res.json(jobs);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -80,6 +81,7 @@ const getTradespersonFeed = async (req, res) => {
   }
 };
 
+//job postted by user id
 const getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id).populate('user', 'name profilePictureUrl');
