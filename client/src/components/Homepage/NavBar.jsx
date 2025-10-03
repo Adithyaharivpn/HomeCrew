@@ -47,7 +47,7 @@ const navigate = useNavigate();
   const { window } = props;
  
   const profilePicUrl = user?.profilePictureUrl 
-    ? `${import.meta.env.VITE_API_BASE_URL}/${user.profilePictureUrl}` 
+    ? `${user.profilePictureUrl}` 
     : null;
 
   const container =

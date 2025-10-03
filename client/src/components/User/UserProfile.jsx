@@ -66,7 +66,7 @@ const UserProfile = () => {
   if (!profileData) return <Typography>No profile found.</Typography>;
 
    const profilePicUrl = profileData.profilePictureUrl 
-    ? `${import.meta.env.VITE_API_BASE_URL}/${profileData.profilePictureUrl}` 
+    ? `${profileData.profilePictureUrl}` 
     : null;
 
   return (

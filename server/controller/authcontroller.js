@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const cloudinary = require("../middleware/cloudinary");
 
 const signup = async (req, res) => {
   const { name, email, password, role, tradeCategory, experience, location } =
@@ -16,15 +17,23 @@ const signup = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Prepare user data
+    //user data
     const userData = {
       name,
       email,
       password: hashedPassword,
       role,
     };
+
     if (req.file) {
-      userData.profilePictureUrl = req.file.path;
+      
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+
+      const result = await cloudinary.uploader.upload(dataURI, {
+        folder: 'profile_pics'
+      });
+      userData.profilePictureUrl = result.secure_url;
     }
 
     if (role === "tradesperson") {
