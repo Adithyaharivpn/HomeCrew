@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 const postJob = async (req, res) => {
   try {
-    //Get data from the body(frontend)
+    
     const { title, category, description, city } = req.body;
 
     const userId = req.user.id; 
@@ -53,6 +53,7 @@ const getMyJobs = async (req, res) => {
     const jobs = await Job.find({ user: req.user.id })
       .populate('user', 'name') 
       .sort({ createdAt: -1 });
+       res.json(jobs);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -80,9 +81,27 @@ const getTradespersonFeed = async (req, res) => {
   }
 };
 
+//job postted by user id
+const getJobById = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id).populate('user', 'name profilePictureUrl');
+    if (!job) {
+      return res.status(404).json({ msg: 'Job not found' });
+    }
+    res.json(job);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Job not found' });
+    }
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = { 
   postJob, 
   getJobs, 
   getMyJobs, 
-  getTradespersonFeed 
+  getTradespersonFeed,
+  getJobById
 };

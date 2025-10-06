@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     enum: ["customer", "tradesperson", "admin"],
     required: true,
   },
+  profilePictureUrl: {
+    type: String,
+    default: '',
+  },
   // These fields are only for tradespeople
   tradeCategory: {
     type: String,
@@ -29,6 +33,10 @@ const userSchema = new mongoose.Schema({
   },
   location: {
     type: String,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
   },
 }, { 
   

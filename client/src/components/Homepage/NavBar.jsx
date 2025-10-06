@@ -23,13 +23,13 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '../../api/useAuth';
 
-const pages = ["Post a Job", "Signup", "Login"];
+// const pages = ["Post a Job", "Signup", "Login"];
 // const settings = ["Profile", "Account", "Dashboard", "Logout"];
 const drawerWidth = 240;
 
 
 const NavBar = (props) => {
-const { user, logout } = useAuth(); // ✅ 2. Get user data and logout function
+const { user, logout } = useAuth(); 
 const navigate = useNavigate();
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -46,7 +46,9 @@ const navigate = useNavigate();
   };
   const { window } = props;
  
-
+  const profilePicUrl = user?.profilePictureUrl 
+    ? `${user.profilePictureUrl}` 
+    : null;
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
@@ -213,7 +215,7 @@ const navigate = useNavigate();
             <Box sx={{ ml: 2 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user.name || 'User'} src="/static/images/avatar/2.jpg" />
+                  <Avatar alt={user.name || 'User'} src={profilePicUrl} />
                 </IconButton>
               </Tooltip>
               <Menu
@@ -229,7 +231,7 @@ const navigate = useNavigate();
                 
                 {/* --- Role-Specific Menu Items --- */}
                 {user.role === 'admin' && (
-                  <MenuItem onClick={() => { navigate('/admin-dashboard'); handleCloseUserMenu(); }}>
+                  <MenuItem onClick={() => { navigate('/admin/admin-dashboard'); handleCloseUserMenu(); }}>
                     <Typography>Admin Dashboard</Typography>
                   </MenuItem>
                 )}

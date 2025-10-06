@@ -17,9 +17,13 @@ import LockIcon from "@mui/icons-material/Lock";
 import PersonIcon from "@mui/icons-material/Person";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../api/useAuth";
 
 const SignUp = () => {
   const navigate = useNavigate();
+
+  const { login } = useAuth();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -31,9 +35,11 @@ const SignUp = () => {
     location: "",
   });
 
+  const [profilePicture, setProfilePicture] = useState(null);
   const [tradeCategories, setTradeCategories] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchTradeCategories = async () => {
@@ -57,6 +63,10 @@ const SignUp = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    setProfilePicture(e.target.files[0]);
+  };
+
   const handleRoleChange = (e) => {
     const { name, value } = e.target;
     const newFormData = {
@@ -76,22 +86,36 @@ const SignUp = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setIsLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
+      setIsLoading(false);
       return;
     }
 
-    // You can destructure here for cleaner payload creation
-    const { confirmPassword, ...payload } = formData;
-
+    const data = new FormData();
+    
+   Object.keys(formData).forEach(key => {
+    if (key !== 'confirmPassword') {
+      data.append(key, formData[key]);
+    }
+    });
+    // Append the file if it exists
+    if (profilePicture) {
+      data.append("profilePicture", profilePicture);
+    }
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`,
-        payload
+        data
       );
       setSuccess(response.data.message);
-      // Clear all fields on success
+      
+      if (response.data.token) {
+        login(response.data.token);
+      }
+
       setFormData({
         name: "",
         email: "",
@@ -104,8 +128,7 @@ const SignUp = () => {
       });
 
       setTimeout(() => {
-        console.log("Attempting to redirect to /login...");
-        navigate("/login");
+        navigate("/");
       }, 2000);
     } catch (err) {
       if (err.response && err.response.data && err.response.data.errors) {
@@ -156,6 +179,21 @@ const SignUp = () => {
 
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={2} direction="column">
+            {/* image */}
+            <Grid item>
+              <Button variant="outlined" component="label" fullWidth>
+                Upload Profile Picture
+                <input
+                  type="file"
+                  name="profilePicture"
+                  hidden
+                  onChange={handleFileChange}
+                />
+              </Button>
+              {profilePicture && (
+                <Typography sx={{ mt: 1 }}>{profilePicture.name}</Typography>
+              )}
+            </Grid>
             {/* Name */}
             <Grid>
               <TextField
@@ -311,8 +349,9 @@ const SignUp = () => {
                 variant="contained"
                 size="large"
                 sx={{ py: 1.5, fontWeight: "bold" }}
+                disabled={isLoading}
               >
-                Sign Up
+                 {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
               </Button>
             </Grid>
             <Grid>

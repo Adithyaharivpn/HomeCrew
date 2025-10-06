@@ -94,14 +94,14 @@ const HowItWorks = () => {
       });
 
       gsap.from(".timeline-item", {
-        y: 150,
+        y: 120,
         opacity: 0,
         stagger: 0.3,
         scrollTrigger: {
           trigger: main.current,
           ease: "power1.inOut",
           start: "top top",
-          end: "bottom",
+          end: "bottom ",
           scrub: 1,
           // markers: true,
         },
@@ -115,8 +115,9 @@ const HowItWorks = () => {
       ref={main}
       sx={{
         bgcolor: "#f8fafd",
-        py: { xs: 8, md: 15 },
+        py: { xs: 8, md: 12 },
         px: { xs: 2, md: 3 },
+        height: "70vh",
       }}
     >
       <Container maxWidth="lg">
