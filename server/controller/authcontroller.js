@@ -79,7 +79,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // 1. Check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, isActive: true  });
     if (!user) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
@@ -87,7 +87,7 @@ const login = async (req, res) => {
     // 2. Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(400).json({ error: "Invalid credentials or user deactivated" });
     }
 
     // 3. If credentials are correct, create a JWT
