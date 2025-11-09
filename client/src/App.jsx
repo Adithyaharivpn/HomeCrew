@@ -19,6 +19,7 @@ import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfile from "./components/User/UserProfile.jsx";
 import ViewDetails from "./components/User/ViewDetails.jsx";
+import ChatBox from "./components/User/Chatbox.jsx";
 // import gsap from 'gsap';
 // import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -103,9 +104,18 @@ function App() {
                   allowedRoles={["customer", "tradesperson", "admin"]}
                 ><ViewDetails /></ProtectedRoute>
               }
-            >
+            />
               
-            </Route>
+              <Route
+              path="/chat/:roomId"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["customer", "tradesperson", "admin"]}
+                >
+                  <ChatBox />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
           <Footer />
         </div>
