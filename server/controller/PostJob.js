@@ -63,12 +63,12 @@ const getMyJobs = async (req, res) => {
 const getTradespersonFeed = async (req, res) => {
   try {
     const tradesperson = await User.findById(req.user.id);
-    if (!tradesperson || !tradesperson.tradeCategory) {
-      return res.status(400).json({ error: 'User trade category not found.' });
-    }
+    // if (!tradesperson || !tradesperson.tradeCategory) {
+    //   return res.status(400).json({ error: 'User trade category not found.' });
+    // }
 
     const jobs = await Job.find({ 
-      category: tradesperson.tradeCategory, 
+      // category: tradesperson.tradeCategory, 
       status: 'open' 
     })
     .populate('user') 

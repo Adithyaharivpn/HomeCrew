@@ -57,7 +57,6 @@ const PopularJobs = () => {
                 <Box sx={{ color: 'primary.main', mb: 1 }}>{service.icon}</Box>
                 <Typography fontWeight="medium">{service.name}</Typography>
               </Box>
-
             </Grid>
           ))}
         </Grid>
