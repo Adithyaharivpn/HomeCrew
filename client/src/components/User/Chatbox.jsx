@@ -64,7 +64,7 @@ const ChatBox = () => {
             variant="outlined"
             value={currentMessage}
             onChange={(e) => setCurrentMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyUp={(e) => e.key === 'Enter' && handleSendMessage()}
           />
           <Button variant="contained" onClick={handleSendMessage} sx={{ ml: 1 }}>
             Send
