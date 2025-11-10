@@ -135,10 +135,12 @@ const BrowseJobsPage = () => {
                   View Details
                 </Button>
                 <Button
+                  component={Link}
+                  to={`/chat/${job._id}`}
                   size="small"
                   sx={{ bgcolor: "#0D47A1", color: "white" }}
                 >
-                  Send Quote
+                   Send Quote
                 </Button>
               </CardActions>
             </Card>

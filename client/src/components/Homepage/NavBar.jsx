@@ -20,7 +20,8 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import AdbIcon from "@mui/icons-material/Adb";
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '../../api/useAuth';
 
 // const pages = ["Post a Job", "Signup", "Login"];
@@ -49,6 +50,15 @@ const navigate = useNavigate();
   const profilePicUrl = user?.profilePictureUrl 
     ? `${user.profilePictureUrl}` 
     : null;
+
+
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+  
+
+  const handleGoBack = () => {
+    navigate(-1); ;
+  };
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
@@ -116,6 +126,14 @@ const navigate = useNavigate();
           </IconButton>
 
           {/* icon */}
+         
+          {
+            !isHomePage &&  (
+            <IconButton onClick={handleGoBack} sx={{ color: 'white', mr: 1 }}>
+              <ArrowBackIcon />
+            </IconButton>
+          )}
+      
 
           <Typography
             variant="h6"
