@@ -37,6 +37,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import RestoreIcon from '@mui/icons-material/Restore';
 import api from "../../api/axiosConfig"; // Your axios instance
 import { useAuth } from "../../api/useAuth"; // Your auth hook
+import { useMemo } from "react";
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth(); // Assuming user has role
@@ -53,33 +54,14 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [filter, setFilter] = useState('');
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await api.get("/api/admin/dashboard");
-        setDashboardData(response.data);
-      } catch (err) {
-        console.error("Failed to fetch dashboard data:", err);
-        setError("Failed to load dashboard data. Please try again.");
-        if (err.response && err.response.status === 401) {
-          logout();
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, [logout]);
 
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
         setLoading(true);
-        // Use Promise.all to fetch both sets of data concurrently
+        setError(null);
         const [dashboardRes, usersRes] = await Promise.all([
           api.get("/api/admin/dashboard"),
           api.get("/api/admin/users"),
@@ -88,12 +70,16 @@ const AdminDashboard = () => {
         setUsers(usersRes.data);
       } catch (err) {
         console.error("Failed to fetch admin data:", err);
+        setError("Failed to load dashboard data. Please try again.");
+        if (err.response && err.response.status === 401) {
+          logout();
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchAdminData();
-  }, []);
+  }, [logout]);
 
   const handleDeactivateUser = async (userId) => {
     if (window.confirm("Are you sure you want to deactivate this user?")) {
@@ -155,6 +141,19 @@ const AdminDashboard = () => {
     { name: "Tradespeople", value: dashboardData.totalTradespeople },
     { name: "Customers", value: dashboardData.totalCustomers },
   ];
+
+  const filteredUsers = useMemo(() => {
+    if (!filter) {
+      return users; 
+    }
+    return users.filter(user =>
+      user.name.toLowerCase().includes(filter.toLowerCase()) ||
+      user.email.toLowerCase().includes(filter.toLowerCase()) ||
+      user.role.toLowerCase().includes(filter.toLowerCase())
+    );
+  }, [users, filter]); 
+
+
 
   if (loading) {
     return (
@@ -261,11 +260,22 @@ const AdminDashboard = () => {
         <Typography variant="h5" sx={{ p: 2 }}>
           User Management
         </Typography>
+       
+        <Box sx={{ p: 2 }}>
+          <TextField
+            fullWidth
+            label="Filter users by name or email or role"
+            variant="outlined"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </Box>
+
         <TableContainer>
           <Table>
             <TableHead>{/* ... Table Headers ... */}</TableHead>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <TableRow key={user._id}>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
