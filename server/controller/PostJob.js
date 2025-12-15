@@ -98,10 +98,28 @@ const getJobById = async (req, res) => {
   }
 };
 
+const getTradespersonActivejobs = async (req, res) => {
+  const currentUserId = req.user.id; 
+
+  try {
+    const jobs = await Job.find({ 
+        assignedTo: currentUserId, 
+        status: 'assigned' 
+    })
+    .populate('user', 'name email profilePictureUrl') 
+    .sort({ updatedAt: -1 });
+
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 module.exports = { 
   postJob, 
   getJobs, 
   getMyJobs, 
   getTradespersonFeed,
-  getJobById
+  getJobById,
+  getTradespersonActivejobs
 };

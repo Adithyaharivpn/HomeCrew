@@ -20,6 +20,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfile from "./components/User/UserProfile.jsx";
 import ViewDetails from "./components/User/ViewDetails.jsx";
 import ChatBox from "./components/User/Chatbox.jsx";
+import Chatroom from "./components/User/Chatroom.jsx";
+import TradespersonActiveJobs from "./components/User/TradespersonActiveJobs.jsx";
 // import gsap from 'gsap';
 // import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -102,17 +104,37 @@ function App() {
               element={
                 <ProtectedRoute
                   allowedRoles={["customer", "tradesperson", "admin"]}
-                ><ViewDetails /></ProtectedRoute>
+                >
+                  <ViewDetails />
+                </ProtectedRoute>
               }
             />
-              
-              <Route
+
+            <Route
+              path="/my-job-proposals/:jobId"
+              element={
+                <ProtectedRoute allowedRoles={["customer"]}>
+                  <Chatroom />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/chat/:roomId"
               element={
                 <ProtectedRoute
                   allowedRoles={["customer", "tradesperson", "admin"]}
                 >
                   <ChatBox />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/my-works"
+              element={
+                <ProtectedRoute allowedRoles={["tradesperson"]}>
+                  <TradespersonActiveJobs />
                 </ProtectedRoute>
               }
             />

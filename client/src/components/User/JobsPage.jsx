@@ -13,19 +13,19 @@ import {
   Button,
   CardActions,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; 
 
-const BrowseJobsPage = () => {
+const JobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user, logout } = useAuth();
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
-      let url = "/api/jobs/"; // Default URL for public users
+      let url = "/api/jobs/"; 
 
-      // 3. Determine the correct URL based on the user's role
       if (user) {
         if (user.role === "customer") {
           url = "/api/jobs/userjob";
@@ -48,22 +48,44 @@ const BrowseJobsPage = () => {
     };
 
     fetchJobs();
-  }, [user,logout]);
+  }, [user, logout]);
+
+  
+  const handleContactCustomer = async (job) => {
+    if (!user) {
+      alert("Please login to contact customers");
+      return;
+    }
+    try {
+      const res = await api.post('/api/chat/initiate', {
+        jobId: job._id,
+        customerId: job.user._id, 
+        tradespersonId: user.id 
+      });
+      
+      navigate(`/chat/${res.data._id}`); 
+      
+    } catch (err) {
+      console.error("Error starting chat:", err);
+      alert(err.response?.data?.message || "Could not start chat.");
+    }
+  };
 
   const getTitle = () => {
     if (user?.role === "customer") return "My Posted Jobs";
     if (user?.role === "tradesperson") return "My Job Feed";
     return "Open Job Listings";
   };
+
   if (loading) {
     return (
-      <Container sx={{ mt: 10, mb: 10 }}>
+      <Container sx={{ mt: 10, mb: 5, minHeight: "70vh" }}>
         <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
           {getTitle()}
         </Typography>
         <Grid container spacing={3}>
           {Array.from(new Array(6)).map((item, index) => (
-            <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid key={index} size={{xs:12, sm:6, md:4 }} >
               <Card sx={{ height: "100%" }}>
                 <CardContent>
                   <Skeleton
@@ -90,13 +112,13 @@ const BrowseJobsPage = () => {
   }
 
   return (
-    <Container sx={{ mt: 10, mb: 10 }}>
+    <Container sx={{ mt: 10, mb: 5, minHeight: "45vh" }}>
       <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
         {getTitle()}
       </Typography>
       <Grid container spacing={3}>
         {jobs.map((job) => (
-          <Grid key={job._id} size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid key={job._id} size={{xs:12,sm:6,md:4}} >
             <Card
               sx={{
                 height: "100%",
@@ -134,14 +156,29 @@ const BrowseJobsPage = () => {
                 >
                   View Details
                 </Button>
-                <Button
-                  component={Link}
-                  to={`/chat/${job._id}`}
-                  size="small"
-                  sx={{ bgcolor: "#0D47A1", color: "white" }}
-                >
-                   Send Quote
-                </Button>
+                
+                
+                {user?.role === 'tradesperson' && (
+                  <Button
+                    size="small"
+                    sx={{ bgcolor: "#2e7d32", color: "white" }}
+                    onClick={() => handleContactCustomer(job)}
+                  >
+                    Send Quote
+                  </Button>
+                )}
+
+                 
+                 {user?.role === 'customer' && (
+                  <Button
+                    component={Link}
+                    size="small"
+                    variant="outlined"
+                    to={`/my-job-proposals/${job._id}`} 
+                  >
+                    Proposals
+                  </Button>
+                )}
               </CardActions>
             </Card>
           </Grid>
@@ -151,4 +188,4 @@ const BrowseJobsPage = () => {
   );
 };
 
-export default BrowseJobsPage;
+export default JobsPage;

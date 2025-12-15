@@ -6,8 +6,7 @@ const Message = require('../models/Message');
 
 router.get('/:roomId', authMiddleware, async (req, res) => {
   try {
-    const messages = await Message.find({ conversationId: req.params.roomId })
-      .populate('sender', 'name profilePictureUrl') 
+    const messages = await Message.find({ roomId: req.params.roomId })
       .sort({ createdAt: 'asc' }); 
 
     res.json(messages);

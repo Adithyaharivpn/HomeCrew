@@ -61,7 +61,7 @@ const ViewDetails = () => {
     : null;
 
   return (
-    <Box component={Container} maxWidth="lg" sx={{ mt: 4 }}>
+    <Box component={Container} maxWidth="lg" sx={{ mt: 10, mb: 5, minHeight: "45vh" }}>
       <Paper sx={{ p: 4 }}>
         <Grid container spacing={4}>
           {/* Left Column: Job Details */}

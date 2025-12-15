@@ -20,18 +20,17 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import AdbIcon from "@mui/icons-material/Adb";
 import React from "react";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from '../../api/useAuth';
+import { useAuth } from "../../api/useAuth";
 
 // const pages = ["Post a Job", "Signup", "Login"];
 // const settings = ["Profile", "Account", "Dashboard", "Logout"];
 const drawerWidth = 240;
 
-
 const NavBar = (props) => {
-const { user, logout } = useAuth(); 
-const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -43,21 +42,19 @@ const navigate = useNavigate();
   const handleLogout = () => {
     logout();
     handleCloseUserMenu();
-    navigate('/'); 
+    navigate("/");
   };
   const { window } = props;
- 
-  const profilePicUrl = user?.profilePictureUrl 
-    ? `${user.profilePictureUrl}` 
+
+  const profilePicUrl = user?.profilePictureUrl
+    ? `${user.profilePictureUrl}`
     : null;
 
-
   const location = useLocation();
-  const isHomePage = location.pathname === '/';
-  
+  const isHomePage = location.pathname === "/";
 
   const handleGoBack = () => {
-    navigate(-1); ;
+    navigate(-1);
   };
 
   const container =
@@ -70,46 +67,69 @@ const navigate = useNavigate();
       </Typography>
       <Divider sx={{ bgcolor: "white" }} />
       <List>
-        <ListItem
-          disablePadding
-          sx={{ display: "flex", justifyContent: "center", py: 1 }}
-        >
-          <Button
-            variant="contained"
-            color="secondary"
-            component={Link}
-            to="/jobposting"
+        {!user && (
+          <>
+            <ListItem
+              disablePadding
+              sx={{ display: "flex", justifyContent: "center", py: 1 }}
+            >
+              <Button color="inherit" component={Link} to="/Signup">
+                Signup
+              </Button>
+            </ListItem>
+            <Divider sx={{ bgcolor: "white" }} />
+            <ListItem
+              disablePadding
+              sx={{ display: "flex", justifyContent: "center", py: 1 }}
+            >
+              <Button color="inherit" component={Link} to="/Login">
+                Login
+              </Button>
+            </ListItem>
+          </>
+        )}
+
+        {user && user.role === "customer" && (
+          <ListItem
+            disablePadding
+            sx={{ display: "flex", justifyContent: "center", py: 1 }}
           >
-            Post a Job
-          </Button>
-        </ListItem>
+            <Button
+              variant="contained"
+              color="secondary"
+              component={Link}
+              to="/jobposting"
+            >
+              Post a Job
+            </Button>
+          </ListItem>
+        )}
 
-        <Divider sx={{ bgcolor: "white" }} />
+        {user && (
+          <ListItem
+            disablePadding
+            sx={{ display: "flex", justifyContent: "center", py: 1 }}
+          >
+            <Button color="inherit" component={Link} to="/jobspage">
+              Browse Jobs
+            </Button>
+          </ListItem>
+        )}
 
-        <ListItem
-          disablePadding
-          sx={{ display: "flex", justifyContent: "center", py: 1 }}
-        >
-          <Button color="inherit" component={Link} to="/Signup">
-            Signup
-          </Button>
-        </ListItem>
-
-        <Divider sx={{ bgcolor: "white" }} />
-
-        <ListItem
-          disablePadding
-          sx={{ display: "flex", justifyContent: "center", py: 1 }}
-        >
-          <Button color="inherit" component={Link} to="/Login">
-            Login
-          </Button>
-        </ListItem>
-
-        <Divider sx={{ bgcolor: "white" }} />
+        {user && user.role === "tradesperson" && (
+          <ListItem
+            disablePadding
+            sx={{ display: "flex", justifyContent: "center", py: 1 }}
+          >
+            <Button color="inherit" component={Link} to="/my-works">
+              My Active Jobs
+            </Button>
+          </ListItem>
+        )}
       </List>
     </Box>
   );
+
   return (
     <AppBar position="static" sx={{ bgcolor: "#1a2027" }}>
       <Container maxWidth="xl">
@@ -124,17 +144,12 @@ const navigate = useNavigate();
           >
             <MenuIcon />
           </IconButton>
-
           {/* icon */}
-         
-          {
-            !isHomePage &&  (
-            <IconButton onClick={handleGoBack} sx={{ color: 'white', mr: 1 }}>
+          {!isHomePage && (
+            <IconButton onClick={handleGoBack} sx={{ color: "white", mr: 1 }}>
               <ArrowBackIcon />
             </IconButton>
           )}
-      
-
           <Typography
             variant="h6"
             noWrap
@@ -144,14 +159,13 @@ const navigate = useNavigate();
               mr: 2,
               display: { xs: "none", md: "flex" },
               fontFamily: "monospace",
-              fontWeight: 700,  
+              fontWeight: 700,
               color: "inherit",
               textDecoration: "none",
             }}
           >
             HomeCrew
           </Typography>
-
           <nav>
             <Drawer
               container={container}
@@ -174,10 +188,8 @@ const navigate = useNavigate();
               {drawer}
             </Drawer>
           </nav>
-
           {/* Desktop */}
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-
           <Typography
             variant="h5"
             noWrap
@@ -196,27 +208,41 @@ const navigate = useNavigate();
           >
             LOGO
           </Typography>
-
-
           {/* Pages */}
-        <Box sx={{ flexGrow: 1 }} /> {/* This is a spacer */}
-
-         
-          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: 'center', gap: 1 }}>
-            
+          <Box sx={{ flexGrow: 1 }} /> {/* This is a spacer */}
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
             {!user && (
               <>
-                <Button color="secondary" variant="contained" component={Link} to="/jobposting">
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  component={Link}
+                  to="/jobposting"
+                >
                   Post a Job
                 </Button>
-                <Button color="inherit" component={Link} to="/signup">Signup</Button>
-                <Button color="inherit" component={Link} to="/login">Login</Button>
+                <Button color="inherit" component={Link} to="/signup">
+                  Signup
+                </Button>
+                <Button color="inherit" component={Link} to="/login">
+                  Login
+                </Button>
               </>
             )}
 
-            
-            {user && user.role === 'customer' && (
-              <Button color="secondary" variant="contained" component={Link} to="/jobposting">
+            {user && user.role === "customer" && (
+              <Button
+                color="secondary"
+                variant="contained"
+                component={Link}
+                to="/jobposting"
+              >
                 Post a Job
               </Button>
             )}
@@ -226,14 +252,22 @@ const navigate = useNavigate();
               </Button>
             )}
 
-          
+            {user && user.role === "tradesperson" && (
+              <Button
+                color="inherit"
+                component={Link}
+                to="/my-works"
+                sx={{ border: "1px solid rgba(255,255,255,0.3)" }}
+              >
+                My Active Jobs
+              </Button>
+            )}
           </Box>
-
           {user && (
             <Box sx={{ ml: 2 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user.name || 'User'} src={profilePicUrl} />
+                  <Avatar alt={user.name || "User"} src={profilePicUrl} />
                 </IconButton>
               </Tooltip>
               <Menu
@@ -243,22 +277,37 @@ const navigate = useNavigate();
                 onClose={handleCloseUserMenu}
               >
                 {/* --- Menu Items for ALL Logged-In Users --- */}
-                <MenuItem onClick={() => { navigate('/profile'); handleCloseUserMenu(); }}>
+                <MenuItem
+                  onClick={() => {
+                    navigate("/profile");
+                    handleCloseUserMenu();
+                  }}
+                >
                   <Typography>Profile</Typography>
                 </MenuItem>
-                
+
                 {/* --- Role-Specific Menu Items --- */}
-                {user.role === 'admin' && (
-                  <MenuItem onClick={() => { navigate('/admin/admin-dashboard'); handleCloseUserMenu(); }}>
+                {user.role === "admin" && (
+                  <MenuItem
+                    onClick={() => {
+                      navigate("/admin/admin-dashboard");
+                      handleCloseUserMenu();
+                    }}
+                  >
                     <Typography>Admin Dashboard</Typography>
                   </MenuItem>
                 )}
-                {user.role === 'tradesperson' && (
-                  <MenuItem onClick={() => { navigate('/tradesperson-dashboard'); handleCloseUserMenu(); }}>
+                {user.role === "tradesperson" && (
+                  <MenuItem
+                    onClick={() => {
+                      navigate("/tradesperson-dashboard");
+                      handleCloseUserMenu();
+                    }}
+                  >
                     <Typography>My Dashboard</Typography>
                   </MenuItem>
                 )}
-                
+
                 {/* --- Logout Button --- */}
                 <MenuItem onClick={handleLogout}>
                   <Typography>Logout</Typography>
@@ -266,7 +315,6 @@ const navigate = useNavigate();
               </Menu>
             </Box>
           )}
-
         </Toolbar>
       </Container>
     </AppBar>

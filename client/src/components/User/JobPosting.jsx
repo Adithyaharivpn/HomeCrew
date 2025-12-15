@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from '../../api/axiosConfig.js';
 import {
   Box,
@@ -10,13 +10,12 @@ import {
   FormControl,
   Button,
   InputAdornment,
-  IconButton,
 } from "@mui/material";
 import LocationPinIcon from "@mui/icons-material/LocationPin";
-import { useEffect } from "react";
-// import { useAuth } from '../../api/Auth.jsx';
+import { useNavigate } from "react-router-dom"; 
 
 const JobPosting = () => {
+  const navigate = useNavigate(); 
   const [jobDetails, setJobDetails] = useState({
     title: "",
     category: "",
@@ -45,6 +44,9 @@ const JobPosting = () => {
 
       alert("Job posted successfully!");
 
+      
+      navigate("/jobs"); 
+
       setJobDetails({ title: "", category: "", description: "", city: "" });
     } catch (error) {
       console.error("Failed to post job:", error);
@@ -61,7 +63,6 @@ const JobPosting = () => {
         const response = await api.get(
           '/api/service/'
         );
-        // console.log("Services API Response:", response.data);
         setServices(response.data);
       } catch (error) {
         console.error("Failed to fetch services:", error);
@@ -70,6 +71,7 @@ const JobPosting = () => {
 
     fetchServices();
   }, []);
+
   return (
     <Box
       sx={{
@@ -98,23 +100,22 @@ const JobPosting = () => {
           sx={{ mb: 2 }}
         />
 
-<FormControl fullWidth required sx={{ mb: 2 }}>
-  <InputLabel>Category</InputLabel>
-  <Select
-    name="category"
-    label="Category"
-    value={jobDetails.category}
-    onChange={handleChange}
-  >
-    {Array.isArray(services) &&
-      services.map((service) => (
-        <MenuItem key={service.id} value={service.service_name}>
-          {service.service_name}
-        </MenuItem>
-      ))}
-  </Select>
-</FormControl>
-
+        <FormControl fullWidth required sx={{ mb: 2 }}>
+          <InputLabel>Category</InputLabel>
+          <Select
+            name="category"
+            label="Category"
+            value={jobDetails.category}
+            onChange={handleChange}
+          >
+            {Array.isArray(services) &&
+              services.map((service) => (
+                <MenuItem key={service.id} value={service.service_name}>
+                  {service.service_name}
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
 
         <TextField
           label="Job Description"
@@ -136,7 +137,7 @@ const JobPosting = () => {
           fullWidth
           required
           sx={{ mb: 2 }}
-          InputProps={{
+          slotProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <LocationPinIcon />
