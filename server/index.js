@@ -13,8 +13,9 @@ const jobs = require('./routes/jobs');
 const services = require('./routes/service');
 const admin = require('./routes/admin');
 const user = require('./routes/user');  
-const messageRoutes = require('./routes/messege');  
+const chatRoutes = require('./routes/chat')
 const Message = require('./models/Message');
+const appointmentRoutes = require('./routes/appointment');
 
 const PORT = process.env.PORT || 8080;
 
@@ -53,39 +54,44 @@ app.use('/api/jobs', jobs);
 app.use('/api/service', services);
 app.use('/api/admin', admin); // Admin routes
 app.use('/api/users', user);  // User profile routes
-app.use('/api/messages', messageRoutes);
+app.use('/api/chat', chatRoutes)
+app.use('/api/appointments',appointmentRoutes );
 
 app.get('/', (req, res) => {
   res.send('College Project API Server - Running!');
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
-
+  
   socket.on('joinRoom', (roomId) => {
     socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
   });
 
-  socket.on('sendMessage', async(data) => {
+  socket.on('sendMessage', async (data) => {
     try {
-      //Save the new message to the database
+     
       const newMessage = new Message({
-        conversationId: data.roomId,
-        sender: data.senderId, 
+        roomId: data.roomId,
+        sender: data.sender, 
         text: data.text,
+        type: data.type || 'text',
+        appointmentId: data.appointmentId || null,
+        appointmentDate: data.appointmentDate || null
       });
-      await newMessage.save();
-    // Broadcast to others in the room
-    socket.to(data.roomId).emit('receiveMessage', data);
-    // You would also save the message to the DB here
-    } catch (err) {
-      console.error("Error saving message:", err);
+
+      const savedMessage = await newMessage.save();
+
+      await savedMessage.populate('sender', 'name profilePictureUrl');
+
+      io.to(data.roomId).emit('receiveMessage', savedMessage);
+      
+    } catch (error) {
+      console.error("Error saving message to DB:", error);
     }
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    console.log('User disconnected');
   });
 });
 

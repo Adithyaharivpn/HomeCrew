@@ -23,11 +23,21 @@ const jobSchema = new mongoose.Schema({
     enum: ['open', 'assigned', 'completed'],
     default: 'open',
   },
+
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
+  },
+  
+ 
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', 
+    default: null
   }
+
+
 }, {
   timestamps: true 
 });

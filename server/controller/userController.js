@@ -3,7 +3,7 @@ const User = require('../models/User');
 // Get current user's profile
 const getMyProfile = async (req, res) => {
   try {
-    // req.user.id is available from the auth middleware
+  
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -15,9 +15,9 @@ const getMyProfile = async (req, res) => {
   }
 };
 
-// Update current user's profile
+
 const updateMyProfile = async (req, res) => {
-  // Pull fields from the request body
+  
   const { name, location, experience, tradeCategory } = req.body;
   
   const profileFields = {};
@@ -33,7 +33,7 @@ const updateMyProfile = async (req, res) => {
     let user = await User.findByIdAndUpdate(
       req.user.id,
       { $set: profileFields },
-      { new: true } // Return the updated document
+      { new: true } 
     ).select('-password');
 
     res.json(user);
