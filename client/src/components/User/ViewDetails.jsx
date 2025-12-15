@@ -1,41 +1,43 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useAuth } from "../../api/useAuth";
-import api from "../../api/axiosConfig";
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  Chip,
-  CircularProgress,
-  Alert,
-  Grid,
-  Avatar,
-  TextField,
-  Button,
-} from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  Container, Typography, Paper, Box, Chip, Button, 
+  Dialog, DialogTitle, DialogContent, TextField, DialogActions, 
+  CircularProgress 
+} from '@mui/material';
+import api from '../../api/axiosConfig';
+import { useAuth } from '../../api/useAuth';
 
 const ViewDetails = () => {
   const { jobId } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  // State for the quote form
-  const [quoteAmount, setQuoteAmount] = useState("");
-  const [quoteDetails, setQuoteDetails] = useState("");
+  
+  // Edit State
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editData, setEditData] = useState({
+    title: '',
+    description: '',
+    category: '',
+    city: ''
+  });
 
   useEffect(() => {
     const fetchJob = async () => {
       try {
         const response = await api.get(`/api/jobs/${jobId}`);
         setJob(response.data);
-        console.log(response.data);
-      } catch (err) {
-        setError("Failed to fetch job details.");
-        console.error(err);
+        setEditData({
+          title: response.data.title,
+          description: response.data.description,
+          category: response.data.category,
+          city: response.data.city
+        });
+      } catch (error) {
+        console.error("Error fetching job:", error);
       } finally {
         setLoading(false);
       }
@@ -43,102 +45,85 @@ const ViewDetails = () => {
     fetchJob();
   }, [jobId]);
 
-  const handleQuoteSubmit = async (e) => {
-    e.preventDefault();
-    alert(
-      `Submitting quote of ₹${quoteAmount} for job ${jobId}. Details: ${quoteDetails}`
-    );
-    // Here you would make an API call to a new endpoint to save the quote
-    // e.g., await api.post(`/api/jobs/${jobId}/quotes`, { amount: quoteAmount, details: quoteDetails });
+ 
+  const handleEditChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
-  if (!job) return <Typography>Job not found.</Typography>;
+  // Submit Edit
+  const handleEditSubmit = async () => {
+    try {
+      const res = await api.put(`/api/jobs/${jobId}`, editData);
+      setJob(res.data); 
+      setOpenEdit(false);
+      alert("Job updated successfully!");
+    } catch (err) {
+      alert("Failed to update job.");
+      console.error(err);
+    }
+  };
 
-  const profilePicUrl = job.user?.profilePictureUrl
-    ? `${import.meta.env.VITE_API_BASE_URL}/${job.user.profilePictureUrl}`
-    : null;
+  if (loading) return <CircularProgress sx={{ mt: 5, display: 'block', mx: 'auto' }} />;
+  if (!job) return <Typography sx={{ mt: 5, textAlign: 'center' }}>Job not found</Typography>;
+
+  // Check if current user is the owner
+  const isOwner = user && job.user && user.id === job.user._id;
 
   return (
-    <Box component={Container} maxWidth="lg" sx={{ mt: 10, mb: 5, minHeight: "45vh" }}>
-      <Paper sx={{ p: 4 }}>
-        <Grid container spacing={4}>
-          {/* Left Column: Job Details */}
-          <Grid size={{ xs:12 , md:8 }} >
+    <Container sx={{ mt: 10, mb: 5 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box>
+            <Typography variant="h4" gutterBottom>{job.title}</Typography>
             <Chip label={job.category} color="primary" sx={{ mb: 2 }} />
-            <Typography
-              variant="h3"
-              component="h1"
-              fontWeight="bold"
-              gutterBottom
-            >
-              {job.title}
-            </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 3 }}>
-              Location: {job.city}
-            </Typography>
-            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
-              {job.description}
-            </Typography>
-          </Grid>
-
-          {/* Right Column: Customer Info */}
-          <Grid size={{ xs:12 , md:4 }}>
-            <Paper variant="outlined" sx={{ p: 2, textAlign: "center" }}>
-              <Typography variant="h6" gutterBottom>
-                Posted By
-              </Typography>
-              <Avatar
-                src={profilePicUrl}
-                sx={{ width: 80, height: 80, mx: "auto", mb: 1 }}
-              />
-              <Typography fontWeight="bold">
-                {job.user ? job.user.name : "A customer"}
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-
-        {/* --- Conditional Quote Form for Tradespeople --- */}
-        {user?.role === "tradesperson" || user?.role === "admin" && (
-          <Box mt={5}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
-              Submit Your Quote
-            </Typography>
-            <Box component="form" onSubmit={handleQuoteSubmit}>
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Quote Amount (₹)"
-                type="number"
-                value={quoteAmount}
-                onChange={(e) => setQuoteAmount(e.target.value)}
-                required
-              />
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Details / Scope of Work"
-                multiline
-                rows={4}
-                value={quoteDetails}
-                onChange={(e) => setQuoteDetails(e.target.value)}
-                required
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                sx={{ mt: 2 }}
-              >
-                Submit Quote
-              </Button>
-            </Box>
           </Box>
-        )}
+          
+        
+          {isOwner && (
+            <Button variant="outlined" onClick={() => setOpenEdit(true)}>
+              Edit Job
+            </Button>
+          )}
+        </Box>
+
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2 }}>Description:</Typography>
+        <Typography variant="body1" paragraph>{job.description}</Typography>
+
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Location:</Typography>
+        <Typography variant="body1" paragraph>{job.city}</Typography>
+
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Posted By:</Typography>
+        <Typography variant="body1">{job.user?.name || "Unknown User"}</Typography>
       </Paper>
-    </Box>
+
+      {/* --- EDIT DIALOG --- */}
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Job Details</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="normal" fullWidth label="Job Title"
+            name="title" value={editData.title} onChange={handleEditChange}
+          />
+          <TextField
+            margin="normal" fullWidth label="Category"
+            name="category" value={editData.category} onChange={handleEditChange}
+          />
+          <TextField
+            margin="normal" fullWidth label="Location (City)"
+            name="city" value={editData.city} onChange={handleEditChange}
+          />
+          <TextField
+            margin="normal" fullWidth multiline rows={4} label="Description"
+            name="description" value={editData.description} onChange={handleEditChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
+          <Button onClick={handleEditSubmit} variant="contained">Save Changes</Button>
+        </DialogActions>
+      </Dialog>
+
+    </Container>
   );
 };
 

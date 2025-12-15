@@ -115,11 +115,42 @@ const getTradespersonActivejobs = async (req, res) => {
   }
 };
 
+
+const updateJob = async (req, res) => {
+  try {
+    const { title, description, category, city } = req.body;
+    
+
+    let job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    if (job.user.toString() !== req.user.id) {
+      return res.status(401).json({ message: 'Not authorized to edit this job' });
+    }
+
+    // 3. Update fields
+    job.title = title || job.title;
+    job.description = description || job.description;
+    job.category = category || job.category;
+    job.city = city || job.city;
+
+    await job.save();
+    res.json(job);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = { 
   postJob, 
   getJobs, 
   getMyJobs, 
   getTradespersonFeed,
   getJobById,
-  getTradespersonActivejobs
+  getTradespersonActivejobs,
+  updateJob
 };
