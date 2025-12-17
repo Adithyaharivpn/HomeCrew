@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from '../../api/axiosConfig.js';
+import api from "../../api/axiosConfig.js";
 import {
   Box,
   Typography,
@@ -12,10 +12,10 @@ import {
   InputAdornment,
 } from "@mui/material";
 import LocationPinIcon from "@mui/icons-material/LocationPin";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const JobPosting = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [jobDetails, setJobDetails] = useState({
     title: "",
     category: "",
@@ -37,15 +37,11 @@ const JobPosting = () => {
     setIsLoading(true);
 
     try {
-      await api.post(
-        '/api/jobs/',
-        jobDetails
-      );
+      await api.post("/api/jobs/", jobDetails);
 
       alert("Job posted successfully!");
 
-      
-      navigate("/jobs"); 
+      navigate("/jobspage");
 
       setJobDetails({ title: "", category: "", description: "", city: "" });
     } catch (error) {
@@ -60,9 +56,7 @@ const JobPosting = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await api.get(
-          '/api/service/'
-        );
+        const response = await api.get("/api/service/");
         setServices(response.data);
       } catch (error) {
         console.error("Failed to fetch services:", error);

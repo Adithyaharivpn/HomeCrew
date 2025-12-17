@@ -4,6 +4,7 @@ const ChatRoom = require('../models/ChatRoom');
 const Message = require('../models/Message');
 const Job = require('../models/JobsModel'); 
 const Appointment = require('../models/Appointment');
+const Notification = require('../models/Notification'); 
 
 
 router.post('/initiate', async (req, res) => {
@@ -14,11 +15,26 @@ router.post('/initiate', async (req, res) => {
     if (job.status === 'assigned' && job.assignedTo.toString() !== tradespersonId) {
       return res.status(403).json({ message: "Job is closed." });
     }
+    
     let room = await ChatRoom.findOne({ jobId, tradespersonId });
     
     if (!room) {
       room = new ChatRoom({ jobId, customerId, tradespersonId });
       await room.save();
+
+
+      const notif = await Notification.create({
+        recipient: customerId, 
+        sender: tradespersonId,
+        message: `New Proposal received for your job: "${job.title}"`,
+        link: `/my-job-proposals/${jobId}` 
+      });
+
+
+      const io = req.app.get('io');
+      if (io) {
+          io.to(customerId.toString()).emit("receiveNotification", notif);
+      }
     }
     res.json(room);
   } catch (error) {
@@ -27,7 +43,7 @@ router.post('/initiate', async (req, res) => {
   }
 });
 
-
+// GET MESSAGES 
 router.get('/messages/:roomId', async (req, res) => {
   try {
     const messages = await Message.find({ roomId: req.params.roomId })
@@ -38,7 +54,7 @@ router.get('/messages/:roomId', async (req, res) => {
   }
 });
 
-
+//  GET ROOMS 
 router.get('/job/:jobId', async (req, res) => {
   try {
     const rooms = await ChatRoom.find({ jobId: req.params.jobId })
@@ -52,11 +68,9 @@ router.get('/job/:jobId', async (req, res) => {
 
 
 router.post('/confirm-appointment', async (req, res) => {
-
   const { appointmentId, tradespersonId } = req.body;
 
   try {
-
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
@@ -65,19 +79,21 @@ router.post('/confirm-appointment', async (req, res) => {
 
     const jobId = room.jobId; 
 
-    await Appointment.findByIdAndUpdate(appointmentId, { status: 'confirmed' });
+    const secretCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await Job.findByIdAndUpdate(jobId, { 
-      status: 'assigned', 
-      assignedTo: tradespersonId 
-    });
+    await Appointment.findByIdAndUpdate(appointmentId, { status: 'confirmed' });
 
     await ChatRoom.updateMany(
       { jobId: jobId, tradespersonId: { $ne: tradespersonId } }, 
       { $set: { isArchived: true } }
     );
 
- 
+    await Job.findByIdAndUpdate(jobId, { 
+      status: 'assigned', 
+      assignedTo: tradespersonId,
+      completionCode: secretCode 
+    });
+
     const sysMsg = new Message({
       roomId: room._id,
       sender: tradespersonId, 
@@ -85,6 +101,20 @@ router.post('/confirm-appointment', async (req, res) => {
       type: "system"
     });
     await sysMsg.save();
+
+
+    const notif = await Notification.create({
+      recipient: tradespersonId,
+      message: `Congratulations! Your appointment has been confirmed. Check "My Works".`,
+      link: `/my-works` 
+    });
+
+
+    const io = req.app.get('io');
+    if (io) {
+        io.to(tradespersonId.toString()).emit("receiveNotification", notif);
+        io.to(room._id.toString()).emit("receiveMessage", sysMsg);
+    }
 
     res.json({ success: true });
   } catch (error) {

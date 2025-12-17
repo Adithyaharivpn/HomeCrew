@@ -23,6 +23,10 @@ const Chatroom = () => {
     if (jobId) fetchRooms();
   }, [jobId]);
 
+  const handleViewProfile = (userId) => {
+    navigate(`/profile/${userId}`);
+  };
+
   return (
     <Container sx={{ mt: 10, mb: 5, minHeight: "45vh" }}>
       <Typography variant="h5" gutterBottom sx={{color:'black'}}>Proposals & Chats</Typography>
@@ -46,15 +50,29 @@ const Chatroom = () => {
                   </Button>
                 }
               >
-                <ListItemAvatar>
+                <ListItemAvatar 
+                    sx={{ cursor: 'pointer' }} 
+                    onClick={() => handleViewProfile(room.tradespersonId?._id)}
+                >
                   <Avatar src={room.tradespersonId?.profilePictureUrl} />
                 </ListItemAvatar>
+
+                {/* 2. MAKE NAME CLICKABLE */}
                 <ListItemText
-                  primary={room.tradespersonId?.name || "Tradesperson"}
+                  primary={
+                    <Typography 
+                        component="span" 
+                        variant="subtitle1" 
+                        sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline', color: 'primary.main' } }}
+                        onClick={() => handleViewProfile(room.tradespersonId?._id)}
+                    >
+                        {room.tradespersonId?.name || "Tradesperson"}
+                    </Typography>
+                  }
                   secondary={
                     room.isArchived 
-                    ? <Chip label="Archived" size="small" /> 
-                    : "Active Proposal"
+                    ? <Chip label="Archived" size="small" sx={{mt:0.5}} /> 
+                    : <Typography variant="body2" color="text.secondary">Active Proposal • Click name to view rating</Typography>
                   }
                 />
               </ListItem>
