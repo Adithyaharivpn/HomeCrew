@@ -8,8 +8,6 @@ import {
   IconButton,
   List,
   ListItem,
-  ListItemButton,
-  ListItemText,
   Menu,
   MenuItem,
   Toolbar,
@@ -23,9 +21,8 @@ import React from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../api/useAuth";
+import NotificationBell from "../User/NotificationBell"; 
 
-// const pages = ["Post a Job", "Signup", "Login"];
-// const settings = ["Profile", "Account", "Dashboard", "Logout"];
 const drawerWidth = 240;
 
 const NavBar = (props) => {
@@ -69,19 +66,13 @@ const NavBar = (props) => {
       <List>
         {!user && (
           <>
-            <ListItem
-              disablePadding
-              sx={{ display: "flex", justifyContent: "center", py: 1 }}
-            >
+            <ListItem disablePadding sx={{ display: "flex", justifyContent: "center", py: 1 }}>
               <Button color="inherit" component={Link} to="/Signup">
                 Signup
               </Button>
             </ListItem>
             <Divider sx={{ bgcolor: "white" }} />
-            <ListItem
-              disablePadding
-              sx={{ display: "flex", justifyContent: "center", py: 1 }}
-            >
+            <ListItem disablePadding sx={{ display: "flex", justifyContent: "center", py: 1 }}>
               <Button color="inherit" component={Link} to="/Login">
                 Login
               </Button>
@@ -90,26 +81,15 @@ const NavBar = (props) => {
         )}
 
         {user && user.role === "customer" && (
-          <ListItem
-            disablePadding
-            sx={{ display: "flex", justifyContent: "center", py: 1 }}
-          >
-            <Button
-              variant="contained"
-              color="secondary"
-              component={Link}
-              to="/jobposting"
-            >
+          <ListItem disablePadding sx={{ display: "flex", justifyContent: "center", py: 1 }}>
+            <Button variant="contained" color="secondary" component={Link} to="/jobposting">
               Post a Job
             </Button>
           </ListItem>
         )}
 
         {user && (
-          <ListItem
-            disablePadding
-            sx={{ display: "flex", justifyContent: "center", py: 1 }}
-          >
+          <ListItem disablePadding sx={{ display: "flex", justifyContent: "center", py: 1 }}>
             <Button color="inherit" component={Link} to="/jobspage">
               Browse Jobs
             </Button>
@@ -117,10 +97,7 @@ const NavBar = (props) => {
         )}
 
         {user && user.role === "tradesperson" && (
-          <ListItem
-            disablePadding
-            sx={{ display: "flex", justifyContent: "center", py: 1 }}
-          >
+          <ListItem disablePadding sx={{ display: "flex", justifyContent: "center", py: 1 }}>
             <Button color="inherit" component={Link} to="/my-works">
               My Active Jobs
             </Button>
@@ -172,9 +149,7 @@ const NavBar = (props) => {
               variant="temporary"
               open={mobileOpen}
               onClose={handleDrawerToggle}
-              ModalProps={{
-                keepMounted: true,
-              }}
+              ModalProps={{ keepMounted: true }}
               sx={{
                 display: { xs: "block", sm: "none" },
                 "& .MuiDrawer-paper": {
@@ -209,22 +184,11 @@ const NavBar = (props) => {
             LOGO
           </Typography>
           {/* Pages */}
-          <Box sx={{ flexGrow: 1 }} /> {/* This is a spacer */}
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
+          <Box sx={{ flexGrow: 1 }} /> 
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1 }}>
             {!user && (
               <>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  component={Link}
-                  to="/jobposting"
-                >
+                <Button color="secondary" variant="contained" component={Link} to="/jobposting">
                   Post a Job
                 </Button>
                 <Button color="inherit" component={Link} to="/signup">
@@ -237,12 +201,7 @@ const NavBar = (props) => {
             )}
 
             {user && user.role === "customer" && (
-              <Button
-                color="secondary"
-                variant="contained"
-                component={Link}
-                to="/jobposting"
-              >
+              <Button color="secondary" variant="contained" component={Link} to="/jobposting">
                 Post a Job
               </Button>
             )}
@@ -264,19 +223,20 @@ const NavBar = (props) => {
             )}
           </Box>
           {user && (
-            <Box sx={{ ml: 2 }}>
+            <Box sx={{ ml: 2, display: 'flex', alignItems: 'center' }}>       
+              <NotificationBell />
               <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 1 }}>
                   <Avatar alt={user.name || "User"} src={profilePicUrl} />
                 </IconButton>
               </Tooltip>
+              
               <Menu
                 sx={{ mt: "45px" }}
                 anchorEl={anchorElUser}
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                {/* --- Menu Items for ALL Logged-In Users --- */}
                 <MenuItem
                   onClick={() => {
                     navigate("/profile");
@@ -286,7 +246,6 @@ const NavBar = (props) => {
                   <Typography>Profile</Typography>
                 </MenuItem>
 
-                {/* --- Role-Specific Menu Items --- */}
                 {user.role === "admin" && (
                   <MenuItem
                     onClick={() => {
@@ -297,18 +256,6 @@ const NavBar = (props) => {
                     <Typography>Admin Dashboard</Typography>
                   </MenuItem>
                 )}
-                {user.role === "tradesperson" && (
-                  <MenuItem
-                    onClick={() => {
-                      navigate("/tradesperson-dashboard");
-                      handleCloseUserMenu();
-                    }}
-                  >
-                    <Typography>My Dashboard</Typography>
-                  </MenuItem>
-                )}
-
-                {/* --- Logout Button --- */}
                 <MenuItem onClick={handleLogout}>
                   <Typography>Logout</Typography>
                 </MenuItem>

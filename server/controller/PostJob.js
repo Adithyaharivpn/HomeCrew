@@ -84,16 +84,22 @@ const getTradespersonFeed = async (req, res) => {
 //job postted by user id
 const getJobById = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate('user', 'name profilePictureUrl');
-    if (!job) {
-      return res.status(404).json({ msg: 'Job not found' });
+    const job = await Job.findById(req.params.id)
+       .populate('user', 'name profilePictureUrl')
+       .populate('assignedTo', 'name profilePictureUrl')
+       .select('+completionCode'); 
+
+    if (!job) return res.status(404).json({ msg: 'Job not found' });
+
+    let jobData = job.toObject();
+
+    if (req.user && job.user._id.toString() !== req.user.id) {
+        delete jobData.completionCode; 
     }
-    res.json(job);
+
+    res.json(jobData);
   } catch (err) {
-    console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Job not found' });
-    }
+    console.error(err);
     res.status(500).send('Server Error');
   }
 };
@@ -145,6 +151,31 @@ const updateJob = async (req, res) => {
   }
 };
 
+const completeJob = async (req, res) => {
+  const { jobId, code } = req.body;
+  try {
+    
+    const job = await Job.findById(jobId).select('+completionCode');
+
+    if (!job) return res.status(404).json({ message: "Job not found" });
+
+   
+    if (job.completionCode !== code) {
+      return res.status(400).json({ message: "Invalid Code! Ask the customer for the correct code." });
+    }
+
+    job.status = 'completed';
+    job.isCompleted = true;
+    await job.save();
+
+    res.json({ message: "Job Verified & Completed!", success: true });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+
+
 module.exports = { 
   postJob, 
   getJobs, 
@@ -152,5 +183,6 @@ module.exports = {
   getTradespersonFeed,
   getJobById,
   getTradespersonActivejobs,
-  updateJob
+  updateJob,
+  completeJob
 };

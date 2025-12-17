@@ -15,7 +15,11 @@ const admin = require('./routes/admin');
 const user = require('./routes/user');  
 const chatRoutes = require('./routes/chat')
 const Message = require('./models/Message');
+const ChatRoom = require('./models/ChatRoom');     
+const Notification = require('./models/Notification');
 const appointmentRoutes = require('./routes/appointment');
+const reviewRoutes = require('./routes/review');
+const notficationRoutes = require('./routes/notification');
 
 const PORT = process.env.PORT || 8080;
 
@@ -44,6 +48,9 @@ const io = new Server(server, {
   }
 });
 
+
+app.set('io', io); 
+
 // Middleware
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -52,10 +59,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobs);
 app.use('/api/service', services);
-app.use('/api/admin', admin); // Admin routes
-app.use('/api/users', user);  // User profile routes
+app.use('/api/admin', admin); 
+app.use('/api/users', user);  
 app.use('/api/chat', chatRoutes)
 app.use('/api/appointments',appointmentRoutes );
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/notifications',notficationRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('College Project API Server - Running!');
@@ -63,16 +73,22 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   
+  socket.on('addUser', (userId) => {
+    if (userId) {
+        socket.join(userId); 
+        console.log(`User ${userId} joined notification room`);
+    }
+  });
+
   socket.on('joinRoom', (roomId) => {
     socket.join(roomId);
   });
 
   socket.on('sendMessage', async (data) => {
     try {
-     
       const newMessage = new Message({
         roomId: data.roomId,
-        sender: data.sender, 
+        sender: data.sender._id || data.sender, 
         text: data.text,
         type: data.type || 'text',
         appointmentId: data.appointmentId || null,
@@ -80,16 +96,34 @@ io.on('connection', (socket) => {
       });
 
       const savedMessage = await newMessage.save();
-
       await savedMessage.populate('sender', 'name profilePictureUrl');
 
+      
       io.to(data.roomId).emit('receiveMessage', savedMessage);
+
+      const room = await ChatRoom.findById(data.roomId);
+      if (room) {
+          const senderId = data.sender._id || data.sender;
+          
+          const receiverId = room.customerId.toString() === senderId.toString()
+            ? room.tradespersonId 
+            : room.customerId;
+
+          const notif = await Notification.create({
+            recipient: receiverId,
+            sender: senderId,
+            message: `New message: ${data.text.substring(0, 30)}...`,
+            link: `/chat/${data.roomId}`
+          });
+
+          console.log(`Sending notification to room: ${receiverId}`);
+          io.to(receiverId.toString()).emit("receiveNotification", notif);
+      }
       
     } catch (error) {
-      console.error("Error saving message to DB:", error);
+      console.error("Error saving message/notification:", error);
     }
-  });
-
+});
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
@@ -97,6 +131,4 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
-  
-
 });

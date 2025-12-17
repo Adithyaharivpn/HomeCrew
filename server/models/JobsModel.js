@@ -35,7 +35,13 @@ const jobSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', 
     default: null
-  }
+  },
+
+  completionCode: { 
+    type: String, 
+    select: false 
+  },
+  isCompleted: { type: Boolean, default: false },
 
 
 }, {
