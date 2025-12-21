@@ -3,17 +3,21 @@ import api from "../../api/axiosConfig.js";
 import { useAuth } from "../../api/useAuth.js";
 import {
   Container, Grid, Card, CardContent, Typography, Skeleton,
-  Box, Chip, Button, CardActions, TextField, MenuItem, CircularProgress
+  Box, Chip, Button, CardActions, TextField, MenuItem, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import KeyIcon from '@mui/icons-material/Key';
 
 const JobsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [categoryOptions, setCategoryOptions] = useState([]); 
+  const [openCodeDialog, setOpenCodeDialog] = useState(false);
+  const [selectedJobCode, setSelectedJobCode] = useState(null);
+  const [selectedJobTitle, setSelectedJobTitle] = useState("");
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -59,6 +63,11 @@ const JobsPage = () => {
       alert(err.response?.data?.message || "Could not start chat.");
     }
   };
+  const handleViewCode = (job) => {
+    setSelectedJobTitle(job.title);
+    setSelectedJobCode(job.completionCode);
+    setOpenCodeDialog(true);
+  };
 
   const getTitle = () => {
     if (user?.role === "customer") return "My Posted Jobs";
@@ -98,7 +107,6 @@ const JobsPage = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
         />
-        
         <TextField
             select
             label="Category"
@@ -107,8 +115,6 @@ const JobsPage = () => {
             sx={{ minWidth: 200 }}
         >
             <MenuItem value="All">All Categories</MenuItem>
-          
-            {/* --- FIX: Map object properties properly --- */}
             {categoryOptions.map((cat) => (
                 <MenuItem key={cat._id} value={cat.service_name}>
                     {cat.service_name}
@@ -125,6 +131,9 @@ const JobsPage = () => {
         ) : (
             sortedJobs.map((job) => {
             const isCompleted = job.status === "completed";
+            const isAssigned = job.status === "assigned";
+            const isMyJob = user && job.user._id === user.id;
+
             return (
                 <Grid key={job._id} item xs={12} sm={6} md={4}>
                 <Card sx={{
@@ -155,10 +164,23 @@ const JobsPage = () => {
                         </Link>
                     </Typography>
                     </CardContent>
-                    <CardActions>
+                    
+                    <CardActions sx={{flexWrap: 'wrap', gap: 1}}>
                         <Button component={Link} size="small" sx={{ bgcolor: isCompleted ? "grey" : "#0D47A1", color: "white" }} to={`/job/${job._id}`}>
                             View Details
                         </Button>
+                        {user?.role === "customer" && isMyJob && isAssigned && (
+                            <Button 
+                                size="small" 
+                                variant="contained" 
+                                color="warning" 
+                                startIcon={<KeyIcon />}
+                                onClick={() => handleViewCode(job)}
+                            >
+                                Get Code
+                            </Button>
+                        )}
+
                         {user?.role === "tradesperson" && !isCompleted && (
                             <Button size="small" sx={{ bgcolor: "#2e7d32", color: "white" }} onClick={() => handleContactCustomer(job)}>
                             Send Quote
@@ -176,6 +198,28 @@ const JobsPage = () => {
             })
         )}
       </Grid>
+      <Dialog open={openCodeDialog} onClose={() => setOpenCodeDialog(false)}>
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold' }}>
+            Job Completion Code
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: 'center', minWidth: '300px', py: 3 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+                Give this code to the tradesperson ONLY when the work is done satisfactorily.
+            </Typography>
+            <Box sx={{ 
+                bgcolor: '#eee', p: 2, borderRadius: 2, mt: 2, 
+                fontSize: '2rem', letterSpacing: '5px', fontWeight: 'bold', color: '#333' 
+            }}>
+                {selectedJobCode || "Wait..."}
+            </Box>
+            <Typography variant="caption" sx={{ display: 'block', mt: 2 }}>
+                Job: {selectedJobTitle}
+            </Typography>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={() => setOpenCodeDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
