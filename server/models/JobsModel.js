@@ -23,26 +23,25 @@ const jobSchema = new mongoose.Schema({
     enum: ['open', 'assigned', 'completed'],
     default: 'open',
   },
-
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  
- 
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', 
     default: null
   },
-
-  completionCode: { 
+completionCode: { 
     type: String, 
-    select: false 
+    select: false,
+    default: function() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
   },
-  isCompleted: { type: Boolean, default: false },
 
+  isCompleted: { type: Boolean, default: false },
 
 }, {
   timestamps: true 
