@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from "../../api/axiosConfig.js";
-import axios from "axios";
+import api from "../../api/axiosConfig.js"; // Use your configured API instance
 import {
   Box,
   Typography,
@@ -30,8 +29,9 @@ const JobPosting = () => {
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-
-  const [locationOptions, setLocationOptions] = useState([]);
+  // --- LOCATION STATE ---
+  // Always initialize as an empty array
+  const [locationOptions, setLocationOptions] = useState([]); 
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationInputValue, setLocationInputValue] = useState("");
 
@@ -46,11 +46,19 @@ const JobPosting = () => {
       if (!query) return;
       setLocationLoading(true);
       try {
-          const openUrl = import.meta.env.VITE_OPENMAP;
-          const res = await axios.get(`${openUrl}${query}`);
-          setLocationOptions(res.data);
+          // FIX 1: Use 'api.get' instead of 'axios.get' to ensure it hits your Backend URL
+          const res = await api.get(`/api/jobs/location-search?q=${query}`);
+          
+          // FIX 2: Strict Array Check before setting state
+          if (Array.isArray(res.data)) {
+            setLocationOptions(res.data);
+          } else {
+            console.warn("API returned invalid data:", res.data);
+            setLocationOptions([]); 
+          }
       } catch (error) {
           console.error("Location search failed", error);
+          setLocationOptions([]); // Reset to empty on error
       } finally {
           setLocationLoading(false);
       }
@@ -81,6 +89,7 @@ const JobPosting = () => {
       await api.post("/api/jobs/", jobDetails);
       alert("Job posted successfully!");
       navigate("/jobspage");
+      // Reset form
       setJobDetails({ title: "", category: "", description: "", city: "", location: { lat: null, lng: null } });
     } catch (error) {
       console.error("Failed to post job:", error);
@@ -162,26 +171,29 @@ const JobPosting = () => {
 
         <Autocomplete
             fullWidth
-            options={locationOptions}
+            // FIX 3: THE SAFETY SHIELD 🛡️
+            // This prevents "filter is not a function" crash
+            options={Array.isArray(locationOptions) ? locationOptions : []}
+            
             loading={locationLoading}
-            getOptionLabel={(option) => option.display_name}
+            getOptionLabel={(option) => option.display_name || ""}
             filterOptions={(x) => x} 
+            
             onInputChange={(event, newInputValue) => {
                 setLocationInputValue(newInputValue);
             }}
 
             onChange={(event, newValue) => {
                 if (newValue) {
-                    setJobData({
+                    // Update state safely
+                    const newData = {
                         ...jobDetails,
                         city: newValue.display_name.split(',')[0],
                         location: {
                             lat: parseFloat(newValue.lat),
                             lng: parseFloat(newValue.lon)
                         }
-                    });
-                }
-                function setJobData(newData) {
+                    };
                     setJobDetails(newData);
                 }
             }}
