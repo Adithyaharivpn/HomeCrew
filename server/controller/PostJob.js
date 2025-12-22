@@ -4,7 +4,7 @@ const logger = require('../utils/logger');
 
 const postJob = async (req, res) => {
   try {
-    const { title, category, description, city } = req.body;
+    const { title, category, description, city, location } = req.body;
     const userId = req.user.id; 
 
     if (!title || !category || !description || !city) {
@@ -17,6 +17,7 @@ const postJob = async (req, res) => {
       category,
       description,
       city,
+      location,
       user: userId, 
     });
 

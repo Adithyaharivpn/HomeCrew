@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Review = require('../models/Review');
 const auth = require('../middleware/authMiddlware');
+const logger = require('../utils/logger'); 
 
-// POST a Review
+
 router.post('/', auth, async (req, res) => {
   try {
     const { jobId, targetUserId, rating, comment, visibility } = req.body;
@@ -18,8 +19,13 @@ router.post('/', auth, async (req, res) => {
     });
 
     await newReview.save();
+    logger.info(`Review posted: ${rating} Stars for User ${targetUserId} by User ${req.user.id}`, {
+        meta: { type: 'review_created', jobId }
+    });
+
     res.json(newReview);
   } catch (error) {
+    logger.error(`Error posting review: ${error.message}`);
     res.status(500).json(error);
   }
 });
@@ -42,6 +48,7 @@ router.get('/:userId', auth, async (req, res) => {
 
     res.json(reviews);
   } catch (error) {
+    logger.error(`Error fetching reviews for User ${req.params.userId}: ${error.message}`);
     res.status(500).json(error);
   }
 });

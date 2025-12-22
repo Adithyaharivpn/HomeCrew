@@ -22,6 +22,8 @@ import ViewDetails from "./components/User/ViewDetails.jsx";
 import ChatBox from "./components/User/Chatbox.jsx";
 import Chatroom from "./components/User/Chatroom.jsx";
 import TradespersonActiveJobs from "./components/User/TradespersonActiveJobs.jsx";
+import MapSearch from "./components/User/MapSearch.jsx";
+import PaymentPage from "./components/Payment/PaymentPage.jsx";
 // import gsap from 'gsap';
 // import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -138,6 +140,24 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/map-search"
+              element={
+                <ProtectedRoute allowedRoles={["tradesperson"]}>
+                  <MapSearch />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="/payment"
+              element={
+                <ProtectedRoute allowedRoles={["customer", "tradesperson"]}>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
+
           </Routes>
           <Footer />
         </div>
