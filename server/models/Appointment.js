@@ -21,6 +21,7 @@ const appointmentSchema = new mongoose.Schema({
     enum: ['pending', 'confirmed', 'rejected'], 
     default: 'pending' 
   },
+  price: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now }
 });
 

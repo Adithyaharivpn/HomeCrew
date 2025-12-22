@@ -17,6 +17,7 @@ const messageSchema = new mongoose.Schema({
     enum: ['text', 'appointment', 'system'], 
     default: 'text' 
   },
+  price: { type: Number }, 
   appointmentId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Appointment' 

@@ -1,23 +1,20 @@
 const User = require('../models/User');
+const logger = require('../utils/logger'); 
 
-// Get current user's profile
 const getMyProfile = async (req, res) => {
   try {
-  
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(`Error fetching profile: ${err.message}`);
     res.status(500).send('Server Error');
   }
 };
 
-
 const updateMyProfile = async (req, res) => {
-  
   const { name, location, experience, tradeCategory } = req.body;
   
   const profileFields = {};
@@ -36,9 +33,10 @@ const updateMyProfile = async (req, res) => {
       { new: true } 
     ).select('-password');
 
+    logger.info(`User profile updated: ${req.user.id}`, { meta: { action: 'profile_update' } });
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(`Error updating profile: ${err.message}`);
     res.status(500).send('Server Error');
   }
 };
@@ -53,7 +51,7 @@ const getUserById = async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(`Error fetching user by ID: ${err.message}`);
     if (err.kind === 'ObjectId') {
         return res.status(404).json({ msg: 'User not found' });
     }

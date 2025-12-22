@@ -239,7 +239,7 @@ const NavBar = (props) => {
               >
                 <MenuItem
                   onClick={() => {
-                    navigate("/profile");
+                    navigate(`/profile/${user.id}`);
                     handleCloseUserMenu();
                   }}
                 >
