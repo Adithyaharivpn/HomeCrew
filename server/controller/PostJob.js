@@ -12,7 +12,7 @@ const postJob = async (req, res) => {
       logger.warn(`Job post failed: Missing fields by User ${userId}`);
       return res.status(400).json({ message: 'Please fill out all required fields.' });
     }
-
+    
     const newJob = new Job({
       title,
       category,
