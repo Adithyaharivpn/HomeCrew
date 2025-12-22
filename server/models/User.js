@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
-  // These fields are only for tradespeople
+
   tradeCategory: {
     type: String,
   },
@@ -38,6 +38,13 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  isPaid: {
+        type: Boolean,
+        default: false
+    },
+    paymentId: {
+        type: String ,
+    }
 }, { 
   
   timestamps: true 

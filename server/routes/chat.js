@@ -5,6 +5,7 @@ const Message = require('../models/Message');
 const Job = require('../models/JobsModel'); 
 const Appointment = require('../models/Appointment');
 const Notification = require('../models/Notification'); 
+const logger = require('../utils/logger'); 
 
 
 router.post('/initiate', async (req, res) => {
@@ -13,6 +14,7 @@ router.post('/initiate', async (req, res) => {
   try {
     const job = await Job.findById(jobId);
     if (job.status === 'assigned' && job.assignedTo.toString() !== tradespersonId) {
+      logger.warn(`Chat init blocked: Job ${jobId} is closed. User: ${tradespersonId}`);
       return res.status(403).json({ message: "Job is closed." });
     }
     
@@ -22,14 +24,15 @@ router.post('/initiate', async (req, res) => {
       room = new ChatRoom({ jobId, customerId, tradespersonId });
       await room.save();
 
-
       const notif = await Notification.create({
         recipient: customerId, 
         sender: tradespersonId,
         message: `New Proposal received for your job: "${job.title}"`,
         link: `/my-job-proposals/${jobId}` 
       });
-
+      logger.info(`New Chat Proposal initiated for Job ${jobId} by Tradesperson ${tradespersonId}`, {
+         meta: { type: 'chat_proposal', customerId }
+      });
 
       const io = req.app.get('io');
       if (io) {
@@ -38,23 +41,24 @@ router.post('/initiate', async (req, res) => {
     }
     res.json(room);
   } catch (error) {
-    console.error(error);
+    logger.error(`Error initiating chat: ${error.message}`);
     res.status(500).json(error);
   }
 });
 
-// GET MESSAGES 
+ 
 router.get('/messages/:roomId', async (req, res) => {
   try {
     const messages = await Message.find({ roomId: req.params.roomId })
       .populate('sender', 'name profilePictureUrl email');
     res.json(messages);
   } catch (error) {
+    logger.error(`Error fetching messages for room ${req.params.roomId}: ${error.message}`);
     res.status(500).json(error);
   }
 });
 
-//  GET ROOMS 
+
 router.get('/job/:jobId', async (req, res) => {
   try {
     const rooms = await ChatRoom.find({ jobId: req.params.jobId })
@@ -62,6 +66,19 @@ router.get('/job/:jobId', async (req, res) => {
       .sort({ updatedAt: -1 });
     res.json(rooms);
   } catch (error) {
+    logger.error(`Error fetching chat rooms for job ${req.params.jobId}: ${error.message}`);
+    res.status(500).json(error);
+  }
+});
+
+
+router.get('/:roomId', async (req, res) => {
+  try {
+    const room = await ChatRoom.findById(req.params.roomId);
+    if (!room) return res.status(404).json({ message: "Room not found" });
+    res.json(room);
+  } catch (error) {
+    logger.error(`Error fetching room details: ${error.message}`);
     res.status(500).json(error);
   }
 });
@@ -79,46 +96,35 @@ router.post('/confirm-appointment', async (req, res) => {
 
     const jobId = room.jobId; 
 
-    const secretCode = Math.floor(100000 + Math.random() * 900000).toString();
-
     await Appointment.findByIdAndUpdate(appointmentId, { status: 'confirmed' });
 
     await ChatRoom.updateMany(
       { jobId: jobId, tradespersonId: { $ne: tradespersonId } }, 
       { $set: { isArchived: true } }
     );
-
+    
     await Job.findByIdAndUpdate(jobId, { 
       status: 'assigned', 
       assignedTo: tradespersonId,
-      completionCode: secretCode 
+      price: appointment.price 
     });
+
 
     const sysMsg = new Message({
       roomId: room._id,
       sender: tradespersonId, 
-      text: "System: Job Confirmed. This chat is now the official channel.",
+      text: `System: Appointment Confirmed for ₹${appointment.price}.`,
       type: "system"
     });
     await sysMsg.save();
 
 
-    const notif = await Notification.create({
-      recipient: tradespersonId,
-      message: `Congratulations! Your appointment has been confirmed. Check "My Works".`,
-      link: `/my-works` 
-    });
-
-
     const io = req.app.get('io');
-    if (io) {
-        io.to(tradespersonId.toString()).emit("receiveNotification", notif);
-        io.to(room._id.toString()).emit("receiveMessage", sysMsg);
-    }
+    if (io) io.to(room._id.toString()).emit("receiveMessage", sysMsg);
 
     res.json({ success: true });
   } catch (error) {
-    console.error(error);
+    logger.error(`Error confirming appointment: ${error.message}`);
     res.status(500).json(error);
   }
 });
