@@ -1,6 +1,7 @@
 const Job = require('../models/JobsModel');
 const User = require('../models/User');
 const logger = require('../utils/logger'); 
+const axios = require('axios');
 
 const postJob = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ const postJob = async (req, res) => {
       logger.warn(`Job post failed: Missing fields by User ${userId}`);
       return res.status(400).json({ message: 'Please fill out all required fields.' });
     }
-
+    
     const newJob = new Job({
       title,
       category,
@@ -186,6 +187,18 @@ const markJobAsPaid = async (req, res) => {
     }
 };
 
+const searchLocation = async (req, res) => {
+    try {
+        const { q } = req.query;
+        const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${q}`, {
+            headers: { 'User-Agent': 'HomeCrew-App' }
+        });
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 module.exports = { 
   postJob, 
   getJobs, 
@@ -195,5 +208,6 @@ module.exports = {
   getTradespersonActivejobs,
   updateJob,
   completeJob,
-  markJobAsPaid
+  markJobAsPaid,
+  searchLocation
 };

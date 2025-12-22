@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { postJob, getJobs, getMyJobs, getTradespersonFeed, getJobById, getTradespersonActivejobs, updateJob,completeJob,markJobAsPaid} = require('../controller/PostJob');
+const { postJob, getJobs, getMyJobs, getTradespersonFeed, getJobById, getTradespersonActivejobs, updateJob,completeJob,markJobAsPaid,searchLocation} = require('../controller/PostJob');
 const authMiddleware = require('../middleware/authMiddlware');
 
 
@@ -16,6 +16,7 @@ router.post('/', authMiddleware, postJob);
 
 router.post('/complete', authMiddleware, completeJob);
 
+router.get('/location-search', searchLocation); 
 
 router.put('/:id', authMiddleware, updateJob);
 
