@@ -68,7 +68,7 @@ const TradespersonActiveJobs = () => {
 
   const handleReviewSubmit = async () => {
     try {
-      await api.post('/api/reviews', {
+      await api.post('/api/reviews/', {
         jobId: selectedJobId,
         targetUserId: reviewTargetId,
         rating: rating,
