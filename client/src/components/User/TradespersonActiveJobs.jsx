@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Container, Typography, Grid, Card, CardContent, 
   Chip, Button, CardActions, Skeleton, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, Box, Rating, Paper, Divider
+  DialogContent, DialogActions, TextField, Box, Rating, Paper, Divider,
+  Snackbar, Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
@@ -15,9 +16,11 @@ import Confetti from 'react-confetti';
 const TradespersonActiveJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  
   const [openVerify, setOpenVerify] = useState(false);
   const [verifyCode, setVerifyCode] = useState("");
   const [selectedJobId, setSelectedJobId] = useState(null);
+  
   const [reviewTargetId, setReviewTargetId] = useState(null); 
   const [openReview, setOpenReview] = useState(false);
   const [rating, setRating] = useState(0);
@@ -25,8 +28,16 @@ const TradespersonActiveJobs = () => {
   
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowDimension, setWindowDimension] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  // Toast State
+  const [toast, setToast] = useState({ open: false, msg: "", severity: "success" });
 
   const navigate = useNavigate();
+
+  const showToast = (msg, severity = "success") => {
+    setToast({ open: true, msg, severity });
+  };
+  const handleCloseToast = () => setToast({ ...toast, open: false });
 
   const detectSize = () => {
     setWindowDimension({ width: window.innerWidth, height: window.innerHeight });
@@ -71,8 +82,10 @@ const TradespersonActiveJobs = () => {
       
       setOpenVerify(false);
       setVerifyCode("");
+      
+      // Success sequence
+      showToast("Job Completed Successfully!", "success");
       setShowConfetti(true);
-
       setTimeout(() => setShowConfetti(false), 8000);
       
       setTimeout(() => {
@@ -84,16 +97,15 @@ const TradespersonActiveJobs = () => {
       }, 3000);
 
     } catch (err) {
-      alert(err.response?.data?.message || "Verification Failed");
+      showToast(err.response?.data?.message || "Verification Failed", "error");
     }
   };
 
   const handleReviewSubmit = async () => {
     if (rating === 0) {
-        alert("Please provide a star rating.");
+        showToast("Please provide a star rating.", "warning");
         return;
     }
-
     try {
       await api.post('/api/reviews', {
         jobId: selectedJobId,
@@ -102,14 +114,12 @@ const TradespersonActiveJobs = () => {
         comment: comment
       });
 
-      alert("Review Submitted Successfully!");
-
+      showToast("Review Submitted!", "success");
       setOpenReview(false);
       setComment("");
       setRating(0);
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Failed to submit review.");
+      showToast("Failed to submit review.", "error");
     }
   };
 
@@ -258,6 +268,7 @@ const TradespersonActiveJobs = () => {
         </Grid>
       )}
       
+      {/* Verify Dialog */}
       <Dialog open={openVerify} onClose={() => setOpenVerify(false)}>
         <DialogTitle>Verify Job Completion</DialogTitle>
         <DialogContent>
@@ -270,6 +281,7 @@ const TradespersonActiveJobs = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Review Dialog */}
       <Dialog open={openReview} onClose={() => setOpenReview(false)} fullWidth maxWidth="sm">
         <DialogTitle>Rate Customer</DialogTitle>
         <DialogContent>
@@ -289,6 +301,19 @@ const TradespersonActiveJobs = () => {
             <Button onClick={handleReviewSubmit} variant="contained" color="success">Submit Review</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Toast Notification */}
+      <Snackbar 
+        open={toast.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseToast} severity={toast.severity} sx={{ width: '100%' }}>
+            {toast.msg}
+        </Alert>
+      </Snackbar>
+
     </Container>
   );
 };
