@@ -19,6 +19,11 @@ import AdminDashboard from "./components/Admin/AdminDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserProfile from "./components/User/UserProfile.jsx";
 import ViewDetails from "./components/User/ViewDetails.jsx";
+import ChatBox from "./components/User/Chatbox.jsx";
+import Chatroom from "./components/User/Chatroom.jsx";
+import TradespersonActiveJobs from "./components/User/TradespersonActiveJobs.jsx";
+import MapSearch from "./components/User/MapSearch.jsx";
+import PaymentPage from "./components/Payment/PaymentPage.jsx";
 // import gsap from 'gsap';
 // import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -87,7 +92,7 @@ function App() {
               }
             />
             <Route
-              path="/profile"
+              path="/profile/:id"
               element={
                 <ProtectedRoute
                   allowedRoles={["customer", "tradesperson", "admin"]}
@@ -101,11 +106,58 @@ function App() {
               element={
                 <ProtectedRoute
                   allowedRoles={["customer", "tradesperson", "admin"]}
-                ><ViewDetails /></ProtectedRoute>
+                >
+                  <ViewDetails />
+                </ProtectedRoute>
               }
-            >
-              
-            </Route>
+            />
+
+            <Route
+              path="/my-job-proposals/:jobId"
+              element={
+                <ProtectedRoute allowedRoles={["customer"]}>
+                  <Chatroom />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/chat/:roomId"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["customer", "tradesperson", "admin"]}
+                >
+                  <ChatBox />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/my-works"
+              element={
+                <ProtectedRoute allowedRoles={["tradesperson"]}>
+                  <TradespersonActiveJobs />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/map-search"
+              element={
+                <ProtectedRoute allowedRoles={["tradesperson"]}>
+                  <MapSearch />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="/payment"
+              element={
+                <ProtectedRoute allowedRoles={["customer", "tradesperson"]}>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
+
           </Routes>
           <Footer />
         </div>

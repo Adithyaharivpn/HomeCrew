@@ -1,23 +1,20 @@
 const User = require('../models/User');
+const logger = require('../utils/logger'); 
 
-// Get current user's profile
 const getMyProfile = async (req, res) => {
   try {
-    // req.user.id is available from the auth middleware
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(`Error fetching profile: ${err.message}`);
     res.status(500).send('Server Error');
   }
 };
 
-// Update current user's profile
 const updateMyProfile = async (req, res) => {
-  // Pull fields from the request body
   const { name, location, experience, tradeCategory } = req.body;
   
   const profileFields = {};
@@ -33,14 +30,33 @@ const updateMyProfile = async (req, res) => {
     let user = await User.findByIdAndUpdate(
       req.user.id,
       { $set: profileFields },
-      { new: true } // Return the updated document
+      { new: true } 
     ).select('-password');
 
+    logger.info(`User profile updated: ${req.user.id}`, { meta: { action: 'profile_update' } });
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(`Error updating profile: ${err.message}`);
     res.status(500).send('Server Error');
   }
 };
 
-module.exports = { getMyProfile, updateMyProfile };
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    logger.error(`Error fetching user by ID: ${err.message}`);
+    if (err.kind === 'ObjectId') {
+        return res.status(404).json({ msg: 'User not found' });
+    }
+    res.status(500).send('Server Error');
+  }
+};
+
+module.exports = { getMyProfile, updateMyProfile, getUserById };

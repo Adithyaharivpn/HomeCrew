@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import api from '../../api/axiosConfig.js';
+import React, { useState, useEffect } from "react";
+import api from "../../api/axiosConfig.js"; // Use your configured API instance
 import {
   Box,
   Typography,
@@ -9,23 +9,32 @@ import {
   InputLabel,
   FormControl,
   Button,
-  InputAdornment,
-  IconButton,
+  Autocomplete,
+  CircularProgress
 } from "@mui/material";
-import LocationPinIcon from "@mui/icons-material/LocationPin";
-import { useEffect } from "react";
-// import { useAuth } from '../../api/Auth.jsx';
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { useNavigate } from "react-router-dom";
 
 const JobPosting = () => {
+  const navigate = useNavigate();
+  
   const [jobDetails, setJobDetails] = useState({
     title: "",
     category: "",
     description: "",
     city: "",
+    location: { lat: null, lng: null } 
   });
-  const [services, setServices] = useState([]);
 
+  const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // --- LOCATION STATE ---
+  // Always initialize as an empty array
+  const [locationOptions, setLocationOptions] = useState([]); 
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationInputValue, setLocationInputValue] = useState("");
+
   const handleChange = (e) => {
     setJobDetails({
       ...jobDetails,
@@ -33,22 +42,57 @@ const JobPosting = () => {
     });
   };
 
+  const fetchLocations = async (query) => {
+      if (!query) return;
+      setLocationLoading(true);
+      try {
+          // FIX 1: Use 'api.get' instead of 'axios.get' to ensure it hits your Backend URL
+          const res = await api.get(`/api/jobs/location-search?q=${query}`);
+          
+          // FIX 2: Strict Array Check before setting state
+          if (Array.isArray(res.data)) {
+            setLocationOptions(res.data);
+          } else {
+            console.warn("API returned invalid data:", res.data);
+            setLocationOptions([]); 
+          }
+      } catch (error) {
+          console.error("Location search failed", error);
+          setLocationOptions([]); // Reset to empty on error
+      } finally {
+          setLocationLoading(false);
+      }
+  };
+
+  useEffect(() => {
+      const delayDebounceFn = setTimeout(() => {
+          if (locationInputValue.length > 2) {
+              fetchLocations(locationInputValue);
+          }
+      }, 500);
+
+      return () => clearTimeout(delayDebounceFn);
+  }, [locationInputValue]);
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!jobDetails.location.lat || !jobDetails.city) {
+        alert("Please select a valid location from the dropdown list.");
+        return;
+    }
+
     setIsLoading(true);
 
     try {
-      await api.post(
-        '/api/jobs/',
-        jobDetails
-      );
-
+      await api.post("/api/jobs/", jobDetails);
       alert("Job posted successfully!");
-
-      setJobDetails({ title: "", category: "", description: "", city: "" });
+      navigate("/jobspage");
+      // Reset form
+      setJobDetails({ title: "", category: "", description: "", city: "", location: { lat: null, lng: null } });
     } catch (error) {
       console.error("Failed to post job:", error);
-
       alert("There was an error posting your job. Please try again.");
     } finally {
       setIsLoading(false);
@@ -58,10 +102,7 @@ const JobPosting = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await api.get(
-          '/api/service/'
-        );
-        // console.log("Services API Response:", response.data);
+        const response = await api.get("/api/service/");
         setServices(response.data);
       } catch (error) {
         console.error("Failed to fetch services:", error);
@@ -70,6 +111,7 @@ const JobPosting = () => {
 
     fetchServices();
   }, []);
+
   return (
     <Box
       sx={{
@@ -83,7 +125,7 @@ const JobPosting = () => {
         boxShadow: "0 6px 32px 0 rgba(40,41,61,0.12)",
       }}
     >
-      <Typography variant="h4" gutterBottom sx={{ color: "text.primary" }}>
+      <Typography variant="h4" gutterBottom sx={{ color: "text.primary", fontWeight: 'bold' }}>
         Post a New Job
       </Typography>
 
@@ -98,23 +140,22 @@ const JobPosting = () => {
           sx={{ mb: 2 }}
         />
 
-<FormControl fullWidth required sx={{ mb: 2 }}>
-  <InputLabel>Category</InputLabel>
-  <Select
-    name="category"
-    label="Category"
-    value={jobDetails.category}
-    onChange={handleChange}
-  >
-    {Array.isArray(services) &&
-      services.map((service) => (
-        <MenuItem key={service.id} value={service.service_name}>
-          {service.service_name}
-        </MenuItem>
-      ))}
-  </Select>
-</FormControl>
-
+        <FormControl fullWidth required sx={{ mb: 2 }}>
+          <InputLabel>Category</InputLabel>
+          <Select
+            name="category"
+            label="Category"
+            value={jobDetails.category}
+            onChange={handleChange}
+          >
+            {Array.isArray(services) &&
+              services.map((service) => (
+                <MenuItem key={service.id} value={service.service_name}>
+                  {service.service_name}
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
 
         <TextField
           label="Job Description"
@@ -128,21 +169,59 @@ const JobPosting = () => {
           sx={{ mb: 2 }}
         />
 
-        <TextField
-          label="City / Town"
-          name="city"
-          value={jobDetails.city}
-          onChange={handleChange}
-          fullWidth
-          required
-          sx={{ mb: 2 }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <LocationPinIcon />
-              </InputAdornment>
-            ),
-          }}
+        <Autocomplete
+            fullWidth
+            // FIX 3: THE SAFETY SHIELD 🛡️
+            // This prevents "filter is not a function" crash
+            options={Array.isArray(locationOptions) ? locationOptions : []}
+            
+            loading={locationLoading}
+            getOptionLabel={(option) => option.display_name || ""}
+            filterOptions={(x) => x} 
+            
+            onInputChange={(event, newInputValue) => {
+                setLocationInputValue(newInputValue);
+            }}
+
+            onChange={(event, newValue) => {
+                if (newValue) {
+                    // Update state safely
+                    const newData = {
+                        ...jobDetails,
+                        city: newValue.display_name.split(',')[0],
+                        location: {
+                            lat: parseFloat(newValue.lat),
+                            lng: parseFloat(newValue.lon)
+                        }
+                    };
+                    setJobDetails(newData);
+                }
+            }}
+
+            renderInput={(params) => (
+              <TextField 
+                {...params} 
+                label="City / Location" 
+                required
+                sx={{ mb: 2 }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {locationLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+            
+            renderOption={(props, option) => (
+                <li {...props}>
+                    <LocationOnIcon sx={{ color: 'text.secondary', mr: 2 }} />
+                    <Typography variant="body2">{option.display_name}</Typography>
+                </li>
+            )}
         />
 
         <Button
@@ -151,6 +230,7 @@ const JobPosting = () => {
           size="large"
           fullWidth
           disabled={isLoading}
+          sx={{ fontWeight: 'bold', py: 1.5 }}
         >
           {isLoading ? "Posting..." : "Post Job"}
         </Button>
