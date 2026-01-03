@@ -4,7 +4,7 @@ import { useAuth } from "../../api/useAuth.js";
 import {
   Container, Grid, Card, CardContent, Typography,
   Box, Chip, TextField, MenuItem, CircularProgress,
-  Avatar, Divider, Stack, AvatarGroup
+  Avatar, Divider, Stack, AvatarGroup, Button
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -14,12 +14,9 @@ import WorkIcon from '@mui/icons-material/Work';
 import DescriptionIcon from '@mui/icons-material/Description';
 import MapIcon from '@mui/icons-material/Map';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import Button from "@mui/material/Button"; // Explicit import
-
-
 import JobActionController from "../User/JobActionController.jsx"; 
 
-
+// Helper: Relative Time
 const timeAgo = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -44,12 +41,11 @@ const JobsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [categoryOptions, setCategoryOptions] = useState([]); 
+  
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -57,20 +53,8 @@ const JobsPage = () => {
         if (user) {
           if (user.role === "customer") url = "/api/jobs/userjob";
           else if (user.role === "tradesperson") url = "/api/jobs/feed";
-      try {
-        let url = "/api/jobs/";
-        if (user) {
-          if (user.role === "customer") url = "/api/jobs/userjob";
-          else if (user.role === "tradesperson") url = "/api/jobs/feed";
         }
-        const [jobsRes, catRes] = await Promise.all([
-            api.get(url),
-            api.get('/api/service/') 
-        ]);
-
-        setJobs(jobsRes.data);
-        setCategoryOptions(catRes.data); 
-
+        
         const [jobsRes, catRes] = await Promise.all([
             api.get(url),
             api.get('/api/service/') 
@@ -80,7 +64,6 @@ const JobsPage = () => {
         setCategoryOptions(catRes.data); 
 
       } catch (error) {
-        console.error("Failed to fetch data:", error);
         console.error("Failed to fetch data:", error);
         if (error.response && error.response.status === 401) {
           logout();
@@ -127,24 +110,7 @@ const JobsPage = () => {
     return 0;
   });
 
-
-  const filteredJobs = jobs.filter((job) => {
-    const matchesSearch = 
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        job.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = 
-        categoryFilter === "All" || job.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
-
-  const sortedJobs = [...filteredJobs].sort((a, b) => {
-    if (a.status === "completed" && b.status !== "completed") return 1;
-    if (a.status !== "completed" && b.status === "completed") return -1;
-    return 0;
-  });
-
   if (loading) {
-     return <Container><CircularProgress sx={{ mt: 5, display: 'block', mx: 'auto' }} /></Container>; 
      return <Container><CircularProgress sx={{ mt: 5, display: 'block', mx: 'auto' }} /></Container>; 
   }
 
@@ -300,6 +266,7 @@ const JobsPage = () => {
                             </Box>
                         </Box>
                     </CardContent>
+
                     <Box sx={{ p: 2, pt: 0 }}>
                         <JobActionController 
                             job={job}
@@ -314,37 +281,8 @@ const JobsPage = () => {
             })
         )}
       </Grid>
-      <Dialog 
-        open={openCodeDialog} 
-        onClose={() => setOpenCodeDialog(false)} 
-        maxWidth="xs" 
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 3 } }}
-      >
-        <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', bgcolor: '#f8f9fa', borderBottom: '1px solid #eee' }}>
-            Job Completion Code
-        </DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-                Share this code with the tradesperson <b>only</b> after the work is completed.
-            </Typography>
-            <Box sx={{ bgcolor: '#e8f5e9', border: '2px dashed #4caf50', p: 3, borderRadius: 2, mt: 3, mb: 1 }}>
-                <Typography variant="h3" sx={{ letterSpacing: '8px', fontWeight: 'bold', color: '#2e7d32', fontFamily: 'monospace' }}>
-                    {selectedJobCode || "..."}
-                </Typography>
-            </Box>
-            <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} sx={{ mt: 2 }}>
-                <WorkIcon fontSize="small" color="action" />
-                <Typography variant="caption" color="text.secondary">{selectedJobTitle}</Typography>
-            </Stack>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-            <Button onClick={() => setOpenCodeDialog(false)} variant="outlined" sx={{ borderRadius: 2 }}>Close</Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   );
 };
 
-export default JobsPage;
 export default JobsPage;
