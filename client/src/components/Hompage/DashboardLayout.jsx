@@ -5,7 +5,7 @@ import {
   ShieldCheck, User, Zap 
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import NavBar from "../Global/NavBar";
+import NavBar from "../Hompage/NavBar";
 
 const DashboardLayout = () => {
   const location = useLocation();
