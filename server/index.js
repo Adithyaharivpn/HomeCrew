@@ -32,7 +32,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Cors
-const allowedOrigins = ['https://college-project-git-feature-jobpage-adithyaharivpns-projects.vercel.app', 'http://localhost:3000' ,'http://localhost:5173' , 'https://college-project-git-feature-ui-adithyaharivpns-projects.vercel.app' ]; 
+const allowedOrigins = ['https://college-project-git-feature-jobpage-adithyaharivpns-projects.vercel.app', 'http://localhost:3000' ,'http://localhost:5173' , 'https://college-project-git-shadcn-version-adithyaharivpns-projects.vercel.app' ]; 
 
 const corsOptions = {
   origin: (origin, callback) => {
