@@ -29,6 +29,7 @@ import {
   CheckCheck, 
   Zap 
 } from "lucide-react";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 // --- Helper Function for Time Formatting ---
 const timeAgo = (dateString) => {
@@ -109,7 +110,7 @@ const NavBar = () => {
           <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform">
              <Zap className="h-5 w-5 text-white fill-white" />
           </div>
-          <span className={`text-2xl font-black tracking-tighter uppercase italic transition-colors duration-500 ${
+          <span className={`text-2xl font-black tracking-tighter uppercase  transition-colors duration-500 ${
             isSolid ? "text-foreground" : "text-white"
           }`}>
             HomeCrew
@@ -146,7 +147,7 @@ const NavBar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-80 mt-4 bg-card border-border rounded-2xl shadow-2xl p-0 overflow-hidden" align="end">
                   <div className="flex items-center justify-between p-4 bg-muted/30 border-b border-border">
-                    <span className="font-black uppercase text-[10px] tracking-widest italic">Signal Inbox</span>
+                    <span className="font-black uppercase text-[10px] tracking-widest ">Signal Inbox</span>
                     {notifications.length > 0 && (
                       <button onClick={handleMarkAllAsRead} className="text-[9px] font-black uppercase text-blue-500 hover:text-blue-600">
                         Dismiss All
@@ -187,7 +188,7 @@ const NavBar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 mt-4 bg-card border-border rounded-2xl shadow-2xl overflow-hidden" align="end">
                   <DropdownMenuLabel className="p-6 bg-muted/20 border-b border-border">
-                    <p className="text-sm font-black uppercase italic tracking-tight">{user.name}</p>
+                    <p className="text-sm font-black uppercase  tracking-tight">{user.name}</p>
                     <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mt-1">{user.role}</p>
                   </DropdownMenuLabel>
                   <div className="p-2">

@@ -82,8 +82,8 @@ const SignUp = () => {
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4 pt-24 pb-20">
       <Card className="w-full max-w-[550px] border-border bg-card rounded-[2.5rem] shadow-2xl overflow-hidden">
         <CardHeader className="pt-10 text-center text-foreground">
-          <CardTitle className="text-3xl font-black italic uppercase tracking-tighter">Create Entity</CardTitle>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 italic">Initialize Global Profile</p>
+          <CardTitle className="text-3xl font-black  uppercase tracking-tighter">Create Entity</CardTitle>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 ">Initialize Global Profile</p>
         </CardHeader>
 
         <CardContent className="pb-10 space-y-6 px-10">

@@ -116,7 +116,7 @@ const Reviews = () => {
 
                       <StarRating rating={review.rating} />
 
-                      <p className="mt-2 text-sm italic text-muted-foreground leading-relaxed transition-colors duration-500">
+                      <p className="mt-2 text-sm  text-muted-foreground leading-relaxed transition-colors duration-500">
                         "{review.comment}"
                       </p>
 

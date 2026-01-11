@@ -53,10 +53,10 @@ const Login = () => {
           <div className="mx-auto h-12 w-12 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-600/20">
             <ShieldCheck className="h-6 w-6 text-blue-600" />
           </div>
-          <CardTitle className="text-3xl font-black italic uppercase tracking-tighter text-foreground leading-none">
+          <CardTitle className="text-3xl font-black  uppercase tracking-tighter text-foreground leading-none">
             Secure Login
           </CardTitle>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 italic">Platform Authentication Required</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 ">Platform Authentication Required</p>
         </CardHeader>
 
         <CardContent className="pb-12 px-10 space-y-6">

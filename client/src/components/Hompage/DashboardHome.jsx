@@ -80,7 +80,7 @@ const DashboardHome = () => {
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-4xl font-black uppercase tracking-tight italic leading-none">
+          <h2 className="text-4xl font-black uppercase tracking-tight  leading-none">
             Welcome, <span className="text-blue-600 underline decoration-blue-600/20 underline-offset-8">{user?.name?.split(' ')[0]}</span>
           </h2>
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mt-4 ml-1">
@@ -106,7 +106,7 @@ const DashboardHome = () => {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">{card.title}</p>
-                <h3 className="text-3xl font-black italic tracking-tighter mt-1">{card.value}</h3>
+                <h3 className="text-3xl font-black  tracking-tighter mt-1">{card.value}</h3>
               </div>
             </CardContent>
           </Card>
