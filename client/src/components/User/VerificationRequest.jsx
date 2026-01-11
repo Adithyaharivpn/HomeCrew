@@ -24,49 +24,48 @@ const VerificationRequest = () => {
   };
 
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) {
-      toast.error("Please select documents first.");
-      return;
-    }
-
-    const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append("documents", selectedFiles[i]);
-    }
-
-    try {
-      setUploading(true);
-      const response = await api.post("/api/users/request-verification", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // 1. UPDATE GLOBAL AUTH STATE (Fixes the "need to logout" issue)
-      // This forces the "Send Quote" button to check against the new status
-      setUser({ ...user, verificationStatus: "pending" });
-
-      toast.success("Documents submitted! Redirecting...");
-
-      // 2. REDIRECT AFTER 2 SECONDS
-      setTimeout(() => {
-        navigate("/dashboard/jobs");
-      }, 2000);
-
-    } catch (err) {
-      toast.error("Upload failed. Try again.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // If approved or pending, we can show a status card or just redirect them away
-  if (user?.verificationStatus === "approved" || user?.verificationStatus === "pending") {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <p className="ml-3 font-black uppercase text-[10px] tracking-widest">Verifying Session...</p>
-      </div>
-    );
+  if (selectedFiles.length === 0) {
+    toast.error("Please select documents first.");
+    return;
   }
+
+  const formData = new FormData();
+  for (let i = 0; i < selectedFiles.length; i++) {
+    formData.append("documents", selectedFiles[i]);
+  }
+
+  try {
+    setUploading(true);
+    // Ensure the endpoint is exactly what the backend expects
+    const response = await api.post("/api/users/request-verification", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    // CHECK: Does your backend return the updated user or a success message?
+    console.log("Upload Success:", response.data);
+
+    // 1. SAFE GLOBAL AUTH UPDATE
+    if (user && setUser) {
+      setUser((prev) => ({
+        ...prev,
+        verificationStatus: "pending",
+      }));
+    }
+
+    toast.success("Documents submitted! Redirecting...");
+
+    setTimeout(() => {
+      navigate("/jobs"); // Adjusted to match your usual jobs route
+    }, 2000);
+
+  } catch (err) {
+    console.error("Actual Upload Error:", err.response?.data || err.message);
+   
+    toast.error(err.response?.data?.message || "Upload failed. Try again.");
+  } finally {
+    setUploading(false);
+  }
+};
 
   return (
     <div className="max-w-2xl mx-auto py-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
