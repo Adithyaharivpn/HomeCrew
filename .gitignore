@@ -1,0 +1,20 @@
+client/src/components/Homepage/Test.jsx
+server/.env
+
+# Dependencies
+**/node_modules
+**/dist
+**/build
+
+# Environment Variables
+**/.env
+**/.env.local
+
+# Logs
+**/logs
+*.log
+npm-debug.log*
+
+# System Files
+.DS_Store
+Thumb.db
