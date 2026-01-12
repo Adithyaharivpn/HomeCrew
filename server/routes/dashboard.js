@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddlware');
+const Job = require('../models/JobsModel');
 const { getRoleDashboardStats } = require('../controller/admincontroller');
 
 router.get('/stats', authMiddleware, getRoleDashboardStats);

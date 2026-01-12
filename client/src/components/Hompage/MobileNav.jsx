@@ -33,19 +33,23 @@ const MobileNav = ({ user }) => {
             </>
           ) : (
             <>
+               <Button asChild variant="ghost" className="justify-start w-full hover:bg-slate-800 hover:text-white">
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+
               {user.role === "customer" && (
                 <Button asChild className="justify-start w-full bg-blue-600 hover:bg-blue-700">
-                  <Link to="/jobposting">Post a Job</Link>
+                  <Link to="/dashboard/post-job">Post a Job</Link>
                 </Button>
               )}
               
               <Button asChild variant="ghost" className="justify-start w-full hover:bg-slate-800 hover:text-white">
-                <Link to="/jobspage">Browse Jobs</Link>
+                <Link to="/dashboard/jobs">Browse Jobs</Link>
               </Button>
 
               {user.role === "tradesperson" && (
                 <Button asChild variant="ghost" className="justify-start w-full hover:bg-slate-800 hover:text-white">
-                  <Link to="/my-works">My Active Jobs</Link>
+                  <Link to="/dashboard/active-works">My Active Jobs</Link>
                 </Button>
               )}
             </>

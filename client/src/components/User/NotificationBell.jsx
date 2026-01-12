@@ -18,116 +18,61 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const NotificationBell = () => {
-  const [notifications, setNotifications] = useState([]);
-  const [open, setOpen] = useState(false); // Controls the popover
+import { useNotifications } from "../../api/NotificationProvider";
+
+const NotificationBell = ({ children, isSolid }) => {
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  // --- Initial Fetch ---
-  useEffect(() => {
-    const fetchNotifs = async () => {
-      try {
-        const res = await api.get("/api/notifications/");
-        setNotifications(res.data);
-      } catch (err) {
-        console.error("Error fetching notifications");
-      }
-    };
-    fetchNotifs();
-  }, []);
-
-  // --- Socket.io Listener ---
-  useEffect(() => {
-    if (!user) return;
-    const socket = io(import.meta.env.VITE_API_BASE_URL);
-    socket.emit("addUser", user.id);
-
-    socket.on("receiveNotification", (newNotif) => {
-      setNotifications((prev) => [newNotif, ...prev]);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [user]);
-
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  // --- Handlers ---
 
   const handleClickNotif = async (notif) => {
-    try {
-      if (!notif.isRead) {
-        await api.put(`/api/notifications/${notif._id}/read`);
-        setNotifications((prev) =>
-          prev.map((n) => (n._id === notif._id ? { ...n, isRead: true } : n))
-        );
-      }
-      setOpen(false); // Close popover
-      if (notif.link) navigate(notif.link);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleMarkAllRead = async () => {
-    const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n._id);
-    if (unreadIds.length === 0) return;
-
-    // Optimistic update
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-
-    try {
-      await Promise.all(
-        unreadIds.map((id) => api.put(`/api/notifications/${id}/read`))
-      );
-    } catch (err) {
-      console.error("Failed to mark all as read");
-    }
+    await markAsRead(notif._id);
+    setOpen(false);
+    if (notif.link) navigate(notif.link);
   };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-6 w-6 text-foreground" />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full p-0 text-xs"
-            >
-              {unreadCount}
-            </Badge>
-          )}
-        </Button>
+        {children ? (
+          <div className="relative cursor-pointer w-full">
+            {children}
+          </div>
+        ) : (
+          <Button variant="ghost" size="icon" className={`relative rounded-xl hover:bg-muted transition-colors ${isSolid ? 'text-foreground' : 'text-white'}`}>
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 bg-red-600 rounded-full border-2 border-background animate-pulse" />
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
 
-      <PopoverContent align="end" className="w-[380px] p-0 shadow-lg">
+      <PopoverContent align="end" className="w-80 p-0 bg-card border-border rounded-2xl shadow-2xl overflow-hidden mt-2">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-card">
-          <h4 className="font-semibold text-foreground">Notifications</h4>
+        <div className="flex items-center justify-between px-5 py-4 bg-muted/20">
+          <h4 className="font-black uppercase text-[10px] tracking-widest text-foreground">Notifications</h4>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleMarkAllRead}
-              className="h-8 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50/10"
+              onClick={markAllAsRead}
+              className="h-8 px-3 font-black uppercase text-[9px] tracking-widest text-blue-600 hover:text-blue-700 hover:bg-blue-500/10 rounded-lg"
             >
-              <CheckCheck className="mr-1 h-3.5 w-3.5" />
-              Mark all read
+              <CheckCheck className="mr-2 h-3.5 w-3.5" />
+              Mark as read
             </Button>
           )}
         </div>
 
-        <Separator />
+        <Separator className="bg-border/50" />
 
         {/* List */}
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-80">
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-              <Inbox className="h-10 w-10 mb-2 opacity-20" />
-              <p className="text-sm">No notifications yet</p>
+            <div className="flex flex-col items-center justify-center h-full py-10 text-muted-foreground opacity-50">
+              <Inbox className="h-10 w-10 mb-3" />
+              <p className="font-black uppercase text-[9px] tracking-widest">No activity found</p>
             </div>
           ) : (
             <div className="flex flex-col">
@@ -135,37 +80,50 @@ const NotificationBell = () => {
                 <button
                   key={notif._id}
                   onClick={() => handleClickNotif(notif)}
-                  className={`w-full text-left px-4 py-3 border-b border-border/40 transition-colors last:border-0
+                  className={`w-full text-left px-5 py-4 border-b border-border/40 transition-all hover:bg-muted
                     ${
-                      notif.isRead
-                        ? "bg-card hover:bg-muted"
-                        : "bg-blue-50/60 dark:bg-blue-900/30 hover:brightness-105"
+                      !notif.isRead
+                        ? "bg-blue-500/5 dark:bg-blue-400/5"
+                        : "opacity-70"
                     }
                   `}
                 >
-                  <div className="flex flex-col gap-1">
-                    <p
-                      className={`text-sm leading-snug ${
-                        notif.isRead
-                          ? "text-muted-foreground"
-                          : "text-foreground font-semibold"
-                      }`}
-                    >
-                      {notif.message}
-                    </p>
-                    <span className="text-[10px] text-muted-foreground">
-                      {new Date(notif.createdAt).toLocaleDateString()} •{" "}
-                      {new Date(notif.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <p className={`text-xs font-bold leading-normal ${!notif.isRead ? "text-foreground" : "text-muted-foreground"}`}>
+                        {notif.message}
+                      </p>
+                      <div className="flex items-center gap-2">
+                           {!notif.isRead && <span className="h-1.5 w-1.5 bg-blue-600 rounded-full" />}
+                           <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                             {new Date(notif.createdAt).toLocaleDateString()}
+                           </span>
+                      </div>
+                    </div>
+                    {!notif.isRead && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markAsRead(notif._id);
+                        }}
+                        className="h-8 w-8 rounded-lg hover:bg-blue-500/10 hover:text-blue-600 transition-colors shrink-0"
+                      >
+                        <CheckCheck className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </button>
               ))}
             </div>
           )}
         </ScrollArea>
+        <div className="p-3 border-t border-border/50 bg-muted/10 text-center">
+            <Button variant="ghost" onClick={() => { navigate('/dashboard/notifications'); setOpen(false); }} className="w-full h-8 font-black uppercase text-[9px] tracking-widest text-muted-foreground hover:text-foreground">
+                View Full Archive
+            </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );

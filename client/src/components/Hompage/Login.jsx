@@ -48,15 +48,15 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/[0.03] blur-[120px] pointer-events-none -z-10" />
 
-      <Card className="w-full max-w-[420px] border-border bg-card rounded-[2.5rem] shadow-2xl overflow-hidden">
+      <Card className="w-full max-w-[420px] border-border bg-card rounded-[1.5rem] shadow-2xl overflow-hidden">
         <CardHeader className="pt-12 text-center">
           <div className="mx-auto h-12 w-12 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-600/20">
             <ShieldCheck className="h-6 w-6 text-blue-600" />
           </div>
-          <CardTitle className="text-3xl font-black  uppercase tracking-tighter text-foreground leading-none">
+          <CardTitle className="text-2xl font-bold tracking-tight text-foreground leading-none">
             Secure Login
           </CardTitle>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 ">Platform Authentication Required</p>
+          <p className="text-sm text-muted-foreground mt-4">Platform Authentication Required</p>
         </CardHeader>
 
         <CardContent className="pb-12 px-10 space-y-6">
@@ -68,14 +68,14 @@ const Login = () => {
             )}
 
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Network ID</Label>
+              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Traffic ID (Email)</Label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
+                <Mail className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                 <Input
                   name="email"
                   type="email"
                   placeholder="name@example.com"
-                  className="pl-12 h-14 bg-muted/20 border-border rounded-2xl font-bold"
+                  className="pl-12 h-14 rounded-xl"
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -84,14 +84,14 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Access Key</Label>
+              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Access Key</Label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
+                <Lock className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                 <Input
                   name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="pl-12 pr-12 h-14 bg-muted/20 border-border rounded-2xl font-bold"
+                  className="pl-12 pr-12 h-14 rounded-xl"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -99,14 +99,14 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground z-10"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black h-14 rounded-2xl uppercase text-[11px] tracking-widest border-none" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-14 rounded-xl text-sm tracking-wide border-none shadow-lg" disabled={isLoading}>
               {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Identity"}
             </Button>
           </form>

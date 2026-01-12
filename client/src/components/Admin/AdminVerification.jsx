@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axiosConfig";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Icons
 import {
@@ -29,6 +30,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const AdminVerification = () => {
@@ -36,6 +47,15 @@ const AdminVerification = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("pending");
   const [filter, setFilter] = useState("");
+  
+  // AlertDialog state
+  const [confirmDialog, setConfirmDialog] = useState({ 
+    open: false, 
+    userId: null, 
+    status: "",
+    title: "",
+    description: "" 
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -53,11 +73,22 @@ const AdminVerification = () => {
     }
   };
 
-  const handleVerify = async (userId, status) => {
-    if (!window.confirm(`Set status to ${status.toUpperCase()} for this entity?`)) return;
+  const handleActionClick = (userId, status) => {
+    setConfirmDialog({
+        open: true,
+        userId,
+        status,
+        title: `Confirm ${status === 'approved' ? 'Verification' : 'Rejection'}`,
+        description: `Are you sure you want to ${status === 'approved' ? 'approve' : 'reject'} this tradesperson's verification request? This will affect their ability to work on the platform.`
+    });
+  };
+
+  const executeAction = async () => {
+    const { userId, status } = confirmDialog;
     try {
       await api.put("/api/admin/verify", { userId, status });
       toast.success(`Entity updated to ${status}`);
+      setConfirmDialog({ ...confirmDialog, open: false });
       fetchUsers();
     } catch (err) {
       toast.error("Action rejected by server");
@@ -129,12 +160,12 @@ const AdminVerification = () => {
                 <TableCell className="text-right px-8">
                   <div className="flex justify-end gap-2">
                     {user.verificationStatus !== "approved" && (
-                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[9px] h-10 px-6 rounded-xl shadow-lg shadow-emerald-600/20" onClick={() => handleVerify(user._id, "approved")}>
+                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[9px] h-10 px-6 rounded-xl shadow-lg shadow-emerald-600/20" onClick={() => handleActionClick(user._id, "approved")}>
                         Approve
                       </Button>
                     )}
                     {user.verificationStatus !== "rejected" && (
-                      <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 font-black uppercase text-[9px] h-10 px-6 rounded-xl" onClick={() => handleVerify(user._id, "rejected")}>
+                      <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 font-black uppercase text-[9px] h-10 px-6 rounded-xl" onClick={() => handleActionClick(user._id, "rejected")}>
                         Reject
                       </Button>
                     )}
@@ -148,7 +179,46 @@ const AdminVerification = () => {
     </div>
   );
 
-  if (loading) return <div className="flex h-[60vh] items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>;
+  if (loading) return (
+    <div className="space-y-8 py-12">
+      <div className="flex justify-between items-center px-2">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-14 w-14 rounded-2xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48 rounded-lg" />
+            <Skeleton className="h-3 w-64" />
+          </div>
+        </div>
+        <Skeleton className="h-14 w-40 rounded-xl" />
+      </div>
+      <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden">
+        <div className="p-8 flex justify-between gap-6 border-b border-border bg-muted/20">
+          <Skeleton className="h-14 w-96 rounded-2xl" />
+          <Skeleton className="h-14 w-full max-w-md rounded-2xl" />
+        </div>
+        <Table>
+          <TableBody>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <TableRow key={i} className="border-border">
+                <TableCell className="px-8 py-6">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2 text-left">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-48" />
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell><Skeleton className="h-8 w-24 rounded-xl" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                <TableCell className="text-right px-8"><Skeleton className="h-10 w-48 ml-auto rounded-xl" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -207,6 +277,28 @@ const AdminVerification = () => {
           </CardContent>
         </Tabs>
       </Card>
+
+      <AlertDialog open={confirmDialog.open} onOpenChange={(o) => setConfirmDialog(prev => ({ ...prev, open: o }))}>
+        <AlertDialogContent className="bg-card border-border rounded-[2.5rem] p-10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black uppercase italic tracking-tight">{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground font-medium text-lg leading-relaxed pt-4">
+              {confirmDialog.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-3 pt-8">
+            <AlertDialogCancel className="h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest border-border">Cancel Action</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={executeAction}
+              className={`h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest border-none ${
+                confirmDialog.status === 'approved' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' : 'bg-destructive hover:bg-destructive/90 shadow-destructive/20'
+              } shadow-xl`}
+            >
+              Confirm System Update
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

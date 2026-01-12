@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import { useAuth } from "../../api/useAuth";
 import Confetti from "react-confetti";
+import io from "socket.io-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Icons
 import {
@@ -140,15 +142,46 @@ const JobsPage = () => {
     fetchData();
   }, [user, logout]);
 
+  // Listen for real-time review prompts
+  useEffect(() => {
+    const userId = user?._id || user?.id;
+    if (!userId) return;
+    
+    const socket = io(import.meta.env.VITE_API_BASE_URL);
+    socket.emit("addUser", userId); 
+    
+    socket.on("job_review_prompt", (data) => {
+        setReviewDialog({
+            open: true,
+            jobId: data.jobId,
+            targetId: data.targetId
+        });
+        toast.info("Job Completed! Please leave a review.");
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+    });
+    
+    return () => socket.disconnect();
+  }, [user?._id || user?.id]);
+
   const handleContactCustomer = async (job) => {
+    // If Customer is clicking "Chat/Pay", handle separately or correct IDs
+    const isCustomer = user.role === 'customer';
+    
+    if (!isCustomer && user.role === 'tradesperson' && !user.isVerified) {
+        toast.error("Account pending verification.", { description: "You cannot initiate chats until approved." });
+        return;
+    }
+
     try {
-      const res = await api.post("/api/chat/initiate", {
-        jobId: job._id,
-        customerId: job.user?._id || job.user,
-        tradespersonId: user.id,
-      });
+      const payload = {
+          jobId: job._id,
+          customerId: isCustomer ? (user._id || user.id) : (job.user?._id || job.user),
+          tradespersonId: isCustomer ? (job.assignedTo?._id || job.assignedTo) : (user._id || user.id)
+      };
+      
+      const res = await api.post("/api/chat/initiate", payload);
       navigate(`/dashboard/chat/${res.data._id}`);
-      toast.success("Conversation started!");
     } catch (err) {
       toast.error("Could not start chat.");
     }
@@ -187,6 +220,14 @@ const JobsPage = () => {
       setShowConfetti(true);
       setVerifyDialog({ open: false, jobId: null, customerId: null });
       toast.success("Job Completed!");
+      
+      // Auto-open review dialog
+      setReviewDialog({ 
+        open: true, 
+        jobId: verifyDialog.jobId, 
+        targetId: verifyDialog.customerId 
+      });
+      
       setTimeout(() => setShowConfetti(false), 3000);
     } catch (err) {
       toast.error("Invalid Code");
@@ -248,8 +289,41 @@ const JobsPage = () => {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="animate-spin text-blue-600" />
+      <div className="w-full px-2 py-12 space-y-10">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="space-y-4 w-full md:w-auto">
+                <Skeleton className="h-10 w-64 rounded-xl" />
+                <Skeleton className="h-4 w-40 rounded-lg" />
+            </div>
+            <Skeleton className="h-14 w-48 rounded-2xl" />
+        </div>
+        <div className="flex flex-col sm:flex-row gap-4">
+            <Skeleton className="h-14 flex-1 rounded-2xl" />
+            <Skeleton className="h-14 w-full sm:w-[250px] rounded-2xl" />
+        </div>
+        <Skeleton className="h-16 w-full rounded-[1.5rem]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <Card key={i} className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-md flex flex-col h-[400px]">
+              <div className="p-8 space-y-4">
+                <Skeleton className="h-8 w-3/4 rounded-lg" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+              </div>
+              <div className="px-8 flex-1 space-y-3">
+                 <Skeleton className="h-3 w-full" />
+                 <Skeleton className="h-3 w-5/6" />
+                 <Skeleton className="h-3 w-4/6" />
+              </div>
+              <div className="p-6 bg-muted/10 border-t border-border mt-auto space-y-3">
+                 <Skeleton className="h-12 w-full rounded-2xl" />
+                 <Skeleton className="h-10 w-full rounded-xl" />
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
 
@@ -263,7 +337,7 @@ const JobsPage = () => {
         />
       )}
 
-      <div className="container mx-auto px-4">
+      <div className="w-full px-2">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
           <div className="space-y-1">
             <h1 className="text-4xl font-black uppercase tracking-tight text-foreground ">
@@ -351,7 +425,7 @@ const JobsPage = () => {
           </TabsList>
         </Tabs>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sortedJobs.map((job) => (
             <Card
               key={job._id}

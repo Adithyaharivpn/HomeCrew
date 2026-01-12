@@ -19,7 +19,19 @@ router.post('/', auth, async (req, res) => {
     });
 
     await newReview.save();
-    logger.info(`Review posted: ${rating} Stars for User ${targetUserId} by User ${req.user.id}`, {
+
+    // Recalculate Average Rating for Tradesperson
+    const allReviews = await Review.find({ targetUserId });
+    const totalReviews = allReviews.length;
+    const averageRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews;
+
+    const User = require('../models/User');
+    await User.findByIdAndUpdate(targetUserId, {
+      averageRating: parseFloat(averageRating.toFixed(1)),
+      totalReviews: totalReviews
+    });
+
+    logger.info(`Review posted: ${rating} Stars for User ${targetUserId}. New Average: ${averageRating.toFixed(1)}`, {
         meta: { type: 'review_created', jobId }
     });
 

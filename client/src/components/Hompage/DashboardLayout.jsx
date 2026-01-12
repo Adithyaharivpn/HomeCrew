@@ -1,96 +1,197 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, Briefcase, MessageSquare, 
-  ShieldCheck, User, Zap 
+  ShieldCheck, User, Zap, Wallet, Map as MapIcon, 
+  List, CreditCard, Users, Terminal, LogOut, ArrowLeft, Sun, Moon, Bell
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import NavBar from "../Hompage/NavBar";
+import { useAuth } from "../../api/useAuth";
+import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useTheme } from "../Utils/Themeprovider";
+import { useNotifications } from "../../api/NotificationProvider";
+import NotificationBell from "../User/NotificationBell";
+
+const Logo = () => {
+    return (
+      <Link
+        to="/"
+        className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20"
+      >
+        <div className="h-5 w-6 bg-foreground dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0 flex items-center justify-center">
+            <Zap className="h-3 w-3 text-background dark:text-black" />
+        </div>
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="font-medium text-foreground whitespace-pre"
+        >
+          HomeCrew
+        </motion.span>
+      </Link>
+    );
+  };
+  
+  const LogoIcon = () => {
+    return (
+      <Link
+        to="/"
+        className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20"
+      >
+        <div className="h-5 w-6 bg-foreground dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0 flex items-center justify-center">
+             <Zap className="h-3 w-3 text-background dark:text-black" />
+        </div>
+      </Link>
+    );
+  };
 
 const DashboardLayout = () => {
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const { setTheme } = useTheme();
+  const { unreadCount } = useNotifications();
+  const [open, setOpen] = useState(false);
+  
+  // Define menu items per role
+  const roleMenus = {
+    admin: [
+      { label: "Overview", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Users", href: "/dashboard/admin-panel", icon: <Users className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { 
+        label: "Notifications", 
+        icon: <Bell className="h-5 w-5 flex-shrink-0 text-foreground" />,
+        badge: unreadCount 
+      },
+      { label: "System Logs", href: "/dashboard/system-logs", icon: <Terminal className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Verify", href: "/dashboard/verifications", icon: <ShieldCheck className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Market", href: "/dashboard/jobs", icon: <List className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+    ],
+    tradesperson: [
+      { label: "Overview", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { 
+        label: "Notifications", 
+        icon: <Bell className="h-5 w-5 flex-shrink-0 text-foreground" />,
+        badge: unreadCount 
+      },
+      { label: "Market", href: "/dashboard/jobs", icon: <List className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Map", href: "/dashboard/map", icon: <MapIcon className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Wallet", href: "/dashboard/billing", icon: <Wallet className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      // Conditionally add Verify
+      ...(!user?.isVerified ? [{ label: "Verify", href: "/dashboard/get-verified", icon: <ShieldCheck className="h-5 w-5 flex-shrink-0 text-foreground" /> }] : []),
+    ],
+    customer: [
+      { label: "Overview", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { 
+        label: "Notifications", 
+        icon: <Bell className="h-5 w-5 flex-shrink-0 text-foreground" />,
+        badge: unreadCount 
+      },
+      { label: "Market", href: "/dashboard/jobs", icon: <List className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Post Job", href: "/dashboard/post-job", icon: <Briefcase className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Payments", href: "/dashboard/billing", icon: <CreditCard className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+    ]
+  };
 
-  const menuItems = [
-    { name: "Home", path: "/dashboard", icon: LayoutDashboard },
-    { name: "Jobs", path: "/dashboard/jobs", icon: Briefcase },
-    { name: "Chat", path: "/dashboard/messages", icon: MessageSquare },
-    { name: "Verify", path: "/dashboard/get-verified", icon: ShieldCheck },
-    { name: "Profile", path: "/dashboard/profile", icon: User },
+  const menuItems = (user && roleMenus[user.role]) ? roleMenus[user.role] : [];
+
+  // Add Profile and Logout
+  const commonLinks = [
+      { label: "Profile", href: "/dashboard/profile", icon: <User className="h-5 w-5 flex-shrink-0 text-foreground" /> },
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* GLOBAL TOP NAV */}
-      <NavBar />
-      
-      <div className="flex flex-1 pt-20 pb-20 md:pb-0 h-screen overflow-hidden">
+    <div className={cn(
+        "flex flex-col md:flex-row bg-background w-full flex-1 mx-auto overflow-hidden",
+        "h-screen" 
+      )}>
+        <Sidebar open={open} setOpen={setOpen}>
+            <SidebarBody className="justify-between gap-10">
+                <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+                    {open ? <Logo /> : <LogoIcon />}
+                    <div className="mt-8 flex flex-col gap-2">
+                        {menuItems.map((link, idx) => {
+                            if (link.label === "Notifications") {
+                                return (
+                                    <NotificationBell key={idx}>
+                                        <SidebarLink link={link} />
+                                    </NotificationBell>
+                                );
+                            }
+                            return <SidebarLink key={idx} link={link} />;
+                        })}
+                        {commonLinks.map((link, idx) => (
+                            <SidebarLink key={`common-${idx}`} link={link} />
+                        ))}
+                        
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <div className="flex items-center justify-start gap-2 group/sidebar py-2 cursor-pointer">
+                                    <div className="h-5 w-5 flex-shrink-0 relative"> 
+                                        <Sun className="h-5 w-5 absolute rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
+                                        <Moon className="h-5 w-5 absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
+                                    </div>
+                                    <motion.span 
+                                        animate={{ display: open ? "inline-block" : "none", opacity: open ? 1 : 0 }}
+                                        className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+                                    >
+                                        Theme
+                                    </motion.span>
+                                </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="ml-10 bg-card border-border"> 
+                                 <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">Light</DropdownMenuItem>
+                                 <DropdownMenuItem onClick={() => setTheme("dark")} className="cursor-pointer">Dark</DropdownMenuItem>
+                                 <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">System</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                         <div onClick={logout} className="cursor-pointer">
+                            <SidebarLink link={{
+                                label: "Log Out",
+                                href: "#", // Dummy
+                                icon: <LogOut className="h-5 w-5 flex-shrink-0 text-foreground" />
+                            }} />
+                        </div>
+                    </div>
+                </div>
+                <div>
+                   <SidebarLink
+                    link={{
+                        label: user?.name || "User",
+                        href: "/dashboard/profile",
+                        icon: (
+                        <div className="h-7 w-7 flex-shrink-0 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center font-bold text-xs uppercase">
+                            {user?.name?.charAt(0)}
+                        </div>
+                        ),
+                    }}
+                    />
+                </div>
+            </SidebarBody>
+        </Sidebar>
         
-        {/* DESKTOP SIDEBAR (Hidden on Mobile) */}
-        <aside className="hidden md:flex w-72 border-r border-border bg-card flex-col">
-          <div className="p-8 space-y-8">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Zap className="h-5 w-5 text-white fill-white" />
-              </div>
-              <span className="text-xl font-black uppercase  tracking-tighter">HomeCrew</span>
-            </div>
-
-            <nav className="space-y-2">
-              {menuItems.map((item) => (
-                <Link 
-                  key={item.path} 
-                  to={item.path} 
-                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${
-                    location.pathname === item.path 
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 font-bold" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="text-[11px] uppercase tracking-widest font-black">{item.name}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </aside>
-
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 overflow-hidden relative">
-          <ScrollArea className="h-full w-full">
-            <div className="p-4 md:p-10 max-w-5xl mx-auto">
-              <Outlet />
+        <div className="flex flex-1 overflow-hidden relative bg-background border-l border-neutral-200 dark:border-neutral-700 rounded-tl-2xl">
+          {location.pathname.includes("/map") ? (
+            <div className="h-full w-full p-0">
+               <Outlet />
             </div>
-          </ScrollArea>
-        </main>
-
-        {/* MOBILE BOTTOM NAVIGATION (Hidden on Desktop) */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-t border-border px-4 pb-6 pt-3">
-          <div className="flex justify-between items-center max-w-md mx-auto">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link 
-                  key={item.path} 
-                  to={item.path} 
-                  className="flex flex-col items-center gap-1 min-w-[64px]"
-                >
-                  <div className={`p-2 rounded-xl transition-all ${
-                    isActive ? "bg-blue-600 text-white" : "text-muted-foreground"
-                  }`}>
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  <span className={`text-[9px] font-black uppercase tracking-widest ${
-                    isActive ? "text-blue-600" : "text-muted-foreground"
-                  }`}>
-                    {item.name}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-
-      </div>
+          ) : (
+            <ScrollArea className="h-full w-full">
+              <div className="mx-auto h-full w-full p-2 md:p-10 transition-all duration-300">
+                <Outlet />
+              </div>
+            </ScrollArea>
+          )}
+        </div>
     </div>
   );
 };

@@ -9,14 +9,25 @@ const logger = require('../utils/logger');
 const authMiddleware = require('../middleware/authMiddlware');
 
 
-router.post('/initiate', async (req, res) => {
+router.post('/initiate', authMiddleware, async (req, res) => {
   const { jobId, customerId, tradespersonId } = req.body; 
 
   try {
+    // Enforce Verification Check
+    if (req.user.role === 'tradesperson' && !req.user.isVerified) {
+        logger.warn(`Chat init blocked: User ${req.user.id} not verified.`);
+        return res.status(403).json({ message: "Verification required to start chats." });
+    }
+
     const job = await Job.findById(jobId);
     if (job.status === 'assigned' && job.assignedTo.toString() !== tradespersonId) {
       logger.warn(`Chat init blocked: Job ${jobId} is closed. User: ${tradespersonId}`);
       return res.status(403).json({ message: "Job is closed." });
+    }
+
+    if (job.status === 'completed' || job.status === 'cancelled') {
+        logger.warn(`Chat init blocked: Job ${jobId} is ${job.status}`);
+        return res.status(403).json({ message: "Job is closed. Chat disabled." });
     }
     
     let room = await ChatRoom.findOne({ jobId, tradespersonId });
@@ -48,10 +59,36 @@ router.post('/initiate', async (req, res) => {
 });
 
  
+// Unread message count for current user
+router.get('/unread-count', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // find chat rooms where the user is a participant
+    const rooms = await ChatRoom.find({
+      $or: [ { customerId: userId }, { tradespersonId: userId } ]
+    }).select('_id');
+
+    const roomIds = rooms.map(r => r._id);
+
+    const count = await Message.countDocuments({
+      roomId: { $in: roomIds },
+      sender: { $ne: userId },
+      seenBy: { $ne: userId }
+    });
+
+    res.json({ count });
+  } catch (error) {
+    logger.error(`Error fetching unread count: ${error.message}`);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 router.get('/messages/:roomId', async (req, res) => {
   try {
     const messages = await Message.find({ roomId: req.params.roomId })
-      .populate('sender', 'name profilePictureUrl email');
+      .populate('sender', 'name profilePictureUrl email')
+      .populate('appointmentId');
     res.json(messages);
   } catch (error) {
     logger.error(`Error fetching messages for room ${req.params.roomId}: ${error.message}`);
@@ -130,30 +167,5 @@ router.post('/confirm-appointment', async (req, res) => {
   }
 });
 
-
-// Unread message count for current user
-router.get('/unread-count', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    // find chat rooms where the user is a participant
-    const rooms = await ChatRoom.find({
-      $or: [ { customerId: userId }, { tradespersonId: userId } ]
-    }).select('_id');
-
-    const roomIds = rooms.map(r => r._id);
-
-    const count = await Message.countDocuments({
-      roomId: { $in: roomIds },
-      sender: { $ne: userId },
-      seenBy: { $ne: userId }
-    });
-
-    res.json({ count });
-  } catch (error) {
-    logger.error(`Error fetching unread count: ${error.message}`);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 module.exports = router;

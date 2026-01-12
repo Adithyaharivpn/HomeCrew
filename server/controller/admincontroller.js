@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Job = require('../models/JobsModel'); 
+const Review = require('../models/Review');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger'); 
 
@@ -193,7 +194,7 @@ const getRoleDashboardStats = async (req, res) => {
         if (role === 'tradesperson') {
             const tradespersonId = req.user.id;
             const earningsAgg = await mongoose.connection.collection('transactions').aggregate([
-                { $match: { tradesperson: mongoose.Types.ObjectId(tradespersonId), status: 'success' } },
+                { $match: { tradesperson: new mongoose.Types.ObjectId(tradespersonId), status: 'success' } },
                 { $group: { _id: null, totalEarnings: { $sum: '$amount' } } }
             ]).toArray();
 
@@ -203,17 +204,23 @@ const getRoleDashboardStats = async (req, res) => {
                 status: { $in: ['assigned', 'in_progress'] } 
             });
 
+            // Calculate live rating from reviews
+            const reviews = await Review.find({ targetUserId: tradespersonId });
+            const averageRating = reviews.length > 0 
+                ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+                : 0;
+
             return res.json({ 
                 totalEarned, 
                 activeJobs,
-                rating: req.user.averageRating || 0 
+                rating: parseFloat(averageRating.toFixed(1)) 
             });
         }
 
         if (role === 'customer') {
             const customerId = req.user.id;
             const spentAgg = await mongoose.connection.collection('transactions').aggregate([
-                { $match: { user: mongoose.Types.ObjectId(customerId), status: 'success' } },
+                { $match: { user: new mongoose.Types.ObjectId(customerId), status: 'success' } },
                 { $group: { _id: null, totalSpent: { $sum: '$amount' } } }
             ]).toArray();
 

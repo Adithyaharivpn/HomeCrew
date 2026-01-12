@@ -93,7 +93,7 @@ const MapSearch = () => {
     }
 
     return (
-        <Card className="h-[85vh] m-4 mt-20 overflow-hidden relative shadow-lg border-0">
+        <Card className="h-full w-full overflow-hidden relative shadow-none border-0 rounded-none">
             
             {/* Legend - Floating Top Right */}
             <div className="absolute top-4 right-4 z-[1000] bg-white p-3 rounded-lg shadow-md border border-slate-200">

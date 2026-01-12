@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox"; 
 import { Loader2, Mail, User, CloudUpload, Upload } from "lucide-react";
+import LocationSearchInput from "./LocationSearchInput";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "", email: "", password: "", confirmPassword: "",
     role: "", tradeCategory: "", experience: "", location: "",
+    lat: "", lng: "",
     agreeToTerms: false 
   });
 
@@ -41,6 +43,15 @@ const SignUp = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleSelectChange = (name, value) => setFormData({ ...formData, [name]: value });
+  
+  const handleLocationSelect = (locData) => {
+      setFormData(prev => ({
+          ...prev,
+          location: locData.city || locData.fullAddress.split(',')[0],
+          lat: locData.lat,
+          lng: locData.lng
+      }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,7 +91,7 @@ const SignUp = () => {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4 pt-24 pb-20">
-      <Card className="w-full max-w-[550px] border-border bg-card rounded-[2.5rem] shadow-2xl overflow-hidden">
+      <Card className="w-full max-w-[550px] border-border bg-card rounded-[1.5rem] shadow-2xl overflow-hidden">
         <CardHeader className="pt-10 text-center text-foreground">
           <CardTitle className="text-3xl font-black  uppercase tracking-tighter">Create Entity</CardTitle>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 ">Initialize Global Profile</p>
@@ -99,14 +110,14 @@ const SignUp = () => {
             </Label>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input name="name" placeholder="FULL NAME" className="h-14 bg-muted/20 border-border rounded-2xl font-bold uppercase text-xs" value={formData.name} onChange={handleChange} required />
-                <Input name="email" type="email" placeholder="EMAIL ADDRESS" className="h-14 bg-muted/20 border-border rounded-2xl font-bold uppercase text-xs" value={formData.email} onChange={handleChange} required />
-                <Input name="password" type="password" placeholder="PASSWORD" className="h-14 bg-muted/20 border-border rounded-2xl font-bold" value={formData.password} onChange={handleChange} required />
-                <Input name="confirmPassword" type="password" placeholder="CONFIRM ACCESS KEY" className="h-14 bg-muted/20 border-border rounded-2xl font-bold" value={formData.confirmPassword} onChange={handleChange} required />
+                <Input name="name" placeholder="Full Name" className="h-14 rounded-xl font-bold text-sm" value={formData.name} onChange={handleChange} required />
+                <Input name="email" type="email" placeholder="Email Address" className="h-14 rounded-xl font-bold text-sm" value={formData.email} onChange={handleChange} required />
+                <Input name="password" type="password" placeholder="Password" className="h-14 rounded-xl font-bold" value={formData.password} onChange={handleChange} required />
+                <Input name="confirmPassword" type="password" placeholder="Confirm Password" className="h-14 rounded-xl font-bold" value={formData.confirmPassword} onChange={handleChange} required />
             </div>
 
             <Select onValueChange={(val) => handleSelectChange("role", val)} value={formData.role}>
-              <SelectTrigger className="h-14 bg-muted/20 border-border rounded-2xl font-black uppercase text-[10px] tracking-widest px-6">
+              <SelectTrigger className="h-14 bg-background border-none rounded-xl font-black uppercase text-[10px] tracking-widest px-6 shadow-input">
                 <SelectValue placeholder="SELECT ROLE" />
               </SelectTrigger>
               <SelectContent>
@@ -118,15 +129,35 @@ const SignUp = () => {
             {formData.role === "tradesperson" && (
                 <div className="p-6 bg-muted/30 rounded-[2rem] border border-border space-y-4 animate-in slide-in-from-top-4">
                     <Select onValueChange={(val) => handleSelectChange("tradeCategory", val)}>
-                        <SelectTrigger className="bg-background rounded-xl h-12">
+                        <SelectTrigger className="bg-background rounded-xl h-12 border-none shadow-input font-bold text-sm">
                             <SelectValue placeholder="Specialization Category" />
                         </SelectTrigger>
                         <SelectContent>
                             {tradeCategories.map(c => <SelectItem key={c._id} value={c.service_name}>{c.service_name}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    <Input name="location" placeholder="PRIMARY SERVICE CITY" className="bg-background rounded-xl h-12 uppercase text-xs font-bold" value={formData.location} onChange={handleChange} required />
-                    <Label className="cursor-pointer border border-border h-12 rounded-xl flex items-center justify-center bg-background hover:bg-muted text-[10px] font-black uppercase tracking-widest">
+                    
+                    <Input 
+                        name="experience" 
+                        type="number" 
+                        placeholder="Years of Experience" 
+                        className="h-12 rounded-xl font-bold text-sm shadow-input border-none" 
+                        value={formData.experience} 
+                        onChange={handleChange} 
+                        min="0"
+                    />
+                    
+                    <div className="space-y-2">
+                         <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Service Location</Label>
+                         <LocationSearchInput 
+                            value={formData.location} 
+                            onChange={handleChange} 
+                            onLocationSelect={handleLocationSelect} 
+                         />
+                         <p className="text-[9px] text-muted-foreground ml-1 uppercase tracking-wider">* Search or click map icon to pin location</p>
+                    </div>
+
+                    <Label className="cursor-pointer border border-border h-12 rounded-xl flex items-center justify-center bg-background hover:bg-muted text-[10px] font-black uppercase tracking-widest shadow-input">
                         <Upload className="mr-2 h-4 w-4" /> {verificationDocs.length > 0 ? `${verificationDocs.length} Documents Staged` : "Identity / Trade Licenses"}
                         <input type="file" multiple hidden onChange={(e) => setVerificationDocs(e.target.files)} />
                     </Label>

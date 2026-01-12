@@ -30,8 +30,8 @@ const JobActionController = ({
   const isMyJob =
     user &&
     (isCustomer
-      ? job.user?._id === user.id || job.user === user.id
-      : job.assignedTo === user.id || job.assignedTo?._id === user.id);
+      ? (job.user && user && (job.user?._id === user._id || job.user === user._id || job.user === user.id))
+      : (job.assignedTo && user && (job.assignedTo === user._id || job.assignedTo === user.id || job.assignedTo?._id === user._id)));
 
   // SHARED BUTTON STYLING - Ensures mouse doesn't have to move
   const btnStyle = "w-full font-black rounded-2xl h-14 uppercase text-[10px] tracking-widest shadow-lg border-none transition-all active:scale-[0.98]";
@@ -54,6 +54,21 @@ const JobActionController = ({
 
       case "assigned":
       case "in_progress":
+        // Prioritize Payment if not paid
+        if (!job.isPaid) {
+             return (
+               <Button
+                 className={`${btnStyle} bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20`}
+                 onClick={() => navigate("/dashboard/payment", { 
+                    state: { amount: job.price, jobId: job._id, type: 'escrow' } 
+                 })}
+               >
+                 <ShieldCheck className="mr-2 h-4 w-4" />
+                 Pay Securely
+               </Button>
+             );
+        }
+
         if (job.isPaid && job.completionCode && onViewCode) {
           return (
             <Button
@@ -95,6 +110,18 @@ const JobActionController = ({
   if (isWorker) {
     // Already assigned to this job
     if (isMyJob && !["completed", "cancelled"].includes(job.status)) {
+      if (!job.isPaid) {
+          return (
+            <Button
+              disabled
+              className={`${btnStyle} bg-amber-500/50 text-white cursor-not-allowed opacity-70`}
+            >
+              <Clock className="mr-2 h-4 w-4 animate-spin" />
+              Waiting for Customer Payment
+            </Button>
+          );
+      }
+
       return (
         <Button
           className={`${btnStyle} bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20`}
@@ -108,28 +135,28 @@ const JobActionController = ({
 
     if (job.status === "open") {
       // FIX: Check verification status dynamically
-      if (user.verificationStatus === "pending") {
-        return (
-          <Button
-            disabled
-            className={`${btnStyle} bg-amber-500/50 text-white cursor-not-allowed opacity-70`}
-          >
-            <Clock className="mr-2 h-4 w-4 animate-spin" />
-            Verification Pending
-          </Button>
-        );
-      }
-
-      if (user.verificationStatus !== "approved") {
-        return (
-          <Button
-            className={`${btnStyle} bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20`}
-            onClick={() => navigate("/dashboard/get-verified")}
-          >
-            <ShieldCheck className="mr-2 h-4 w-4" />
-            Verify to Apply
-          </Button>
-        );
+      if (!user.isVerified) {
+          if (user.verificationStatus === "pending") {
+            return (
+              <Button
+                disabled
+                className={`${btnStyle} bg-amber-500/50 text-white cursor-not-allowed opacity-70`}
+              >
+                <Clock className="mr-2 h-4 w-4 animate-spin" />
+                Verification Pending
+              </Button>
+            );
+          }
+          
+          return (
+            <Button
+              className={`${btnStyle} bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20`}
+              onClick={() => navigate("/dashboard/get-verified")}
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Verify to Apply
+            </Button>
+          );
       }
 
       return (

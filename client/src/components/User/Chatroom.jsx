@@ -51,7 +51,8 @@ const Chatroom = () => {
   }, [jobId]);
 
   // Security Check: If user is not the owner and not an admin, block the view
-  const isAuthorized = user?.role === "admin" || user?.id === jobOwnerId;
+  const currentUserId = user?._id || user?.id;
+  const isAuthorized = user?.role === "admin" || (jobOwnerId && currentUserId === jobOwnerId.toString());
 
   const handleViewProfile = (userId) => {
     navigate(`/dashboard/profile/${userId}`);
@@ -78,7 +79,7 @@ const Chatroom = () => {
 
   return (
     <div className="bg-background text-foreground pb-20">
-      <div className="container mx-auto px-4 max-w-3xl">
+      <div className="container mx-auto px-4 w-full">
         {/* Navigation & Header */}
         <div className="flex flex-col gap-4 mb-8">
           <Button

@@ -4,11 +4,11 @@ import { useAuth } from "../../api/useAuth";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell
 } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Icons
 import { 
-  Users, Briefcase, HardHat, Terminal, Trash2, Edit3, RefreshCcw, 
-  Search, LogOut, Loader2, ShieldAlert 
+  Search, LogOut, Loader2, ShieldAlert,
+  Users, Briefcase, HardHat, Trash2, Edit3, RefreshCcw, MoreHorizontal
 } from "lucide-react";
 
 // UI Components
@@ -22,6 +22,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
@@ -31,7 +39,7 @@ const AdminDashboard = () => {
   });
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]); 
-  const [logs, setLogs] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -44,16 +52,14 @@ const AdminDashboard = () => {
     const fetchAdminData = async () => {
       try {
         setLoading(true);
-        const [dashboardRes, usersRes, logsRes, jobsRes] = await Promise.all([
+        const [dashboardRes, usersRes, jobsRes] = await Promise.all([
           api.get("/api/admin/dashboard"),
           api.get("/api/admin/users"),
-          api.get("/api/admin/logs"),
           api.get("/api/admin/jobs"), 
         ]);
         
         setDashboardData(dashboardRes.data);
         setUsers(usersRes.data);
-        setLogs(logsRes.data);
         setJobs(jobsRes.data);
       } catch (err) {
         setError("Failed to load dashboard data.");
@@ -114,7 +120,51 @@ const AdminDashboard = () => {
     { name: "Customers", value: dashboardData.totalCustomers, color: "#10b981" }
   ];
 
-  if (loading) return <div className="flex h-full items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>;
+  if (loading) return (
+    <div className="space-y-8 py-12">
+        <div className="flex justify-between items-center px-2">
+            <div className="space-y-2">
+                <Skeleton className="h-8 w-48 rounded-lg" />
+                <Skeleton className="h-3 w-64" />
+            </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+                <Card key={i} className="bg-card border-border border-l-4 rounded-2xl">
+                    <CardContent className="p-6 flex items-center justify-between">
+                        <div className="space-y-2">
+                            <Skeleton className="h-3 w-20" />
+                            <Skeleton className="h-8 w-12" />
+                        </div>
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+        <Card className="bg-card border-border rounded-[2rem] h-[350px] p-8">
+            <Skeleton className="h-full w-full rounded-xl" />
+        </Card>
+        <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden">
+            <div className="p-8 flex justify-between gap-6 bg-muted/20">
+                <Skeleton className="h-12 w-48 rounded-xl" />
+                <Skeleton className="h-12 w-80 rounded-xl" />
+            </div>
+            <Table>
+                <TableBody>
+                    {[1, 2, 3, 4].map(i => (
+                        <TableRow key={i} className="border-border">
+                            <TableCell className="px-8 py-6"><Skeleton className="h-10 w-10 rounded-full" /></TableCell>
+                            <TableCell><div className="space-y-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-48" /></div></TableCell>
+                            <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                            <TableCell className="text-right px-8"><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </Card>
+    </div>
+  );
   if (error) return <div className="p-8 text-center text-destructive font-black uppercase tracking-widest">{error}</div>;
 
   return (
@@ -124,9 +174,6 @@ const AdminDashboard = () => {
             <h1 className="text-3xl font-black tracking-tight uppercase italic text-foreground">Admin Console</h1>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-1">Platform management and surveillance</p>
         </div>
-        <Button variant="destructive" size="sm" onClick={logout} className="font-black uppercase text-[10px] tracking-widest rounded-xl">
-          <LogOut className="mr-2 h-4 w-4" /> Sign Out
-        </Button>
       </div>
 
       {/* STATS SECTION */}
@@ -148,7 +195,7 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1">
         {/* CHART CARD */}
         <Card className="bg-card border-border rounded-[2rem] overflow-hidden shadow-xl">
           <CardHeader>
@@ -173,31 +220,6 @@ const AdminDashboard = () => {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-
-        {/* LOGS CARD (Optimized Dark Mode Terminal) */}
-        <Card className="bg-slate-950 border-slate-800 rounded-[2rem] overflow-hidden shadow-xl ring-1 ring-white/5">
-          <CardHeader className="bg-slate-900/50 border-b border-slate-800 flex flex-row items-center gap-2 py-3 px-6">
-            <Terminal className="h-4 w-4 text-emerald-500" />
-            <CardTitle className="text-[10px] uppercase font-black tracking-[0.3em] text-slate-400">Live_System_Logs</CardTitle>
-          </CardHeader>
-          <ScrollArea className="h-[300px]">
-            <div className="p-4 space-y-2 font-mono">
-              {logs.length === 0 ? (
-                <div className="text-slate-600 text-xs italic">_listening_for_system_events...</div>
-              ) : (
-                logs.map((log, i) => (
-                  <div key={i} className="flex gap-4 hover:bg-white/5 p-1 rounded transition-colors text-[11px]">
-                    <span className="text-slate-600 shrink-0">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <span className={log.level === 'error' ? 'text-rose-500' : log.level === 'warn' ? 'text-amber-400' : 'text-sky-400'}>
-                      [{log.level.toUpperCase()}]
-                    </span>
-                    <span className="text-slate-300 truncate font-medium">{log.message}</span>
-                  </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
-        </Card>
       </div>
 
       {/* MANAGEMENT TABS */}
@@ -220,96 +242,121 @@ const AdminDashboard = () => {
           </div>
 
           <TabsContent value="users" className="m-0">
-            <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow className="border-border">
-                  <TableHead className="w-16 px-8"></TableHead>
-                  <TableHead className="font-black uppercase text-[10px] tracking-widest py-5">User Details</TableHead>
-                  <TableHead className="font-black uppercase text-[10px] tracking-widest">Role</TableHead>
-                  <TableHead className="font-black uppercase text-[10px] tracking-widest">Status</TableHead>
-                  <TableHead className="text-right font-black uppercase text-[10px] tracking-widest px-8">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((user) => (
-                  <TableRow key={user._id} className="border-border hover:bg-muted/30 transition-colors">
-                    <TableCell className="px-8 py-4">
-                      <Avatar className="h-10 w-10 border-2 border-border shadow-sm">
-                        <AvatarImage src={user.profilePictureUrl} />
-                        <AvatarFallback className="font-black bg-primary/10 text-primary uppercase">{user.name?.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-black uppercase tracking-tight text-foreground">{user.name}</div>
-                      <div className="text-[10px] font-bold text-muted-foreground lowercase">{user.email}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-black uppercase text-[9px] tracking-widest px-3 border-primary/20 text-primary">{user.role}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={user.isActive ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-black uppercase text-[9px]" : "bg-destructive/10 text-destructive border-destructive/20 font-black uppercase text-[9px]"}>
-                        {user.isActive ? "Active" : "Disabled"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right px-8">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/10 text-blue-500" onClick={() => {setEditingUser(user); setIsModalOpen(true);}}>
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                        {user.isActive ? (
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-destructive/10 text-destructive" onClick={() => handleDeactivateUser(user._id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        ) : (
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-emerald-500/10 text-emerald-500" onClick={() => handleReactivateUser(user._id)}>
-                            <RefreshCcw className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="border-border">
+                    <TableHead className="w-16 px-8"></TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest py-5">User Details</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Role</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Status</TableHead>
+                    <TableHead className="text-right font-black uppercase text-[10px] tracking-widest px-8">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredData.map((user) => (
+                    <TableRow key={user._id} className="border-border hover:bg-muted/30 transition-colors">
+                      <TableCell className="px-8 py-4">
+                        <Avatar className="h-10 w-10 border-2 border-border shadow-sm">
+                          <AvatarImage src={user.profilePictureUrl} />
+                          <AvatarFallback className="font-black bg-primary/10 text-primary uppercase">{user.name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-black uppercase tracking-tight text-foreground">{user.name}</div>
+                        <div className="text-[10px] font-bold text-muted-foreground lowercase">{user.email}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-black uppercase text-[9px] tracking-widest px-3 border-primary/20 text-primary">{user.role}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={user.isActive ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-black uppercase text-[9px]" : "bg-destructive/10 text-destructive border-destructive/20 font-black uppercase text-[9px]"}>
+                          {user.isActive ? "Active" : "Disabled"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => {setEditingUser(user); setIsModalOpen(true);}}>
+                              <Edit3 className="mr-2 h-4 w-4" /> Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {user.isActive ? (
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDeactivateUser(user._id)}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Deactivate Account
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem className="text-emerald-500 focus:text-emerald-500" onClick={() => handleReactivateUser(user._id)}>
+                                <RefreshCcw className="mr-2 h-4 w-4" /> Reactivate Account
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </TabsContent>
 
           <TabsContent value="jobs" className="m-0">
-            <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow className="border-border">
-                  <TableHead className="font-black uppercase text-[10px] tracking-widest py-5 px-8">Job Title</TableHead>
-                  <TableHead className="font-black uppercase text-[10px] tracking-widest">Posted By</TableHead>
-                  <TableHead className="font-black uppercase text-[10px] tracking-widest">Category</TableHead>
-                  <TableHead className="font-black uppercase text-[10px] tracking-widest">Status</TableHead>
-                  <TableHead className="text-right font-black uppercase text-[10px] tracking-widest px-8">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((job) => (
-                  <TableRow key={job._id} className="border-border hover:bg-muted/30 transition-colors">
-                    <TableCell className="font-black uppercase tracking-tight py-4 px-8">{job.title}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={job.user?.profilePictureUrl} />
-                          <AvatarFallback className="text-[8px] font-black">{job.user?.name?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{job.user?.name || "Unknown"}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-[10px] font-black uppercase tracking-widest opacity-70">{job.category}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="font-black uppercase text-[9px] tracking-widest border-none px-3">{job.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right px-8">
-                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-destructive/10 text-destructive" onClick={() => handleDeleteJob(job._id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="border-border">
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest py-5 px-8">Job Title</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Posted By</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Category</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Status</TableHead>
+                    <TableHead className="text-right font-black uppercase text-[10px] tracking-widest px-8">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredData.map((job) => (
+                    <TableRow key={job._id} className="border-border hover:bg-muted/30 transition-colors">
+                      <TableCell className="font-black uppercase tracking-tight py-4 px-8">{job.title}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={job.user?.profilePictureUrl} />
+                            <AvatarFallback className="text-[8px] font-black">{job.user?.name?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{job.user?.name || "Unknown"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-[10px] font-black uppercase tracking-widest opacity-70">{job.category}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="font-black uppercase text-[9px] tracking-widest border-none px-3">{job.status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDeleteJob(job._id)}>
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete Job
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </TabsContent>
         </Tabs>
       </Card>

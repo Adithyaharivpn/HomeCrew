@@ -44,7 +44,10 @@ const VerificationRequest = () => {
       // This forces the "Send Quote" button to check against the new status
       setUser({ ...user, verificationStatus: "pending" });
 
-      toast.success("Documents submitted! Redirecting...");
+      toast.success("Verification Submitted", { 
+          description: "It usually takes a few hours for admin approval.",
+          duration: 5000
+      });
 
       // 2. REDIRECT AFTER 2 SECONDS
       setTimeout(() => {
@@ -63,7 +66,10 @@ const VerificationRequest = () => {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <p className="ml-3 font-black uppercase text-[10px] tracking-widest">Verifying Session...</p>
+        <p className="ml-3 font-black uppercase text-[10px] tracking-widest text-center">
+            Verification Pending<br/>
+            <span className="text-muted-foreground normal-case tracking-normal">This process usually takes a few hours.</span>
+        </p>
       </div>
     );
   }

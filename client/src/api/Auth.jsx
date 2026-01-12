@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { AuthContext } from './authContext';
+import api from './axiosConfig';
 
 
 export const AuthProvider = ({ children }) => {
@@ -9,20 +10,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
+    setLoading(true);
+    const fetchUser = async () => {
       if (token) {
-        const decodedUser = jwtDecode(token).user;
-        setUser(decodedUser);
+        try {
+          // Fetch fresh user data from DB to ensure status is synced
+          const { data } = await api.get('/api/auth/me');
+          setUser(data);
+        } catch (error) {
+          console.error("Failed to fetch user profile", error);
+          // Fallback to decoding token if API fails (e.g. network error)
+          // But if 401, likely token invalid
+          if (error.response?.status === 401) {
+             localStorage.removeItem('token');
+             setToken(null);
+             setUser(null);
+          } else {
+             // Try to use decoded token as fallback for non-critical errors
+             try {
+                const decodedUser = jwtDecode(token).user;
+                setUser(decodedUser);
+             } catch (e) {
+                setUser(null);
+             }
+          }
+        }
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error("Invalid token:", error);
-      setUser(null);
-      localStorage.removeItem('token');
-    }finally {
       setLoading(false);
-    }
+    };
+
+    fetchUser();
   }, [token]);
 
   const login = (newToken) => {

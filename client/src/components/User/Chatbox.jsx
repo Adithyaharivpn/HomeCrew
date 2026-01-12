@@ -7,12 +7,13 @@ import { useAuth } from "../../api/useAuth";
 // Icons
 import { 
   Send, Calendar, CheckCircle, XCircle, AlertCircle, 
-  Lock, Loader2, DollarSign, ArrowLeft 
+  Lock, Loader2, DollarSign, ArrowLeft, Star 
 } from "lucide-react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -45,6 +46,11 @@ const ChatBox = () => {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [quotePrice, setQuotePrice] = useState("");
 
+  // Review State
+  const [reviewDialog, setReviewDialog] = useState({ open: false, jobId: null, targetId: null });
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -73,27 +79,68 @@ const ChatBox = () => {
       }
     };
     if (roomId) initData();
+  }, [roomId]);
+
+  // Ref to access latest jobDetails inside socket listeners without re-running effect
+  const jobDetailsRef = useRef(null);
+
+  useEffect(() => {
+    jobDetailsRef.current = jobDetails;
+  }, [jobDetails]);
+
+  useEffect(() => {
+    if (!roomId) return;
+    const userId = user?._id || user?.id;
+    if (!userId) return;
 
     const newSocket = io(import.meta.env.VITE_API_BASE_URL);
     setSocket(newSocket);
     newSocket.emit("joinRoom", roomId);
+    newSocket.emit("addUser", userId);
+
+    // Global Event Listener (Server Event)
+    newSocket.on("job_review_prompt", (data) => {
+        setReviewDialog({
+            open: true,
+            jobId: data.jobId,
+            targetId: data.targetId
+        });
+        setJobDetails(prev => ({ ...prev, isCompleted: true }));
+    });
 
     newSocket.on("receiveMessage", (message) => {
-      if (message.sender._id !== user.id) setMessages((prev) => [...prev, message]);
+      // Just receive everything from server - simple and robust
+      setMessages((prev) => [...prev, message]);
+      
       if (message.type === "system") setIsArchived(true);
+      
+      // Auto-open review dialog if job is completed by the other party (Chat Message logic)
+      if (message.type === "job_completed") {
+         const currentJob = jobDetailsRef.current;
+         if (currentJob) {
+             // Determine correct target ID based on my role
+             const targetUserId = user.role === 'customer' 
+                ? (currentJob.assignedTo?._id || currentJob.assignedTo) 
+                : (currentJob.user?._id || currentJob.user);
+
+             setReviewDialog({ 
+                open: true, 
+                jobId: currentJob._id, 
+                targetId: targetUserId
+             });
+             setJobDetails(prev => ({ ...prev, isCompleted: true }));
+         }
+      }
     });
 
     return () => newSocket.disconnect();
-  }, [roomId, user.id]);
+  }, [roomId, user?._id || user?.id]);
 
   const handleSendMessage = () => {
     if (currentMessage.trim() && socket) {
-      const payload = { roomId, senderId: user.id, text: currentMessage, type: "text" };
+      const payload = { roomId, senderId: user._id || user.id, text: currentMessage, type: "text" };
       socket.emit("sendMessage", payload);
-      setMessages((prev) => [
-        ...prev,
-        { sender: { _id: user.id, name: user.name, profilePictureUrl: user.profilePictureUrl }, ...payload },
-      ]);
+      // Removed optimistic update to prevent duplicates - relying on socket echo
       setCurrentMessage("");
     }
   };
@@ -103,15 +150,15 @@ const ChatBox = () => {
     try {
       const dateObj = new Date(appointmentDate);
       const res = await api.post("/api/appointments", {
-        roomId, providerId: user.id, date: dateObj.toISOString(), status: "pending", price: Number(quotePrice),
+        roomId, providerId: user._id || user.id, date: dateObj.toISOString(), status: "pending", price: Number(quotePrice),
       });
       const payload = {
-        roomId, senderId: user.id, text: `Quote Proposed: ₹${quotePrice}`, 
+        roomId, senderId: user._id || user.id, text: `Quote Proposed: ₹${quotePrice}`, 
         type: "appointment", price: Number(quotePrice), 
         appointmentId: res.data._id, appointmentDate: dateObj.toISOString(),
       };
       if (socket) socket.emit("sendMessage", payload);
-      setMessages((prev) => [...prev, { sender: { ...user, _id: user.id }, ...payload }]);
+      // Removed optimistic update
       setIsScheduleOpen(false);
     } catch (error) { toast.error("Failed to propose quote"); }
   };
@@ -130,12 +177,80 @@ const ChatBox = () => {
     try {
       await api.post(`/api/jobs/complete`, { jobId: jobDetails._id, code: completionCodeInput });
       toast.success("Job marked as completed!");
-      setTimeout(() => window.location.reload(), 1500);
+      
+      // Open Review Dialog immediately
+      setReviewDialog({ 
+        open: true, 
+        jobId: jobDetails._id, 
+        targetId: jobDetails.user?._id || jobDetails.user // Assuming jobDetails.user is the customer
+      });
+      
+      setJobDetails(prev => ({ ...prev, isCompleted: true }));
+
+      // Notify other party to open review
+      if (socket) {
+          socket.emit("sendMessage", {
+             roomId, 
+             senderId: user._id || user.id, 
+             text: "Job Completed! Please leave a review.", 
+             type: "job_completed" 
+          });
+      }
+      
     } catch (err) { toast.error("Invalid Code"); }
+  };
+  
+  const handleSubmitReview = async () => {
+    try {
+      await api.post("/api/reviews", {
+        jobId: reviewDialog.jobId,
+        targetUserId: reviewDialog.targetId,
+        rating,
+        comment,
+      });
+      toast.success("Review submitted!");
+      setReviewDialog({ open: false, jobId: null, targetId: null });
+      window.location.reload(); // Reload after review to show final state
+    } catch {
+      toast.error("Failed to submit review");
+    }
+  };
+
+  const handleQuoteAction = async (msg, status) => {
+    try {
+      // Handle both populated object and string ID
+      const apptId = msg.appointmentId?._id || msg.appointmentId;
+      
+      await api.put(`/api/appointments/${apptId}`, { status });
+      const actionText = status === 'cancelled' ? 'Quote Withdrawn' : 'Quote Declined';
+      
+      const payload = {
+        roomId, senderId: user._id || user.id, text: `${actionText} by ${user.name}`, type: "system"
+      };
+      if (socket) socket.emit("sendMessage", payload);
+      
+      toast.success(actionText);
+      
+      // Update local state without reload
+      setMessages(prev => prev.map(m => {
+        const mApptId = m.appointmentId?._id || m.appointmentId;
+        if (mApptId === apptId) {
+             // Create deep copy-ish or just update the referenced object structure
+             if (typeof m.appointmentId === 'object') {
+                 return { ...m, appointmentId: { ...m.appointmentId, status: status } };
+             }
+        }
+        return m;
+      }));
+      
+    } catch (err) { toast.error("Action failed"); }
   };
 
   const renderMessage = (msg) => {
     if (msg.type === "appointment") {
+      const isMe = msg.sender?._id === (user._id || user.id) || msg.sender === (user._id || user.id);
+      const apptStatus = msg.appointmentId?.status || 'pending'; // Default to pending if not populated yet
+      
       return (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-blue-400 font-black text-[10px] uppercase tracking-widest">
@@ -143,9 +258,23 @@ const ChatBox = () => {
           </div>
           <div className="text-xl font-black italic">₹{msg.price}</div>
           <div className="text-[10px] font-bold opacity-70">{new Date(msg.appointmentDate).toLocaleString()}</div>
-          {msg.sender._id !== user.id && user.role === "customer" && !isArchived && (
+          
+          {apptStatus === 'pending' ? (
             <div className="flex gap-2 pt-2">
-              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] h-8 px-4 rounded-lg" onClick={() => handleAcceptBooking(msg)}>Accept</Button>
+                {!isMe && user.role === "customer" && !isArchived && (
+                <>
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] h-8 px-4 rounded-lg" onClick={() => handleAcceptBooking(msg)}>Accept</Button>
+                    <Button size="sm" variant="destructive" className="font-black text-[10px] h-8 px-4 rounded-lg" onClick={() => handleQuoteAction(msg, 'cancelled')}>Decline</Button>
+                </>
+                )}
+                
+                {isMe && !isArchived && (
+                <Button size="sm" variant="destructive" className="font-black text-[10px] h-8 px-4 rounded-lg opacity-80 hover:opacity-100" onClick={() => handleQuoteAction(msg, 'cancelled')}>Withdraw</Button>
+                )}
+            </div>
+          ) : (
+            <div className="mt-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground border border-border p-2 rounded-lg text-center">
+                {apptStatus === 'cancelled' ? 'Quote Cancelled' : 'Quote Processed'}
             </div>
           )}
         </div>
@@ -157,6 +286,28 @@ const ChatBox = () => {
   const shouldShowPayButton = user.role === "customer" && (isArchived || jobDetails?.status === "assigned") && !jobDetails?.isPaid;
 
   if (loading) return <div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>;
+
+  // Verification Lock
+  if (user.role === 'tradesperson' && !user.isVerified) {
+    return (
+        <div className="flex flex-col h-[calc(100vh-140px)] items-center justify-center space-y-4 animate-in fade-in">
+            <div className="h-24 w-24 bg-muted/50 rounded-full flex items-center justify-center border-2 border-border mb-4">
+                <Lock className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-center">Access Restricted</h2>
+            <p className="text-muted-foreground text-center text-sm max-w-xs font-medium">
+                Identity verification is required to participate in chats and job negotiations.
+            </p>
+            <Button 
+                onClick={() => navigate('/dashboard/get-verified')}
+                className="mt-4 bg-blue-600 font-bold uppercase text-xs h-12 rounded-xl px-8"
+            >
+                 Complete Verification
+            </Button>
+            <Button variant="ghost" className="font-bold text-xs" onClick={() => navigate(-1)}>Go Back</Button>
+        </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in duration-500">
@@ -239,13 +390,15 @@ const ChatBox = () => {
 
         {/* Input */}
         <div className="p-6 bg-card border-t border-border flex gap-3">
-          <Input 
-            placeholder="Type your message..." 
-            className="h-14 bg-background rounded-2xl px-6 font-bold focus-visible:ring-blue-600/20 border-border"
-            value={currentMessage}
-            onChange={(e) => setCurrentMessage(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-          />
+          <div className="flex-1">
+            <Input 
+              placeholder="Type your message..." 
+              className="h-14 bg-background rounded-2xl px-6 font-bold focus-visible:ring-blue-600/20 border-border w-full"
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+            />
+          </div>
           <Button onClick={handleSendMessage} className="h-14 w-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-xl shadow-blue-600/20">
             <Send className="h-6 w-6" />
           </Button>
@@ -259,7 +412,16 @@ const ChatBox = () => {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Appointment Date</label>
-              <Input type="datetime-local" className="h-12 bg-muted rounded-xl" value={appointmentDate} onChange={(e) => setAppointmentDate(e.target.value)} />
+              <Input 
+                type="datetime-local" 
+                className="h-12 bg-muted rounded-xl dark:text-white relative w-full pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                style={{ colorScheme: "dark" }}
+                value={appointmentDate} 
+                onChange={(e) => setAppointmentDate(e.target.value)} 
+              />
+              <div className="absolute right-3 top-[38px] pointer-events-none">
+                 <Calendar className="h-5 w-5 text-muted-foreground" />
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Proposed Price (₹)</label>
@@ -270,6 +432,35 @@ const ChatBox = () => {
             <Button variant="ghost" className="font-bold uppercase text-[10px]" onClick={() => setIsScheduleOpen(false)}>Cancel</Button>
             <Button className="bg-blue-600 text-white font-black uppercase text-[10px] px-8 rounded-xl" onClick={handleScheduleSubmit}>Send Proposal</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Review Dialog */}
+      <Dialog open={reviewDialog.open} onOpenChange={(o) => setReviewDialog({ ...reviewDialog, open: o })}>
+        <DialogContent className="sm:max-w-lg bg-card border-border rounded-[2.5rem] p-10 text-center">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold uppercase">Rate Experience</DialogTitle>
+          </DialogHeader>
+          <div className="py-8 space-y-8">
+            <div className="flex justify-center gap-3">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star
+                  key={s}
+                  onClick={() => setRating(s)}
+                  className={`h-12 w-12 cursor-pointer ${s <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted"}`}
+                />
+              ))}
+            </div>
+            <Textarea
+              placeholder="Share details..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="bg-muted/30 border-border h-36 rounded-2xl p-5 text-lg font-medium"
+            />
+          </div>
+          <Button onClick={handleSubmitReview} className="bg-blue-600 w-full h-14 rounded-2xl font-bold text-lg uppercase">
+            Submit Feedback
+          </Button>
         </DialogContent>
       </Dialog>
     </div>

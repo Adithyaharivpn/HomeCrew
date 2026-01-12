@@ -21,6 +21,7 @@ import {
   Save,
   X,
   Key,
+  Clock,
 } from "lucide-react";
 
 // UI Components
@@ -144,10 +145,15 @@ const ViewDetails = () => {
 
   const handleContact = async () => {
     try {
+      if (user.role === 'tradesperson' && !user.isVerified) {
+        toast.error("Account pending verification.", { description: "You cannot initiate chats until approved." });
+        return;
+      }
+      
       const res = await api.post("/api/chat/initiate", {
         jobId: job._id,
         customerId: job.user._id,
-        tradespersonId: user.id,
+        tradespersonId: user._id || user.id,
       });
       // FIXED: Navigating to the correct dashboard path
       navigate(`/dashboard/chat/${res.data._id}`);
@@ -268,12 +274,52 @@ const ViewDetails = () => {
                   ))}
 
                 {!isMyJob && user.role === "tradesperson" && (
-                  <Button
-                    className="bg-blue-600 h-14 px-8 rounded-2xl shadow-lg shadow-blue-500/20 font-black w-full"
-                    onClick={handleContact}
-                  >
-                    <MessageCircle className="mr-2 h-5 w-5" /> Send Quote
-                  </Button>
+                  <>
+                    {/* OPEN JOB: Apply */}
+                    {job.status === "open" && (
+                        <Button
+                            className={`h-14 px-8 rounded-2xl shadow-lg font-black w-full ${user.isVerified ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20" : "bg-muted text-muted-foreground shadow-none cursor-not-allowed"}`}
+                            onClick={handleContact}
+                            disabled={!user.isVerified}
+                        >
+                            {!user.isVerified ? (
+                                <>
+                                    <ShieldCheck className="mr-2 h-5 w-5" /> Verification Pending
+                                </>
+                            ) : (
+                                <>
+                                    <MessageCircle className="mr-2 h-5 w-5" /> Send Quote
+                                </>
+                            )}
+                        </Button>
+                    )}
+
+                    {/* ASSIGNED TO ME: Chat or Completed */}
+                    {(job.status === "assigned" || job.status === "in_progress") && job.assignedTo?._id === user._id && (
+                        job.isPaid === true ? (
+                            <Button
+                                className="h-14 px-8 rounded-2xl shadow-lg font-black w-full bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
+                                onClick={handleContact}
+                            >
+                                <MessageCircle className="mr-2 h-5 w-5" /> Open Chatroom
+                            </Button>
+                        ) : (
+                            <Button
+                                disabled
+                                className="h-14 px-8 rounded-2xl shadow-lg font-black w-full bg-amber-500/50 text-white cursor-not-allowed"
+                            >
+                                <Clock className="mr-2 h-5 w-5 animate-spin" /> Waiting for Payment
+                            </Button>
+                        )
+                    )}
+
+                     {/* CLOSED */}
+                    {(job.status === "completed" || job.status === "cancelled") && (
+                        <div className="w-full text-center p-4 bg-muted/30 rounded-2xl border border-border">
+                            <p className="text-xs font-black uppercase text-muted-foreground tracking-widest">Job is {job.status}</p>
+                        </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

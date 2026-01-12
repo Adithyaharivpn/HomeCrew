@@ -118,12 +118,12 @@ const JobPosting = () => {
     /* ADJUSTED: Removed pt-32 for better alignment in DashboardLayout */
     <div className="flex justify-center items-start min-h-full bg-background text-foreground pt-6 pb-20 px-4">
       
-      <Card className="w-full max-w-2xl border-border bg-card shadow-2xl rounded-[2.5rem] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <Card className="w-full max-w-2xl border-border bg-card shadow-2xl rounded-[1.5rem] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
         <CardHeader className="pt-10 pb-2">
-          <CardTitle className="text-4xl font-black tracking-tight text-center uppercase leading-none">
+          <CardTitle className="text-3xl font-bold tracking-tight text-center leading-none">
             Post a New Job
           </CardTitle>
-          <p className="text-center text-muted-foreground font-bold uppercase text-[10px] tracking-widest mt-4">
+          <p className="text-center text-muted-foreground text-sm mt-2">
             Connect with verified tradespeople
           </p>
         </CardHeader>
@@ -132,15 +132,16 @@ const JobPosting = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Job Title */}
-            <div className="space-y-3">
-                <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">The Job Title</Label>
+            {/* Job Title */}
+            <div className="space-y-2">
+                <Label htmlFor="title" className="text-xs font-semibold ml-1 text-muted-foreground">The Job Title</Label>
                 <div className="relative group">
-                  <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
+                  <Briefcase className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                   <Input
                       id="title"
                       name="title"
                       placeholder="e.g. Fixing Leaking Pipe"
-                      className="pl-12 h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold focus-visible:ring-blue-600/20"
+                      className="pl-12 h-14 rounded-xl text-base font-medium"
                       value={jobDetails.title}
                       onChange={handleChange}
                       required
@@ -149,15 +150,16 @@ const JobPosting = () => {
             </div>
 
             {/* Category */}
-            <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Category</Label>
+            {/* Category */}
+            <div className="space-y-2">
+                <Label className="text-xs font-semibold ml-1 text-muted-foreground">Category</Label>
                 <Select onValueChange={handleCategoryChange} value={jobDetails.category} required>
-                    <SelectTrigger className="h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold px-5">
+                    <SelectTrigger className="h-14 rounded-xl text-base font-medium px-5">
                         <SelectValue placeholder="What trade do you need?" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border rounded-xl">
                         {Array.isArray(services) && services.map((service) => (
-                            <SelectItem key={service.id || service._id} value={service.service_name} className="py-3 font-bold uppercase text-xs tracking-widest">
+                            <SelectItem key={service.id || service._id} value={service.service_name} className="py-2 text-sm">
                                 {service.service_name}
                             </SelectItem>
                         ))}
@@ -166,13 +168,13 @@ const JobPosting = () => {
             </div>
 
             {/* Location */}
-            <div className="space-y-3 relative">
-                <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Service Location</Label>
+            <div className="space-y-2 relative">
+                <Label className="text-xs font-semibold ml-1 text-muted-foreground">Service Location</Label>
                 <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
+                    <MapPin className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                     <Input
                         placeholder="Search for your city..."
-                        className="pl-12 h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold focus-visible:ring-blue-600/20"
+                        className="pl-12 h-14 rounded-xl text-base font-medium"
                         value={locationInputValue}
                         onChange={(e) => setLocationInputValue(e.target.value)}
                         required
@@ -183,11 +185,11 @@ const JobPosting = () => {
                 </div>
 
                 {locationOptions.length > 0 && (
-                    <ul className="absolute z-[100] mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-border bg-card py-2 shadow-2xl text-sm">
+                    <ul className="absolute z-[100] mt-2 max-h-60 w-full overflow-auto rounded-xl border border-border bg-card py-2 shadow-xl text-sm">
                         {locationOptions.map((option, index) => (
                             <li 
                                 key={index}
-                                className="cursor-pointer px-5 py-4 hover:bg-muted flex items-center gap-3 transition-colors border-b border-border/50 last:border-none"
+                                className="cursor-pointer px-5 py-3 hover:bg-muted flex items-center gap-3 transition-colors border-b border-border/50 last:border-none"
                                 onClick={() => {
                                     setJobDetails(prev => ({ 
                                         ...prev, 
@@ -199,7 +201,7 @@ const JobPosting = () => {
                                 }}
                             >
                                 <MapPin className="h-4 w-4 text-blue-600 shrink-0" />
-                                <span className="truncate font-bold uppercase text-[10px] tracking-tight">{option.display_name}</span>
+                                <span className="truncate font-medium">{option.display_name}</span>
                             </li>
                         ))}
                     </ul>
@@ -207,13 +209,13 @@ const JobPosting = () => {
             </div>
 
             {/* Description */}
-            <div className="space-y-3">
-                <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Describe the problem</Label>
+            <div className="space-y-2">
+                <Label htmlFor="description" className="text-xs font-semibold ml-1 text-muted-foreground">Describe the problem</Label>
                 <Textarea
                     id="description"
                     name="description"
                     placeholder="Provide details about the job..."
-                    className="bg-muted/30 border-border rounded-2xl text-lg min-h-[150px] p-5 font-bold focus-visible:ring-blue-600/20 resize-none"
+                    className="rounded-xl text-base font-medium min-h-[150px] p-5 resize-none"
                     value={jobDetails.description}
                     onChange={handleChange}
                     required
@@ -222,7 +224,7 @@ const JobPosting = () => {
 
             <Button 
                 type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-lg h-16 rounded-2xl shadow-xl shadow-blue-600/20 transition-all active:scale-95 uppercase tracking-widest mt-4"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base h-14 rounded-xl shadow-lg transition-all active:scale-95 mt-4"
                 disabled={isLoading}
             >
                 {isLoading ? (

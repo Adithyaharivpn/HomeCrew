@@ -87,7 +87,8 @@ const getJobById = async (req, res) => {
     const jobOwnerId = job.user._id ? job.user._id.toString() : job.user.toString();
     
     const isOwner = currentUserId === jobOwnerId;
-    if (!isOwner || !job.isPaid) {
+    // Hide code if not owner, OR not paid, OR job is closed
+    if (!isOwner || !job.isPaid || job.status === 'completed' || job.status === 'cancelled') {
        delete jobData.completionCode; 
     }
 
@@ -160,6 +161,23 @@ const completeJob = async (req, res) => {
     job.isCompleted = true;
     await job.save();
     logger.info(`Job successfully completed: ${jobId}`, { meta: { type: 'job_complete' } });
+
+    const io = req.app.get('io');
+    if (io) {
+        // Notify Customer to review
+        io.to(job.user.toString()).emit('job_review_prompt', { 
+            jobId: job._id, 
+            targetId: req.user.id // The tradesperson
+        });
+        
+        // Notify Tradesperson to review (in case they completed it via API externally)
+        if (job.assignedTo) {
+             io.to(job.assignedTo.toString()).emit('job_review_prompt', { 
+                jobId: job._id, 
+                targetId: job.user // The customer
+            });
+        }
+    }
 
     res.json({ message: "Job Verified & Completed!", success: true });
   } catch (error) {

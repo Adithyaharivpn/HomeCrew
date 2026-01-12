@@ -102,8 +102,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     /* This ensures a smooth "OS-style" fade when switching modes */
-    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out,
-      border-color 0.5s ease-in-out;
+    transition: background-color 1.2s ease-in-out, color 1.2s ease-in-out, border-color 1.2s ease-in-out;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-weight: 450;
@@ -126,4 +125,10 @@
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-muted-foreground/50;
+}
+
+@layer components {
+  .bg-card, .bg-background, .bg-muted, .border-border, .bg-popover {
+      transition: background-color 1.2s ease-in-out, border-color 1.2s ease-in-out, color 1.2s ease-in-out, fill 1.2s ease-in-out, stroke 1.2s ease-in-out;
+  }
 }
