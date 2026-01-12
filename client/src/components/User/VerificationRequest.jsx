@@ -24,35 +24,42 @@ const VerificationRequest = () => {
   };
 
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) {
-      toast.error("Please select documents first.");
-      return;
+  if (selectedFiles.length === 0) {
+    toast.error("Please select documents first.");
+    return;
+  }
+
+  const formData = new FormData();
+  for (let i = 0; i < selectedFiles.length; i++) {
+    formData.append("documents", selectedFiles[i]);
+  }
+
+  try {
+    setUploading(true);
+    // Ensure the endpoint is exactly what the backend expects
+    const response = await api.post("/api/users/request-verification", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    // CHECK: Does your backend return the updated user or a success message?
+    console.log("Upload Success:", response.data);
+
+    // 1. SAFE GLOBAL AUTH UPDATE
+    if (user && setUser) {
+      setUser((prev) => ({
+        ...prev,
+        verificationStatus: "pending",
+      }));
     }
-
-    const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append("documents", selectedFiles[i]);
-    }
-
-    try {
-      setUploading(true);
-      const response = await api.post("/api/users/request-verification", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // 1. UPDATE GLOBAL AUTH STATE (Fixes the "need to logout" issue)
-      // This forces the "Send Quote" button to check against the new status
-      setUser({ ...user, verificationStatus: "pending" });
 
       toast.success("Verification Submitted", { 
           description: "It usually takes a few hours for admin approval.",
           duration: 5000
       });
 
-      // 2. REDIRECT AFTER 2 SECONDS
-      setTimeout(() => {
-        navigate("/dashboard/jobs");
-      }, 2000);
+    setTimeout(() => {
+      navigate("/jobs"); // Adjusted to match your usual jobs route
+    }, 2000);
 
     } catch (err) {
       toast.error("Upload failed. Try again.");
