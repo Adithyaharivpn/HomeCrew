@@ -3,6 +3,7 @@ import { ShieldCheck, HeartHandshake, Tag, Star } from "lucide-react";
 import PlaceHolder from "../../assets/Job.jpg";
 import { Card } from "@/components/ui/card";
 import { useTheme } from "../Utils/Themeprovider";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 
 const FeatureRow = ({ icon, title, desc, isDark }) => (
   <div className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-500 cursor-default group ${
@@ -79,10 +80,10 @@ const WhyChooseUs = () => {
               Why Choose Us
             </div>
             
-            <h2 className="mb-6 text-3xl font-extrabold text-foreground md:text-5xl leading-tight transition-colors duration-500">
-              Your Peace of Mind <br className="hidden md:block" />
-              <span className="text-blue-600 dark:text-blue-400">Is Our Priority</span>
-            </h2>
+            <TextGenerateEffect
+              words="Your Peace of Mind Is Our Priority"
+              className="mb-6 text-3xl font-extrabold text-foreground md:text-5xl leading-tight"
+            />
 
             <p className="mb-10 text-lg text-muted-foreground leading-relaxed transition-colors duration-500">
               We are committed to providing not just expert service, but a safe 

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import { useAuth } from "../../api/useAuth";
 import Confetti from "react-confetti";
 import io from "socket.io-client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button as MovingBorderButton } from "@/components/ui/moving-border";
 
 // Icons
 import {
@@ -88,6 +89,22 @@ const JobsPage = () => {
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // URL Parameter Handling
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const category = params.get("category");
+    const search = params.get("search");
+
+    if (category) {
+      setCategoryFilter(category);
+    }
+    
+    if (search) {
+      setSearchTerm(search);
+    }
+  }, [location.search]);
 
   // Dialog States
   const [codeDialog, setCodeDialog] = useState({ open: false, code: "" });
@@ -117,30 +134,31 @@ const JobsPage = () => {
   const [newDate, setNewDate] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        let mainUrl =
-          user?.role === "customer" ? "/api/jobs/userjob" : "/api/jobs/feed";
-        const promises = [api.get(mainUrl), api.get("/api/service/")];
-        if (user?.role === "tradesperson") {
-          promises.push(api.get("/api/jobs/tradesperson/my-works"));
-        }
-        const results = await Promise.all(promises);
-        setJobs(results[0].data || []);
-        setCategoryOptions(results[1].data || []);
-        if (user?.role === "tradesperson" && results[2]) {
-          setMyWorks(results[2].data || []);
-        }
-      } catch (error) {
-        if (error.response?.status === 401) logout();
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      let mainUrl =
+        user?.role === "customer" ? "/api/jobs/userjob" : "/api/jobs/feed";
+      const promises = [api.get(mainUrl), api.get("/api/service/")];
+      if (user?.role === "tradesperson") {
+        promises.push(api.get("/api/jobs/tradesperson/my-works"));
       }
-    };
+      const results = await Promise.all(promises);
+      setJobs(results[0].data || []);
+      setCategoryOptions(results[1].data || []);
+      if (user?.role === "tradesperson" && results[2]) {
+        setMyWorks(results[2].data || []);
+      }
+    } catch (error) {
+      if (error.response?.status === 401) logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
-  }, [user, logout]);
+  }, [user, logout, location.search]);
 
   // Listen for real-time review prompts
   useEffect(() => {
@@ -192,7 +210,7 @@ const JobsPage = () => {
       await api.put(`/api/jobs/${cancelDialog.jobId}/cancel`);
       toast.success("Job cancelled");
       setCancelDialog({ open: false, jobId: null });
-      navigate("/dashboard/jobs");
+      fetchData(); // Refresh the list
     } catch (err) {
       toast.error("Failed to cancel");
     }
@@ -205,7 +223,7 @@ const JobsPage = () => {
       });
       toast.success("Rescheduled!");
       setRescheduleDialog({ open: false, jobId: null });
-      navigate("/dashboard/jobs");
+      fetchData(); // Refresh the list
     } catch (err) {
       toast.error("Failed");
     }
@@ -350,12 +368,14 @@ const JobsPage = () => {
             </p>
           </div>
           {user?.role === "customer" && (
-            <Button
+            <MovingBorderButton
               onClick={() => navigate("/dashboard/post-job")}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl h-14 px-8 shadow-xl shadow-blue-600/20 uppercase text-xs tracking-widest border-none"
+              borderRadius="1rem"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-widest border-none"
+              containerClassName="h-14 w-48 shadow-xl shadow-blue-600/20"
             >
               <Plus className="mr-2 h-5 w-5" /> New Job
-            </Button>
+            </MovingBorderButton>
           )}
         </div>
 
@@ -434,12 +454,27 @@ const JobsPage = () => {
               }`}
             >
               <CardHeader className="p-8 pb-5">
-                <h3
-                  onClick={() => navigate(`/dashboard/job/${job._id}`)}
-                  className="text-2xl font-black uppercase leading-tight cursor-pointer hover:text-blue-600 line-clamp-1  tracking-tighter"
-                >
-                  {job.title}
-                </h3>
+                <div className="flex justify-between items-start gap-4">
+                  <h3
+                    onClick={() => navigate(`/dashboard/job/${job._id}`)}
+                    className="text-2xl font-black uppercase leading-tight cursor-pointer hover:text-blue-600 line-clamp-1  tracking-tighter flex-1"
+                  >
+                    {job.title}
+                  </h3>
+                  {user?.role === "customer" && job.status === "open" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCancelDialog({ open: true, jobId: job._id });
+                      }}
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  )}
+                </div>
                 <div className="flex gap-2 mt-4">
                   <Badge className="bg-blue-600 text-white border-none font-black uppercase text-[9px] px-3 py-1 tracking-widest">
                     {job.category}
@@ -510,13 +545,14 @@ const JobsPage = () => {
                     suppressDefaultDetails={true}
                     />
                   )}
-                  <Button
-                    variant="outline"
-                    className="w-full h-10 rounded-xl border-border bg-card font-bold text-xs"
+                  <MovingBorderButton
+                    borderRadius="1rem"
+                    className="bg-card font-bold text-xs text-foreground border-border"
+                    containerClassName="w-full h-10"
                     onClick={() => navigate(`/dashboard/job/${job._id}`)}
                   >
                     Details <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  </MovingBorderButton>
                 </div>
               </CardFooter>
             </Card>
@@ -651,6 +687,34 @@ const JobsPage = () => {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog
+        open={cancelDialog.open}
+        onOpenChange={(o) => setCancelDialog({ ...cancelDialog, open: o })}
+      >
+        <AlertDialogContent className="bg-card border-border rounded-[2.5rem] p-10 max-w-md shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black uppercase text-center tracking-tight">
+              Delete Project?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-muted-foreground font-medium py-4">
+              This action cannot be undone. This will permanently remove the job posting and any active bids.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-4 mt-4">
+            <AlertDialogCancel className="h-14 rounded-2xl border-border bg-muted/30 font-black uppercase text-xs tracking-widest flex-1">
+              Keep Project
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelJob}
+              className="h-14 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-black uppercase text-xs tracking-widest flex-1 border-none"
+            >
+              Delete now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

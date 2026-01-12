@@ -59,10 +59,10 @@ const Footer = () => {
             <ul className={`space-y-2 text-sm transition-colors duration-500 ${
               isDark ? "text-zinc-500" : "text-blue-100/80"
             }`}>
-              <li><FooterLink to="/jobspage?category=plumbing" isDark={isDark}>Plumbing</FooterLink></li>
-              <li><FooterLink to="/jobspage?category=electrical" isDark={isDark}>Electrical</FooterLink></li>
-              <li><FooterLink to="/jobspage?category=cleaning" isDark={isDark}>Home Cleaning</FooterLink></li>
-              <li><FooterLink to="/jobspage?category=carpentry" isDark={isDark}>Carpentry</FooterLink></li>
+              <li><FooterLink to="/dashboard/jobs?category=Plumbing" isDark={isDark}>Plumbing</FooterLink></li>
+              <li><FooterLink to="/dashboard/jobs?category=Electrical" isDark={isDark}>Electrical</FooterLink></li>
+              <li><FooterLink to="/dashboard/jobs?category=Cleaning" isDark={isDark}>Home Cleaning</FooterLink></li>
+              <li><FooterLink to="/dashboard/jobs?category=Carpentry" isDark={isDark}>Carpentry</FooterLink></li>
             </ul>
           </div>
 

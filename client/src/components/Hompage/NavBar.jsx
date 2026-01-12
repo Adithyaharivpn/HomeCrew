@@ -95,7 +95,7 @@ const NavBar = () => {
               
               {/* Dashboard Link */}
               <Link to="/dashboard">
-                <Button variant="ghost" className={`font-black uppercase text-[10px] tracking-widest hidden sm:flex ${
+                <Button variant="ghost" className={`font-black uppercase text-xs tracking-widest hidden sm:flex ${
                   isSolid ? "text-foreground" : "text-white"
                 }`}>
                   <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
@@ -147,14 +147,14 @@ const NavBar = () => {
             /* Logged Out State */
             <div className="flex items-center gap-3">
               <Link to="/login">
-                <Button variant="ghost" className={`font-black uppercase text-[10px] tracking-widest ${
+                <Button variant="ghost" className={`font-black uppercase text-xs tracking-widest ${
                   isSolid ? "text-foreground" : "text-white"
                 }`}>
                   Sign In
                 </Button>
               </Link>
               <Link to="/signup">
-                <Button className="rounded-xl bg-blue-600 text-white font-black uppercase text-[10px] tracking-widest px-8 h-11 shadow-lg shadow-blue-500/20 border-none">
+                <Button className="rounded-xl bg-blue-600 text-white font-black uppercase text-xs tracking-widest px-8 h-11 shadow-lg shadow-blue-500/20 border-none">
                   Establish Profile
                 </Button>
               </Link>
