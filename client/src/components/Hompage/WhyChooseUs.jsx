@@ -3,7 +3,8 @@ import { ShieldCheck, HeartHandshake, Tag, Star } from "lucide-react";
 import PlaceHolder from "../../assets/Job.jpg";
 import { Card } from "@/components/ui/card";
 import { useTheme } from "../Utils/Themeprovider";
-import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { CometCard } from "@/components/ui/comet-card";
+
 
 const FeatureRow = ({ icon, title, desc, isDark }) => (
   <div className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-500 cursor-default group ${
@@ -50,13 +51,13 @@ const WhyChooseUs = () => {
             }`} />
 
             {/* Main Image */}
-            <div className="relative overflow-hidden rounded-3xl shadow-2xl transition-transform duration-300 hover:scale-[1.02]">
+            <CometCard className="w-full">
               <img
                 src={PlaceHolder}
                 alt="Professional tradesperson at work"
-                className="h-auto w-full object-cover grayscale-[10%] dark:grayscale-[40%] transition-all duration-500"
+                className="h-auto w-full rounded-2xl object-cover grayscale-[10%] dark:grayscale-[40%] transition-all duration-500 shadow-2xl"
               />
-            </div>
+            </CometCard>
 
             {/* Floating Badge (Trust Signal) */}
             <Card className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 p-6 shadow-xl border-border bg-card flex items-center gap-4 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
@@ -80,10 +81,12 @@ const WhyChooseUs = () => {
               Why Choose Us
             </div>
             
-            <TextGenerateEffect
-              words="Your Peace of Mind Is Our Priority"
-              className="mb-6 text-3xl font-extrabold text-foreground md:text-5xl leading-tight"
-            />
+            <h2 
+              className="mb-6 text-3xl font-extrabold md:text-5xl leading-tight"
+              style={{ color: isDark ? "white" : "black" }}
+            >
+              Your Peace of Mind Is Our Priority
+            </h2>
 
             <p className="mb-10 text-lg text-muted-foreground leading-relaxed transition-colors duration-500">
               We are committed to providing not just expert service, but a safe 

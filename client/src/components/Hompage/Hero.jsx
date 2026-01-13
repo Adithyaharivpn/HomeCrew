@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/Utils/Themeprovider";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -38,9 +39,10 @@ const Hero = () => {
   return (
     <div
       style={heroStyle}
-      className="relative overflow-hidden pt-32 pb-48 md:pt-52 md:pb-64 text-center rounded-b-[3rem] md:rounded-b-[50%_8%] shadow-2xl transition-all duration-500"
+      className="relative overflow-hidden pt-32 pb-48 md:pt-52 md:pb-64 text-center shadow-2xl transition-all duration-500"
     >
-      <div className="container mx-auto max-w-4xl px-4 relative z-10">
+      <BackgroundBeams className="absolute top-0 left-0 w-full h-full z-0 opacity-70" />
+      <div className="container mx-auto max-w-4xl pl-2 relative z-10">
         <TypewriterEffectSmooth
           words={[
             { text: "Home" },

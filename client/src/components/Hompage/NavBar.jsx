@@ -89,7 +89,7 @@ const NavBar = () => {
         {/* Actions */}
         <div className="flex items-center gap-3 md:gap-5">
           <div className="hidden md:block">
-            <ModeToggle />
+            <ModeToggle/>
           </div>
           
           {user ? (

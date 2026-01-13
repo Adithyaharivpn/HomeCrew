@@ -9,6 +9,7 @@ import WhyChooseUs from "./components/Hompage/WhyChooseUs";
 import Reviews from "./components/Hompage/Reviews";
 import SignUp from "./components/Hompage/SignUp";
 import Login from "./components/Hompage/Login";
+import CTA from "./components/Hompage/CTA";
 import { Toaster } from "sonner";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -44,6 +45,7 @@ const HomePage = () => (
     <HowItWorks />
     <WhyChooseUs />
     <Reviews />
+    <CTA />
   </>
 );
 
