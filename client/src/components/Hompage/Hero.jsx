@@ -82,17 +82,16 @@ const Hero = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Search services (e.g., Plumbing, Electrical)"
+            placeholder="Search services..."
             className="flex-1 border-none bg-transparent py-3 
       text-slate-700 dark:text-zinc-200 
       placeholder:text-slate-400 dark:placeholder:text-zinc-500 
-      focus:outline-none focus:ring-0 text-base md:text-lg"
+      focus:outline-none focus:ring-0 text-base md:text-lg md:pr-0"
           />
 
           <Button
-            size="lg"
             onClick={handleSearch}
-            className="rounded-full bg-blue-600 dark:bg-blue-500 px-10 py-6 text-base font-bold text-white shadow-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-all transform hover:scale-105 active:scale-95"
+            className="rounded-full bg-blue-600 dark:bg-blue-500 px-6 py-3 md:px-10 md:py-6 text-base font-bold text-white shadow-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-all transform hover:scale-105 active:scale-95"
           >
             Search
           </Button>

@@ -48,7 +48,7 @@ const NotificationBell = ({ children, isSolid }) => {
         )}
       </PopoverTrigger>
 
-      <PopoverContent align="end" className="w-80 p-0 bg-card border-border rounded-2xl shadow-2xl overflow-hidden mt-2">
+      <PopoverContent align="end" className="w-80 p-0 bg-card border-border rounded-2xl shadow-2xl overflow-hidden mt-2 z-[200]">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-muted/20">
           <h4 className="font-black uppercase text-[10px] tracking-widest text-foreground">Notifications</h4>

@@ -146,7 +146,7 @@ const DashboardLayout = () => {
                                     </motion.span>
                                 </div>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="ml-10 bg-card border-border"> 
+                            <DropdownMenuContent align="start" className="ml-10 bg-card border-border z-[200]"> 
                                  <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">Light</DropdownMenuItem>
                                  <DropdownMenuItem onClick={() => setTheme("dark")} className="cursor-pointer">Dark</DropdownMenuItem>
                                  <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">System</DropdownMenuItem>

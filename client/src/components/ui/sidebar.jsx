@@ -111,6 +111,11 @@ export const MobileSidebar = ({
                             "fixed h-full w-full inset-0 bg-background p-10 z-[100] flex flex-col justify-between",
                             className
                         )}
+                        onClick={(e) => {
+                            if (e.target.closest("a")) {
+                                setOpen(false);
+                            }
+                        }}
                     >
                         <div
                             className="absolute right-10 top-10 z-50 text-foreground"

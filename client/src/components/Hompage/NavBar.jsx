@@ -88,7 +88,9 @@ const NavBar = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-3 md:gap-5">
-          <ModeToggle />
+          <div className="hidden md:block">
+            <ModeToggle />
+          </div>
           
           {user ? (
             <div className="flex items-center gap-3 md:gap-5">
@@ -103,7 +105,9 @@ const NavBar = () => {
               </Link>
 
               {/* NOTIFICATIONS DROPDOWN */}
-              <NotificationBell isSolid={isSolid} />
+              <div className="hidden md:block">
+                 <NotificationBell isSolid={isSolid} />
+              </div>
 
               {/* PROFILE DROPDOWN */}
               <DropdownMenu>
@@ -139,8 +143,7 @@ const NavBar = () => {
 
               {/* Profile Dropdown Ends */}
               
-              {/* Mobile Navigation */}
-              <MobileNav user={user} />
+
 
             </div>
           ) : (
@@ -160,6 +163,9 @@ const NavBar = () => {
               </Link>
             </div>
           )}
+          
+          {/* Mobile Navigation */}
+          <MobileNav user={user} />
         </div>
       </div>
     </nav>
