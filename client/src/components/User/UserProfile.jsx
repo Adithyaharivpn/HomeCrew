@@ -135,7 +135,6 @@ const UserProfile = () => {
         </Button>
 
         <Card className="shadow-2xl border-border bg-card rounded-[2.5rem] overflow-hidden">
-          {/* Header Section */}
           <div className="flex flex-col md:flex-row items-center md:items-start p-10 gap-10">
             <div className="relative group">
               <Avatar className="w-40 h-40 border-4 border-background shadow-xl">
