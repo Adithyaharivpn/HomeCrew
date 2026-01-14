@@ -148,17 +148,18 @@ const NavBar = () => {
             </div>
           ) : (
             /* Logged Out State */
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Link to="/login">
-                <Button variant="ghost" className={`font-black uppercase text-xs tracking-widest ${
+                <Button variant="ghost" className={`font-black uppercase text-[10px] md:text-xs tracking-widest ${
                   isSolid ? "text-foreground" : "text-white"
                 }`}>
-                  Sign In
+                  Log In
                 </Button>
               </Link>
               <Link to="/signup">
-                <Button className="rounded-xl bg-blue-600 text-white font-black uppercase text-xs tracking-widest px-8 h-11 shadow-lg shadow-blue-500/20 border-none">
-                  Establish Profile
+                <Button className="rounded-xl bg-blue-600 text-white font-black uppercase text-[10px] md:text-xs tracking-widest px-4 md:px-8 h-10 md:h-11 shadow-lg shadow-blue-500/20 border-none">
+                  <span className="md:hidden">Join</span>
+                  <span className="hidden md:inline">Establish Profile</span>
                 </Button>
               </Link>
             </div>

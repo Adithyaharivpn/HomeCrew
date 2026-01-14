@@ -26,6 +26,11 @@ const postJob = async (req, res) => {
     await newJob.save();
     logger.info(`Job posted: "${title}" by User ${userId}`, { meta: { jobId: newJob._id } });
 
+    const io = req.app.get('io');
+    if (io) {
+        io.emit('job_created', newJob);
+    }
+
     res.status(201).json({ message: 'Job posted successfully!', job: newJob });
 
   } catch (error) {
@@ -138,6 +143,12 @@ const updateJob = async (req, res) => {
     await job.save();
     
     logger.info(`Job updated: ${req.params.id} by User ${req.user.id}`);
+
+    const io = req.app.get('io');
+    if (io) {
+        io.emit('job_updated', job);
+    }
+    
     res.json(job);
   } catch (error) {
     logger.error(`Error updating job: ${error.message}`);
@@ -256,6 +267,11 @@ const rescheduleJob = async (req, res) => {
     job.scheduledDate = scheduledDate;
     await job.save();
 
+    const io = req.app.get('io');
+    if (io) {
+        io.emit('job_updated', job);
+    }
+
     res.status(200).json({ 
       message: "Job rescheduled successfully", 
       scheduledDate: job.scheduledDate 
@@ -285,6 +301,11 @@ const cancelJob = async (req, res) => {
 
     job.status = 'cancelled';
     await job.save();
+
+    const io = req.app.get('io');
+    if (io) {
+        io.emit('job_updated', job);
+    }
 
     res.status(200).json({ message: "Job has been cancelled", job });
   } catch (error) {

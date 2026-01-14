@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, Briefcase, MessageSquare, 
   ShieldCheck, User, Zap, Wallet, Map as MapIcon, 
-  List, CreditCard, Users, Terminal, LogOut, ArrowLeft, Sun, Moon, Bell
+  List, CreditCard, Users, Terminal, LogOut, ArrowLeft, Sun, Moon, Bell, AlertTriangle
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "../../api/useAuth";
@@ -72,6 +72,7 @@ const DashboardLayout = () => {
       },
       { label: "System Logs", href: "/dashboard/system-logs", icon: <Terminal className="h-5 w-5 flex-shrink-0 text-foreground" /> },
       { label: "Verify", href: "/dashboard/verifications", icon: <ShieldCheck className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      { label: "Reports", href: "/dashboard/reports", icon: <AlertTriangle className="h-5 w-5 flex-shrink-0 text-foreground" /> },
       { label: "Market", href: "/dashboard/jobs", icon: <List className="h-5 w-5 flex-shrink-0 text-foreground" /> },
     ],
     tradesperson: [
@@ -104,7 +105,7 @@ const DashboardLayout = () => {
 
   // Add Profile and Logout
   const commonLinks = [
-      { label: "Profile", href: "/dashboard/profile", icon: <User className="h-5 w-5 flex-shrink-0 text-foreground" /> },
+      // { label: "Profile", href: "/dashboard/profile", icon: <User className="h-5 w-5 flex-shrink-0 text-foreground" /> },
   ];
 
   return (
@@ -162,7 +163,7 @@ const DashboardLayout = () => {
                         </div>
                     </div>
                 </div>
-                <div>
+                <div className="mt-auto">
                    <SidebarLink
                     link={{
                         label: user?.name || "User",

@@ -12,7 +12,7 @@ const DashboardSidebar = ({ role, userId }) => {
   const menuItems = {
     admin: [
       { label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
-      { label: "User Management", icon: Users, path: "/dashboard/admin-panel" },
+      { label: "Site Management", icon: Users, path: "/dashboard/admin-panel" },
       { label: "Verifications", icon: ShieldCheck, path: "/dashboard/verifications" },
       { label: "Marketplace", icon: List, path: "/dashboard/jobs" },
     ],

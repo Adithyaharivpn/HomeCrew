@@ -68,7 +68,7 @@ const Login = () => {
             )}
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Traffic ID (Email)</Label>
+              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Email Address</Label>
               <div className="relative group">
                 <Mail className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                 <Input
@@ -84,7 +84,7 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Access Key</Label>
+              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Password</Label>
               <div className="relative group">
                 <Lock className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                 <Input
@@ -107,7 +107,7 @@ const Login = () => {
             </div>
 
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-14 rounded-xl text-sm tracking-wide border-none shadow-lg" disabled={isLoading}>
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Identity"}
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
             </Button>
           </form>
         </CardContent>

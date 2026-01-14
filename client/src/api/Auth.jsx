@@ -5,7 +5,7 @@ import api from './axiosConfig';
 
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(sessionStorage.getItem('token'));
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
           // Fallback to decoding token if API fails (e.g. network error)
           // But if 401, likely token invalid
           if (error.response?.status === 401) {
-             localStorage.removeItem('token');
+             sessionStorage.removeItem('token');
              setToken(null);
              setUser(null);
           } else {
@@ -45,12 +45,12 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = (newToken) => {
-    localStorage.setItem('token', newToken);
+    sessionStorage.setItem('token', newToken);
     setToken(newToken);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     setToken(null);
   };
   

@@ -25,6 +25,7 @@ const reviewRoutes = require('./routes/review');
 const notficationRoutes = require('./routes/notification');
 const paymentRoutes = require('./routes/payment');
 const transactionRoutes = require('./routes/transaction');
+const reportRoutes = require('./routes/report');
 
 const PORT = process.env.PORT || 8080;
 
@@ -72,6 +73,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/notifications', notficationRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.get('/', (req, res) => {
   res.send('College Project API Server - Running!');

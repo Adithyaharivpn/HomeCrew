@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import { useAuth } from "../../api/useAuth";
@@ -79,6 +79,7 @@ const timeAgo = (dateString) => {
 };
 
 const JobsPage = () => {
+  const rescheduleDateRef = useRef(null);
   const [jobs, setJobs] = useState([]);
   const [myWorks, setMyWorks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -134,7 +135,7 @@ const JobsPage = () => {
   const [newDate, setNewDate] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
       let mainUrl =
@@ -154,17 +155,24 @@ const JobsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, logout]);
+
+  const fetchDataRef = useRef(fetchData);
+
+  useEffect(() => {
+    fetchDataRef.current = fetchData;
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData();
-  }, [user, logout, location.search]);
+  }, [fetchData, location.search]);
 
-  // Listen for real-time review prompts
+  // Listen for real-time review prompts & Job Updates
   useEffect(() => {
     const userId = user?._id || user?.id;
     if (!userId) return;
     
+    // Use a single socket connection
     const socket = io(import.meta.env.VITE_API_BASE_URL);
     socket.emit("addUser", userId); 
     
@@ -178,9 +186,24 @@ const JobsPage = () => {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 3000);
     });
+
+    socket.on("job_created", () => {
+        console.log("Socket: job_created received");
+        fetchDataRef.current(); // Use ref
+        if (user.role === 'tradesperson') {
+            toast.info("New job available!");
+        }
+    });
+
+    socket.on("job_updated", () => {
+        console.log("Socket: job_updated received");
+        fetchDataRef.current(); // Use ref
+    });
     
-    return () => socket.disconnect();
-  }, [user?._id || user?.id]);
+    return () => {
+        socket.disconnect();
+    };
+  }, [user?._id || user?.id]); // Removed fetchData from deps
 
   const handleContactCustomer = async (job) => {
     // If Customer is clicking "Chat/Pay", handle separately or correct IDs
@@ -384,10 +407,10 @@ const JobsPage = () => {
             placeholder="Search title..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-14 bg-card border-border rounded-2xl px-6 font-bold"
+            className="h-14 rounded-xl px-6 font-bold"
           />
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-full sm:w-[250px] h-14 bg-card border-border rounded-2xl font-black uppercase text-[10px] tracking-widest px-6">
+            <SelectTrigger className="w-full sm:w-[250px] h-14 rounded-xl font-black uppercase text-[10px] tracking-widest px-6 shadow-input border-none">
               <SelectValue placeholder="Categories" />
             </SelectTrigger>
             <SelectContent className="bg-card border-border rounded-xl">
@@ -531,6 +554,12 @@ const JobsPage = () => {
                       onViewCode={() =>
                         setCodeDialog({ open: true, code: job.completionCode })
                       }
+                      onReschedule={() => 
+                        setRescheduleDialog({ open: true, jobId: job._id })
+                      }
+                      onCancel={() => 
+                        setCancelDialog({ open: true, jobId: job._id })
+                      }
                       onReview={() => {
                         const targetId =
                           user.role === "customer"
@@ -573,13 +602,18 @@ const JobsPage = () => {
               Reschedule
             </DialogTitle>
           </DialogHeader>
-          <Input
-            type="datetime-local"
-            style={{ colorScheme: "dark" }}
-            className="h-16 rounded-2xl border-border bg-muted/30 px-5 font-bold text-lg mt-6"
-            value={newDate}
-            onChange={(e) => setNewDate(e.target.value)}
-          />
+          <div className="relative mt-6">
+              <Input
+                type="datetime-local"
+                style={{ colorScheme: "dark" }}
+                className="h-16 rounded-xl bg-background px-5 font-bold text-lg [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+              />
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <CalendarDays className="h-6 w-6 text-muted-foreground" />
+              </div>
+          </div>
           <Button
             onClick={handleRescheduleSubmit}
             className="w-full bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl font-black text-lg uppercase mt-6"
@@ -633,7 +667,7 @@ const JobsPage = () => {
           </DialogHeader>
           <Input
             placeholder="000000"
-            className="text-center text-3xl tracking-[0.6em] font-mono h-20 bg-muted/20 border-border rounded-2xl my-6"
+            className="text-center text-3xl tracking-[0.6em] font-mono h-20 rounded-xl my-6"
             maxLength={6}
             value={verifyCode}
             onChange={(e) => setVerifyCode(e.target.value)}
@@ -676,7 +710,7 @@ const JobsPage = () => {
               placeholder="Share details..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="bg-muted/30 border-border h-36 rounded-2xl p-5 text-lg font-medium"
+              className="h-36 rounded-xl p-4 text-base font-medium"
             />
           </div>
           <Button

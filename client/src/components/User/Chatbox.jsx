@@ -7,7 +7,7 @@ import { useAuth } from "../../api/useAuth";
 // Icons
 import { 
   Send, Calendar, CheckCircle, XCircle, AlertCircle, 
-  Lock, Loader2, DollarSign, ArrowLeft, Star 
+  Lock, Loader2, DollarSign, ArrowLeft, Star, Flag 
 } from "lucide-react";
 
 // UI Components
@@ -33,6 +33,7 @@ const ChatBox = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const scrollRef = useRef(null);
+  const dateInputRef = useRef(null);
 
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -40,6 +41,7 @@ const ChatBox = () => {
   const [isArchived, setIsArchived] = useState(false);
   const [loading, setLoading] = useState(true);
   const [jobDetails, setJobDetails] = useState(null);
+  const [roomData, setRoomData] = useState(null); // Added
   const [completionCodeInput, setCompletionCodeInput] = useState("");
 
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
@@ -63,6 +65,7 @@ const ChatBox = () => {
         const msgRes = await api.get(`/api/chat/messages/${roomId}`);
         setMessages(msgRes.data);
         const roomRes = await api.get(`/api/chat/${roomId}`);
+        setRoomData(roomRes.data); // Added
         const realJobId = roomRes.data.jobId;
 
         if (realJobId) {
@@ -225,7 +228,7 @@ const ChatBox = () => {
       const actionText = status === 'cancelled' ? 'Quote Withdrawn' : 'Quote Declined';
       
       const payload = {
-        roomId, senderId: user._id || user.id, text: `${actionText} by ${user.name}`, type: "system"
+        roomId, senderId: user._id || user.id, text: `[INFO]: ${actionText} by ${user.name}`, type: "text"
       };
       if (socket) socket.emit("sendMessage", payload);
       
@@ -235,9 +238,11 @@ const ChatBox = () => {
       setMessages(prev => prev.map(m => {
         const mApptId = m.appointmentId?._id || m.appointmentId;
         if (mApptId === apptId) {
-             // Create deep copy-ish or just update the referenced object structure
+             // Update status regardless of whether it's an object or string ID
              if (typeof m.appointmentId === 'object') {
                  return { ...m, appointmentId: { ...m.appointmentId, status: status } };
+             } else {
+                 return { ...m, appointmentId: { _id: m.appointmentId, status: status } };
              }
         }
         return m;
@@ -329,15 +334,62 @@ const ChatBox = () => {
               <h2 className="text-xl font-black uppercase tracking-tighter italic leading-none">{jobDetails?.title}</h2>
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Active Conversation</p>
             </div>
+            <div className="flex items-center gap-2">
             {user.role === "tradesperson" && !isArchived && (
-              <Button onClick={() => setIsScheduleOpen(true)} className="bg-blue-600 font-black text-[10px] uppercase rounded-xl h-10 px-6 border-none shadow-lg shadow-blue-500/20">
+              <Button onClick={() => {
+                  setIsScheduleOpen(true);
+                  setQuotePrice("");
+                  setAppointmentDate("");
+              }} className="bg-blue-600 font-black text-[10px] uppercase rounded-xl h-10 px-6 border-none shadow-lg shadow-blue-500/20">
                 <DollarSign className="mr-2 h-3 w-3" /> Propose Quote
               </Button>
             )}
+            <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-muted-foreground hover:text-destructive transition-colors ml-2"
+                onClick={() => {
+                    let otherUserId;
+                    if (roomData) {
+                        const target = user.role === 'customer' ? roomData.tradespersonId : roomData.customerId;
+                        otherUserId = target?._id || target;
+                    } else {
+                         otherUserId = user.role === 'customer' 
+                            ? (jobDetails?.assignedTo?._id || jobDetails?.assignedTo) 
+                            : (jobDetails?.user?._id || jobDetails?.user);
+                    }
+                    if (!otherUserId) {
+                        const otherMsg = messages.find(m => {
+                            const senderId = m.sender?._id || m.sender;
+                            const myId = user._id || user.id;
+                            return senderId && senderId !== myId;
+                        });
+                        if (otherMsg) {
+                            otherUserId = otherMsg.sender?._id || otherMsg.sender;
+                        }
+                    }
+
+                    if (!otherUserId) {
+                         console.error("Debug: Could not find user. Room:", roomData, "Job:", jobDetails, "User:", user);
+                         return toast.error("Could not identify user to report. Please wait or try again.");
+                    }
+
+                    navigate("/dashboard/report", { state: { reportedUserId: otherUserId, jobId: jobDetails?._id, roomId: roomId } });
+                }}
+            >
+                <Flag className="h-5 w-5" />
+            </Button>
+            </div>
           </div>
 
           {/* Action Alerts */}
           <div className="mt-4 space-y-2">
+            <Alert className="bg-amber-500/10 border-amber-500/20 text-amber-600 rounded-xl">
+              <AlertDescription className="flex items-center gap-2 font-bold text-[10px] uppercase tracking-wide">
+                <AlertCircle className="h-4 w-4" />
+                <span>Safety Warning: Keep all payments and deals inside HomeCrew. We remain responsible only for on-platform transactions.</span>
+              </AlertDescription>
+            </Alert>
             {shouldShowPayButton && (
               <Alert className="bg-blue-600 border-none text-white rounded-2xl animate-pulse">
                 <AlertDescription className="flex justify-between items-center font-black text-[11px] uppercase tracking-wide">
@@ -393,7 +445,7 @@ const ChatBox = () => {
           <div className="flex-1">
             <Input 
               placeholder="Type your message..." 
-              className="h-14 bg-background rounded-2xl px-6 font-bold focus-visible:ring-blue-600/20 border-border w-full"
+              className="h-14 rounded-xl px-4 font-bold focus-visible:ring-blue-600/20 w-full"
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
@@ -410,11 +462,11 @@ const ChatBox = () => {
         <DialogContent className="bg-card border-border rounded-[2.5rem]">
           <DialogHeader><DialogTitle className="font-black uppercase tracking-tight">Propose Job Quote</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
+            <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Appointment Date</label>
               <Input 
                 type="datetime-local" 
-                className="h-12 bg-muted rounded-xl dark:text-white relative w-full pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                className="h-14 rounded-xl dark:text-white relative w-full pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 style={{ colorScheme: "dark" }}
                 value={appointmentDate} 
                 onChange={(e) => setAppointmentDate(e.target.value)} 
@@ -425,7 +477,7 @@ const ChatBox = () => {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Proposed Price (₹)</label>
-              <Input type="number" placeholder="1500" className="h-12 bg-muted rounded-xl font-bold" value={quotePrice} onChange={(e) => setQuotePrice(e.target.value)} />
+              <Input type="number" placeholder="1500" className="h-14 rounded-xl font-bold" value={quotePrice} onChange={(e) => setQuotePrice(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
@@ -455,7 +507,7 @@ const ChatBox = () => {
               placeholder="Share details..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="bg-muted/30 border-border h-36 rounded-2xl p-5 text-lg font-medium"
+              className="h-36 rounded-xl p-4 text-base font-medium"
             />
           </div>
           <Button onClick={handleSubmitReview} className="bg-blue-600 w-full h-14 rounded-2xl font-bold text-lg uppercase">

@@ -19,6 +19,7 @@ import {
   Loader2,
   Calendar,
   ArrowLeft,
+  Phone
 } from "lucide-react";
 
 // UI Components
@@ -75,10 +76,14 @@ const UserProfile = () => {
   const handleFileChange = (e) => {
     setNewProfilePicture(e.target.files[0]);
   };
-
   const handleSave = async () => {
+    if (profileData.phoneNumber && profileData.phoneNumber.length < 10) {
+        toast.error("Phone number must be at least 10 digits");
+        return;
+    }
     const data = new FormData();
     data.append("name", profileData.name);
+    data.append("phoneNumber", profileData.phoneNumber); // Added
     if (profileData.role === "tradesperson") {
       data.append("location", profileData.location);
       data.append("experience", profileData.experience);
@@ -228,6 +233,18 @@ const UserProfile = () => {
                       onChange={handleChange}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                      Phone Number
+                    </Label>
+                    <Input
+                      name="phoneNumber"
+                      type="tel"
+                      className="h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold"
+                      value={profileData.phoneNumber}
+                      onChange={handleChange}
+                    />
+                  </div>
 
                   {profileData.role === "tradesperson" && (
                     <div className="grid gap-6">
@@ -351,6 +368,28 @@ const UserProfile = () => {
                       ).getFullYear()}
                     </span>
                   </div>
+
+                  {/* Contact Info (Self Only) */}
+                  {isSelfView && (
+                      <div className="bg-muted/30 p-8 rounded-[2rem] border border-border space-y-6">
+                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest">
+                          Contact Info (Private)
+                        </h3>
+                        <div className="flex items-center gap-4 group">
+                          <div className="p-3 bg-blue-600/10 rounded-2xl">
+                            <Phone className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <span className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                              Phone Number
+                            </span>
+                            <span className="font-bold text-lg">
+                              {profileData.phoneNumber || "Not set"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                  )}
                 </div>
 
                 {/* RESTORED: Conditional Review Visibility */}

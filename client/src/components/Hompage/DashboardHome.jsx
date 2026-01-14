@@ -49,7 +49,7 @@ const DashboardHome = () => {
         return [
           { title: "Platform Revenue", value: `₹${s.totalRevenue || 0}`, icon: IndianRupee, color: "text-emerald-500" },
           { title: "Active Users", value: s.totalUsers || 0, icon: Users, color: "text-blue-500" },
-          { title: "Pending Verifs", value: s.pendingVerifications || 0, icon: ShieldCheck, color: "text-rose-500", alert: s.pendingVerifications > 0, path: "/dashboard/verifications" },
+          { title: "Pending Verifications", value: s.pendingVerifications || 0, icon: ShieldCheck, color: "text-rose-500", alert: s.pendingVerifications > 0, path: "/dashboard/verifications" },
         ];
       case "tradesperson":
         return [

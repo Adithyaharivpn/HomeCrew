@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
   profilePictureUrl: { type: String, default: '' },
   tradeCategory: { type: String },
   experience: { type: Number },
+  hourlyRate: { type: Number }, // Added
+  bio: { type: String }, // Added
+  phoneNumber: { type: String }, // Added
   location: { type: String },
   mapLocation: {
     lat: { type: Number },

@@ -18,7 +18,7 @@ const SignUp = () => {
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
-    name: "", email: "", password: "", confirmPassword: "",
+    name: "", email: "", password: "", confirmPassword: "", phoneNumber: "",
     role: "", tradeCategory: "", experience: "", location: "",
     lat: "", lng: "",
     agreeToTerms: false 
@@ -57,6 +57,11 @@ const SignUp = () => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    if (formData.phoneNumber.length < 10) {
+      setError("Phone number must be at least 10 digits.");
       return;
     }
 
@@ -112,6 +117,7 @@ const SignUp = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input name="name" placeholder="Full Name" className="h-14 rounded-xl font-bold text-sm" value={formData.name} onChange={handleChange} required />
                 <Input name="email" type="email" placeholder="Email Address" className="h-14 rounded-xl font-bold text-sm" value={formData.email} onChange={handleChange} required />
+                <Input name="phoneNumber" type="tel" placeholder="Contact Phone" className="h-14 rounded-xl font-bold text-sm md:col-span-2" value={formData.phoneNumber} onChange={handleChange} required />
                 <Input name="password" type="password" placeholder="Password" className="h-14 rounded-xl font-bold" value={formData.password} onChange={handleChange} required />
                 <Input name="confirmPassword" type="password" placeholder="Confirm Password" className="h-14 rounded-xl font-bold" value={formData.confirmPassword} onChange={handleChange} required />
             </div>

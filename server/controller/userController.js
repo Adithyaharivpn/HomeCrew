@@ -15,10 +15,11 @@ const getMyProfile = async (req, res) => {
 };
 
 const updateMyProfile = async (req, res) => {
-  const { name, location, experience, tradeCategory } = req.body;
+  const { name, location, experience, tradeCategory, phoneNumber } = req.body;
   
   const profileFields = {};
   if (name) profileFields.name = name;
+  if (phoneNumber) profileFields.phoneNumber = phoneNumber; // Added
   if (location) profileFields.location = location;
   if (experience) profileFields.experience = experience;
   if (tradeCategory) profileFields.tradeCategory = tradeCategory;

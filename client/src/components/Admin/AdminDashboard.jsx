@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { 
   Search, LogOut, Loader2, ShieldAlert,
-  Users, Briefcase, HardHat, Trash2, Edit3, RefreshCcw, MoreHorizontal
+  Users, Briefcase, HardHat, Trash2, Edit3, RefreshCcw, MoreHorizontal, Plus, Tags
 } from "lucide-react";
 
 // UI Components
@@ -39,12 +39,15 @@ const AdminDashboard = () => {
   });
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]); 
+  const [services, setServices] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [newService, setNewService] = useState({ service_name: "", description: "", keywords: "" });
   const [filter, setFilter] = useState('');
   const [activeTab, setActiveTab] = useState("users");
 
@@ -52,15 +55,17 @@ const AdminDashboard = () => {
     const fetchAdminData = async () => {
       try {
         setLoading(true);
-        const [dashboardRes, usersRes, jobsRes] = await Promise.all([
+        const [dashboardRes, usersRes, jobsRes, servicesRes] = await Promise.all([
           api.get("/api/admin/dashboard"),
           api.get("/api/admin/users"),
-          api.get("/api/admin/jobs"), 
+          api.get("/api/admin/jobs"),
+          api.get("/api/service"),
         ]);
         
         setDashboardData(dashboardRes.data);
         setUsers(usersRes.data);
         setJobs(jobsRes.data);
+        setServices(servicesRes.data);
       } catch (err) {
         setError("Failed to load dashboard data.");
         if (err.response?.status === 401) logout();
@@ -106,13 +111,38 @@ const AdminDashboard = () => {
     } catch (err) { toast.error("Delete failed"); }
   };
 
+  const handleCreateService = async () => {
+    try {
+      const response = await api.post("/api/service", {
+        ...newService,
+        keywords: newService.keywords.split(',').map(k => k.trim())
+      });
+      setServices([...services, response.data]);
+      setIsServiceModalOpen(false);
+      setNewService({ service_name: "", description: "", keywords: "" });
+      toast.success("Category added");
+    } catch (err) { toast.error("Failed to add category"); }
+  };
+
+  const handleDeleteService = async (serviceId) => {
+    if (!confirm("Delete this category?")) return;
+    try {
+      await api.delete(`/api/service/${serviceId}`);
+      setServices(services.filter(s => s._id !== serviceId));
+      toast.success("Category deleted");
+    } catch (err) { toast.error("Delete failed"); }
+  };
+
   const filteredData = useMemo(() => {
     const lowerFilter = filter.toLowerCase();
     if (activeTab === "users") {
       return users.filter(u => u.name.toLowerCase().includes(lowerFilter) || u.email.toLowerCase().includes(lowerFilter));
     }
-    return jobs.filter(j => j.title.toLowerCase().includes(lowerFilter) || (j.user?.name || "").toLowerCase().includes(lowerFilter));
-  }, [users, jobs, filter, activeTab]);
+    if (activeTab === "jobs") {
+      return jobs.filter(j => j.title.toLowerCase().includes(lowerFilter) || (j.user?.name || "").toLowerCase().includes(lowerFilter));
+    }
+    return services.filter(s => s.service_name.toLowerCase().includes(lowerFilter) || s.description.toLowerCase().includes(lowerFilter));
+  }, [users, jobs, services, filter, activeTab]);
 
   const chartData = [
     { name: "Users", value: dashboardData.totalUsers, color: "#6366f1" },
@@ -201,9 +231,9 @@ const AdminDashboard = () => {
           <CardHeader>
             <CardTitle className="text-sm font-black uppercase tracking-widest italic">User Distribution</CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px] pr-8">
+          <CardContent className="h-[300px] p-2 sm:p-6 min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 900}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 900}} />
@@ -225,19 +255,30 @@ const AdminDashboard = () => {
       {/* MANAGEMENT TABS */}
       <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-2xl">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="px-8 pt-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-border pb-6 bg-muted/20">
-            <TabsList className="bg-muted h-12 p-1 rounded-xl border border-border">
-              <TabsTrigger value="users" className="font-black uppercase text-[10px] tracking-widest px-6 data-[state=active]:bg-card">Users</TabsTrigger>
-              <TabsTrigger value="jobs" className="font-black uppercase text-[10px] tracking-widest px-6 data-[state=active]:bg-card">Jobs</TabsTrigger>
-            </TabsList>
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder={`Filter ${activeTab}...`} 
-                className="pl-10 h-12 bg-background border-border rounded-xl font-bold focus-visible:ring-primary/20" 
-                value={filter} 
-                onChange={(e) => setFilter(e.target.value)} 
-              />
+          <div className="p-4 sm:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-border bg-muted/20">
+            <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
+               <TabsList className="bg-muted h-12 p-1 rounded-xl border border-border inline-flex w-full lg:w-auto min-w-max">
+                <TabsTrigger value="users" className="flex-1 lg:flex-none font-black uppercase text-[10px] tracking-widest px-4 md:px-6 data-[state=active]:bg-card">Users</TabsTrigger>
+                <TabsTrigger value="jobs" className="flex-1 lg:flex-none font-black uppercase text-[10px] tracking-widest px-4 md:px-6 data-[state=active]:bg-card">Jobs</TabsTrigger>
+                <TabsTrigger value="services" className="flex-1 lg:flex-none font-black uppercase text-[10px] tracking-widest px-4 md:px-6 data-[state=active]:bg-card">Categories</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <div className="relative w-full lg:w-72">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder={`Filter ${activeTab}...`} 
+                  className="pl-10 h-12 bg-background border-border rounded-xl font-bold focus-visible:ring-primary/20 w-full" 
+                  value={filter} 
+                  onChange={(e) => setFilter(e.target.value)} 
+                />
+              </div>
+              {activeTab === "services" && (
+                <Button onClick={() => setIsServiceModalOpen(true)} className="h-12 w-full sm:w-auto px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase text-[10px] tracking-widest rounded-xl shadow-lg whitespace-nowrap">
+                  <Plus className="mr-2 h-4 w-4" /> Add Category
+                </Button>
+              )}
             </div>
           </div>
 
@@ -358,8 +399,72 @@ const AdminDashboard = () => {
               </Table>
             </div>
           </TabsContent>
+          <TabsContent value="services" className="m-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="border-border">
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest py-5 px-8">Category Name</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Description</TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Keywords</TableHead>
+                    <TableHead className="text-right font-black uppercase text-[10px] tracking-widest px-8">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredData.map((service) => (
+                    <TableRow key={service._id} className="border-border hover:bg-muted/30 transition-colors">
+                      <TableCell className="font-black uppercase tracking-tight py-4 px-8">{service.service_name}</TableCell>
+                      <TableCell className="text-[12px] font-medium text-muted-foreground">{service.description}</TableCell>
+                      <TableCell>
+                         <div className="flex flex-wrap gap-1">
+                            {(service.keywords || []).map((k, i) => (
+                                <Badge key={i} variant="outline" className="text-[8px] uppercase tracking-wider">{k}</Badge>
+                            ))}
+                         </div>
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        <Button variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteService(service._id)}>
+                             <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
         </Tabs>
       </Card>
+
+      {/* ADD SERVICE MODAL */}
+      <Dialog open={isServiceModalOpen} onOpenChange={setIsServiceModalOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-card border-border rounded-[2.5rem]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tight italic flex items-center gap-2">
+                <Tags className="h-6 w-6 text-primary" /> Add Category
+            </DialogTitle>
+            <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Define new service taxonomy</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Category Name</label>
+              <Input className="h-12 bg-muted/30 rounded-xl font-bold border-border" value={newService.service_name} onChange={(e) => setNewService({...newService, service_name: e.target.value})} placeholder="e.g. Plumbing" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Description</label>
+              <Input className="h-12 bg-muted/30 rounded-xl font-bold border-border" value={newService.description} onChange={(e) => setNewService({...newService, description: e.target.value})} placeholder="Brief overview..." />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">Keywords (comma separated)</label>
+              <Input className="h-12 bg-muted/30 rounded-xl font-bold border-border" value={newService.keywords} onChange={(e) => setNewService({...newService, keywords: e.target.value})} placeholder="leak, pipe, water..." />
+            </div>
+          </div>
+          <DialogFooter className="gap-3">
+            <Button variant="ghost" className="font-bold uppercase text-[10px]" onClick={() => setIsServiceModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateService} className="bg-primary hover:bg-primary/90 font-black uppercase text-[10px] tracking-widest rounded-xl h-11 px-8 border-none">Add Category</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* EDIT MODAL */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

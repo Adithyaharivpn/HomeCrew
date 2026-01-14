@@ -11,7 +11,16 @@ import {
   ShieldCheck,
   SendHorizontal,
   Clock,
+  CalendarClock,
+  Trash2,
+  MoreHorizontal,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const JobActionController = ({
   job,
@@ -19,6 +28,8 @@ const JobActionController = ({
   onContact,
   onViewCode,
   onReview,
+  onReschedule,
+  onCancel,
   suppressDefaultDetails = false,
 }) => {
   const navigate = useNavigate();
@@ -54,40 +65,66 @@ const JobActionController = ({
 
       case "assigned":
       case "in_progress":
-        // Prioritize Payment if not paid
-        if (!job.isPaid) {
-             return (
-               <Button
-                 className={`${btnStyle} bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20`}
-                 onClick={() => navigate("/dashboard/payment", { 
-                    state: { amount: job.price, jobId: job._id, type: 'escrow' } 
-                 })}
-               >
-                 <ShieldCheck className="mr-2 h-4 w-4" />
-                 Pay Securely
-               </Button>
-             );
-        }
-
-        if (job.isPaid && job.completionCode && onViewCode) {
-          return (
-            <Button
-              className={`${btnStyle} bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20`}
-              onClick={() => onViewCode(job)}
-            >
-              <Key className="mr-2 h-4 w-4" />
-              Reveal Code
-            </Button>
-          );
-        }
         return (
-          <Button
-            className={`${btnStyle} bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20`}
-            onClick={() => onContact(job)}
-          >
-            <MessageCircle className="mr-2 h-4 w-4" />
-            Chat with Worker
-          </Button>
+          <div className="flex w-full gap-2">
+            {/* Primary Action Section */}
+            <div className="flex-1">
+              {!job.isPaid ? (
+                 <Button
+                   className={`${btnStyle} bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20`}
+                   onClick={() => navigate("/dashboard/payment", { 
+                      state: { amount: job.price, jobId: job._id, type: 'escrow' } 
+                   })}
+                 >
+                   <ShieldCheck className="mr-2 h-4 w-4" />
+                   Pay Securely
+                 </Button>
+              ) : (
+                job.completionCode && onViewCode ? (
+                  <Button
+                    className={`${btnStyle} bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20`}
+                    onClick={() => onViewCode(job)}
+                  >
+                    <Key className="mr-2 h-4 w-4" />
+                    Reveal Code
+                  </Button>
+                ) : (
+                  <Button
+                      className={`${btnStyle} bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20`}
+                      onClick={() => onContact(job)}
+                  >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Chat with Worker
+                  </Button>
+                )
+              )}
+            </div>
+
+            {/* Secondary Actions Dropdown */}
+            {(onReschedule || onCancel) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="h-14 w-14 rounded-2xl border-border bg-card p-0 shadow-sm hover:bg-muted">
+                    <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 rounded-xl p-2">
+                  {onReschedule && (
+                    <DropdownMenuItem onClick={() => onReschedule(job)} className="rounded-lg p-3 font-medium cursor-pointer">
+                      <CalendarClock className="mr-2 h-4 w-4 text-amber-500" />
+                      Reschedule
+                    </DropdownMenuItem>
+                  )}
+                  {onCancel && (
+                    <DropdownMenuItem onClick={() => onCancel(job)} className="rounded-lg p-3 font-medium text-red-500 cursor-pointer focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/20">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Cancel Job
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         );
 
       case "completed":

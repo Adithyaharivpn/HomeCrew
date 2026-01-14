@@ -12,9 +12,9 @@ import {
   ShieldCheck,
   Loader2,
   FileText,
-  Search
+  Search,
+  Info
 } from "lucide-react";
-
 // UI Components
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 const AdminVerification = () => {
   const [users, setUsers] = useState([]);
@@ -56,6 +57,10 @@ const AdminVerification = () => {
     title: "",
     description: "" 
   });
+  
+  // Details Dialog state
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -95,6 +100,11 @@ const AdminVerification = () => {
     }
   };
 
+  const handleViewDetails = (user) => {
+      setSelectedUser(user);
+      setDetailsOpen(true);
+  };
+
   // Filter Logic
   const filteredUsers = users.filter(u => 
     u.name?.toLowerCase().includes(filter.toLowerCase()) || 
@@ -105,7 +115,7 @@ const AdminVerification = () => {
   const approvedUsers = filteredUsers.filter((u) => u.verificationStatus === "approved");
   const rejectedUsers = filteredUsers.filter((u) => ["rejected", "unverified"].includes(u.verificationStatus));
 
-  const renderTable = (data) => (
+    const renderTable = (data) => (
     <div className="overflow-hidden">
       <Table>
         <TableHeader className="bg-muted/50">
@@ -159,6 +169,9 @@ const AdminVerification = () => {
                 </TableCell>
                 <TableCell className="text-right px-8">
                   <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="ghost" className="rounded-xl h-10 w-10 p-0 hover:bg-muted" onClick={() => handleViewDetails(user)}>
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                    </Button>
                     {user.verificationStatus !== "approved" && (
                       <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[9px] h-10 px-6 rounded-xl shadow-lg shadow-emerald-600/20" onClick={() => handleActionClick(user._id, "approved")}>
                         Approve
@@ -241,29 +254,31 @@ const AdminVerification = () => {
       {/* Main Container */}
       <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-2xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="px-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-border pb-6 bg-muted/20">
-            <TabsList className="bg-muted h-14 p-1.5 rounded-2xl border border-border w-full md:w-auto">
-              <TabsTrigger value="pending" className="relative font-black uppercase text-[10px] tracking-widest px-8 h-full data-[state=active]:bg-card rounded-xl">
-                Pending
-                {pendingUsers.length > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white font-black shadow-xl">
-                    {pendingUsers.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="verified" className="font-black uppercase text-[10px] tracking-widest px-8 h-full data-[state=active]:bg-card rounded-xl">
-                Verified ({approvedUsers.length})
-              </TabsTrigger>
-              <TabsTrigger value="rejected" className="font-black uppercase text-[10px] tracking-widest px-8 h-full data-[state=active]:bg-card rounded-xl">
-                Rejected ({rejectedUsers.length})
-              </TabsTrigger>
-            </TabsList>
+          <div className="p-4 sm:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-border bg-muted/20">
+            <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
+               <TabsList className="bg-muted h-14 p-1.5 rounded-2xl border border-border inline-flex w-full lg:w-auto min-w-max">
+                <TabsTrigger value="pending" className="relative font-black uppercase text-[10px] tracking-widest px-8 h-full data-[state=active]:bg-card rounded-xl">
+                  Pending
+                  {pendingUsers.length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white font-black shadow-xl">
+                      {pendingUsers.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="verified" className="font-black uppercase text-[10px] tracking-widest px-8 h-full data-[state=active]:bg-card rounded-xl">
+                  Verified ({approvedUsers.length})
+                </TabsTrigger>
+                <TabsTrigger value="rejected" className="font-black uppercase text-[10px] tracking-widest px-8 h-full data-[state=active]:bg-card rounded-xl">
+                  Rejected ({rejectedUsers.length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <div className="relative w-full md:max-w-md group">
+            <div className="relative w-full lg:w-[400px] group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input 
                 placeholder="Search pipeline by name..." 
-                className="pl-12 h-14 bg-background border-border rounded-2xl font-bold focus-visible:ring-primary/20 shadow-inner italic" 
+                className="pl-12 h-14 bg-background border-border rounded-2xl font-bold focus-visible:ring-primary/20 shadow-inner italic w-full" 
                 value={filter} 
                 onChange={(e) => setFilter(e.target.value)} 
               />
@@ -277,6 +292,69 @@ const AdminVerification = () => {
           </CardContent>
         </Tabs>
       </Card>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="sm:max-w-[600px] bg-card border-border rounded-[2.5rem] p-0 overflow-hidden">
+          {selectedUser && (
+            <>
+              <div className="bg-muted/30 p-8 border-b border-border flex items-center gap-6">
+                 <Avatar className="h-24 w-24 border-4 border-card shadow-xl">
+                    <AvatarImage src={selectedUser.profilePictureUrl} />
+                    <AvatarFallback className="text-2xl font-black bg-primary/10 text-primary">{selectedUser.name?.charAt(0)}</AvatarFallback>
+                 </Avatar>
+                 <div>
+                    <h2 className="text-2xl font-black uppercase tracking-tight">{selectedUser.name}</h2>
+                    <p className="text-sm font-bold text-muted-foreground">{selectedUser.email}</p>
+                    <div className="flex gap-2 mt-3">
+                        <Badge variant="outline" className="text-[10px] uppercase tracking-widest bg-background/50">{selectedUser.role}</Badge>
+                        <Badge className={`${selectedUser.isVerified ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"} text-[10px] uppercase tracking-widest border-none`}>
+                            {selectedUser.isVerified ? "Email Verified" : "Email Unverified"}
+                        </Badge>
+                    </div>
+                 </div>
+              </div>
+              
+              <div className="p-8 space-y-6">
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Contact Phone</label>
+                        <p className="font-bold text-sm">{selectedUser.phoneNumber || "Not provided"}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Location</label>
+                        <p className="font-bold text-sm">{selectedUser.location || "Not provided"}</p>
+                    </div>
+                    {selectedUser.role === 'tradesperson' && (
+                        <>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Trade Specialization</label>
+                                <p className="font-bold text-sm">{selectedUser.tradeCategory || "General/Unspecified"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Experience</label>
+                                <p className="font-bold text-sm">{selectedUser.experience ? `${selectedUser.experience} Years` : "Not specified"}</p>
+                            </div>
+                        </>
+                    )}
+                 </div>
+                 
+                 {selectedUser.bio && (
+                    <div className="space-y-2 bg-muted/20 p-4 rounded-xl">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Professional Bio</label>
+                        <p className="text-sm font-medium leading-relaxed">{selectedUser.bio}</p>
+                    </div>
+                 )}
+                 
+                 <div className="pt-4 flex justify-end">
+                    <Button onClick={() => setDetailsOpen(false)} className="bg-primary text-primary-foreground font-black uppercase text-[10px] tracking-widest rounded-xl h-10 px-6">
+                        Close Record
+                    </Button>
+                 </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={confirmDialog.open} onOpenChange={(o) => setConfirmDialog(prev => ({ ...prev, open: o }))}>
         <AlertDialogContent className="bg-card border-border rounded-[2.5rem] p-10">

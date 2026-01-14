@@ -5,7 +5,7 @@ const cloudinary = require("../middleware/cloudinary");
 const logger = require('../utils/logger'); 
 
 const signup = async (req, res) => {
-  const { name, email, password, role, tradeCategory, experience, location, lat, lng } = req.body;
+  const { name, email, password, role, tradeCategory, experience, location, phoneNumber, lat, lng } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -21,6 +21,8 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      phoneNumber, // Added
+      location, // Available for all roles
       verificationStatus: role === 'tradesperson' ? 'pending' : 'unverified',
       isVerified: false,
     };
@@ -32,7 +34,7 @@ const signup = async (req, res) => {
     if (role === "tradesperson") {
       userData.tradeCategory = tradeCategory;
       userData.experience = experience;
-      userData.location = location;
+      // userData.location = location; // Moved up
   
     if (lat && lng) {
           userData.mapLocation = { lat, lng };

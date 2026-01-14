@@ -28,6 +28,7 @@ import Chatroom from "./components/User/Chatroom";
 import ViewDetails from "./components/User/ViewDetails";
 import UserProfile from "./components/User/UserProfile";
 import NotificationsPage from "./components/User/NotificationsPage";
+import ReportPage from "./components/User/ReportPage";
 
 // Admin & Payment Components
 import AdminDashboard from "./components/Admin/AdminDashboard";
@@ -35,6 +36,7 @@ import SystemLogs from "./components/Admin/SystemLogs";
 import TransactionHistory from "./components/Payment/TransactionHistory";
 import PaymentPage from "./components/Payment/PaymentPage";
 import AdminVerification from "./components/Admin/AdminVerification";
+import AdminReports from "./components/Admin/AdminReports";
 import { ThemeProvider } from "./components/Utils/Themeprovider";
 import DashboardHome from "./components/Hompage/DashboardHome";
 
@@ -79,6 +81,7 @@ function App() {
             <Route path="profile" element={<UserProfile />} />
             <Route path="profile/:id" element={<UserProfile />} />
             <Route path="billing" element={<TransactionHistory />} />
+            <Route path="report" element={<ReportPage />} />
 
             {/* Customer Specific */}
             <Route path="post-job" element={<JobPosting />} />
@@ -94,6 +97,7 @@ function App() {
             <Route path="admin-panel" element={<AdminDashboard />} />
             <Route path="system-logs" element={<SystemLogs />} />
             <Route path="verifications" element={<AdminVerification />} />
+            <Route path="reports" element={<AdminReports />} />
           </Route>
           <Route path="/chat/:roomId" element={<ProtectedRoute allowedRoles={["customer", "tradesperson", "admin"]}><ChatBox /></ProtectedRoute>} />
           <Route path="/job/:jobId" element={<ProtectedRoute allowedRoles={["customer", "tradesperson", "admin"]}><ViewDetails /></ProtectedRoute>} />
