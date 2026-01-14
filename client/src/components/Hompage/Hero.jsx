@@ -63,7 +63,7 @@ const Hero = () => {
           Connect with verified local tradespeople in seconds. Use our marketplace to
           find help near you, verify work, and pay securely.
         </p>
-
+          {/* Search Bar */}
         <div
           className={`mx-auto flex max-w-2xl items-center rounded-full border p-2 shadow-2xl transition-all duration-300 focus-within:ring-4 focus-within:ring-blue-500/20 ${
             isDark 
