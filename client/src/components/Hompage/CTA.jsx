@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Hammer, Search } from "lucide-react";
+import { Hammer, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "../Utils/Themeprovider";
 import { BackgroundBeams } from "@/components/ui/background-beams";
+import { motion } from "framer-motion";
 
 const CTA = () => {
   const { theme } = useTheme();
@@ -15,7 +15,6 @@ const CTA = () => {
 
   return (
     <section className="relative overflow-hidden py-24 md:py-32">
-      {/* Background with Beams for consistency */}
       <div className="absolute inset-0 z-0">
           <div className={`absolute inset-0 ${isDark ? "bg-zinc-950" : "bg-blue-50"} opacity-90`} />
           <BackgroundBeams className="opacity-20" />
@@ -28,7 +27,7 @@ const CTA = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6 bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
             Ready to Get Your Job Done?
           </h2>
           

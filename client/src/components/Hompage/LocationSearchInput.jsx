@@ -6,7 +6,6 @@ import { MapPin, Search, Loader2 } from "lucide-react";
 import LocationPicker from "./LocationPicker";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import api from "../../api/axiosConfig"; 
-import axios from 'axios';
 
 const LocationSearchInput = ({ value, onChange, onLocationSelect }) => {
     const [suggestions, setSuggestions] = useState([]);
@@ -19,8 +18,7 @@ const LocationSearchInput = ({ value, onChange, onLocationSelect }) => {
         const timer = setTimeout(async () => {
             if (value && value.length > 2 && isSearching) {
                 try {
-                    // Using OSM Nominatim for suggestions
-                    const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${value}&limit=5`);
+                    const res = await api.get(`https://nominatim.openstreetmap.org/search?format=json&q=${value}&limit=5`);
                     setSuggestions(res.data);
                 } catch (err) {
                     console.error("Location search failed", err);
@@ -36,13 +34,13 @@ const LocationSearchInput = ({ value, onChange, onLocationSelect }) => {
     // Handle Input Change
     const handleInputChange = (e) => {
         setIsSearching(true);
-        onChange(e); // Propagate text change to parent
+        onChange(e); 
     };
 
     // Handle Suggestion Click
     const handleSuggestionClick = (place) => {
         onLocationSelect({
-            city: place.display_name.split(',')[0], // Simple heuristic, parent can refine
+            city: place.display_name.split(',')[0], 
             lat: place.lat,
             lng: place.lon,
             fullAddress: place.display_name
@@ -51,13 +49,11 @@ const LocationSearchInput = ({ value, onChange, onLocationSelect }) => {
         setIsSearching(false);
     };
 
-    // Handle Map Pick
     const handleMapSelect = (locData) => {
         onLocationSelect(locData);
-        setDialogOpen(false); // Close modal
+        setDialogOpen(false);
     };
 
-    // Close suggestions on click outside
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -89,7 +85,7 @@ const LocationSearchInput = ({ value, onChange, onLocationSelect }) => {
                             <MapPin className="h-5 w-5 text-blue-600" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col p-0 overflow-hidden bg-card border-border rounded-xl">
+                    <DialogContent className="sm:max-w-150 h-[80vh] flex flex-col p-0 overflow-hidden bg-card border-border rounded-xl">
                         <DialogHeader className="p-4 border-b border-border">
                             <DialogTitle className="text-sm font-black uppercase tracking-widest">Pinpoint Precise Location</DialogTitle>
                         </DialogHeader>
@@ -103,7 +99,7 @@ const LocationSearchInput = ({ value, onChange, onLocationSelect }) => {
             {/* Suggestions Dropdown */}
             {suggestions.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                    <ScrollArea className="max-h-[200px]">
+                    <ScrollArea className="max-h-50">
                         {suggestions.map((place) => (
                             <div 
                                 key={place.place_id} 

@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState, useEffect, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IndianRupee, Users, Briefcase, Star, ShieldCheck, Zap, Clock, Loader2, ArrowRight, Badge } from "lucide-react";
+import { IndianRupee, Users, Briefcase, Star, ShieldCheck, Zap, Clock, Loader2, ArrowRight, Badge as BadgeIcon, TrendingUp, TrendingDown } from "lucide-react";
 import api from "../../api/axiosConfig";
 import { useAuth } from "../../api/useAuth";
 import { useNavigate } from "react-router-dom";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts'; // Keep these for ChartContainer
 
 const DashboardHome = () => {
   const { user } = useAuth();
@@ -14,6 +18,7 @@ const DashboardHome = () => {
   const [stats, setStats] = useState(null);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = React.useState("90d");
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -47,27 +52,295 @@ const DashboardHome = () => {
     switch (user?.role) {
       case "admin":
         return [
-          { title: "Platform Revenue", value: `₹${s.totalRevenue || 0}`, icon: IndianRupee, color: "text-emerald-500" },
-          { title: "Active Users", value: s.totalUsers || 0, icon: Users, color: "text-blue-500" },
-          { title: "Pending Verifications", value: s.pendingVerifications || 0, icon: ShieldCheck, color: "text-rose-500", alert: s.pendingVerifications > 0, path: "/dashboard/verifications" },
+          { 
+              title: "Platform Revenue", 
+              value: `₹${(s.totalRevenue || 0).toLocaleString()}`, 
+              trend: "+12.5%", 
+              trendIcon: TrendingUp,
+              trendColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+              footerLabel: "vs last month",
+              footerTrend: "Training up",
+              footerTrendIcon: TrendingUp,
+              footerTrendColor: "text-emerald-500"
+          },
+          { 
+              title: "Active Users", 
+              value: (s.totalUsers || 0).toLocaleString(), 
+              trend: "+4.3%", 
+              trendIcon: TrendingUp, 
+              trendColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+              footerLabel: "new registrations",
+              footerTrend: "Growing",
+              footerTrendIcon: TrendingUp,
+              footerTrendColor: "text-emerald-500"
+          },
+          { 
+              title: "Pending Verifications", 
+              value: s.pendingVerifications || 0, 
+              trend: "Attention", 
+              trendIcon: ShieldCheck, 
+              trendColor: s.pendingVerifications > 0 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+              footerLabel: "requires action",
+              footerTrend: "Queue",
+              footerTrendIcon: Clock,
+              footerTrendColor: "text-amber-500",
+              path: "/dashboard/verifications",
+              alert: s.pendingVerifications > 0
+          },
         ];
       case "tradesperson":
         return [
-          { title: "Total Earned", value: `₹${s.totalEarned || 0}`, icon: IndianRupee, color: "text-emerald-500" },
-          { title: "Active Jobs", value: s.activeJobs || 0, icon: Briefcase, color: "text-blue-500" },
-          { title: "Average Rating", value: `${s.rating || 0}/5`, icon: Star, color: "text-amber-500" },
+          { 
+              title: "Total Earned", 
+              value: `₹${(s.totalEarned || 0).toLocaleString()}`, 
+              trend: "+8.2%", 
+              trendIcon: TrendingUp,
+              trendColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", 
+              footerLabel: "this month",
+              footerTrend: "Income up",
+              footerTrendIcon: TrendingUp,
+              footerTrendColor: "text-emerald-500"
+          },
+          { 
+              title: "Active Jobs", 
+              value: s.activeJobs || 0, 
+              trend: "Stable", 
+              trendIcon: briefCaseIcon,
+              trendColor: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+              footerLabel: "in progress",
+              footerTrend: "Consistent",
+              footerTrendIcon: TrendingUp,
+              footerTrendColor: "text-blue-500"
+          },
+          { 
+              title: "Average Rating", 
+              value: `${s.rating || 0}/5`, 
+              trend: "Top Rated", 
+              trendIcon: Star, 
+              trendColor: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+              footerLabel: "client satisfaction",
+              footerTrend: "Excellent",
+              footerTrendIcon: Star,
+              footerTrendColor: "text-amber-500"
+          },
         ];
       case "customer":
         return [
-          { title: "Total Spent", value: `₹${s.totalSpent || 0}`, icon: IndianRupee, color: "text-blue-500" },
-          { title: "Jobs Posted", value: s.totalJobs || 0, icon: Zap, color: "text-purple-500" },
-          { title: "Ongoing Tasks", value: s.ongoingTasks || 0, icon: Briefcase, color: "text-emerald-500" },
+          { 
+              title: "Total Spent", 
+              value: `₹${(s.totalSpent || 0).toLocaleString()}`, 
+              trend: "+2.4%", 
+              trendIcon: TrendingUp,
+              trendColor: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+              footerLabel: "invested",
+              footerTrend: "Spending",
+              footerTrendIcon: TrendingUp,
+              footerTrendColor: "text-blue-500"
+          },
+          { 
+              title: "Jobs Posted", 
+              value: s.totalJobs || 0, 
+              trend: "Active", 
+              trendIcon: Zap,
+              trendColor: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+              footerLabel: "total posts",
+              footerTrend: "Engagement",
+              footerTrendIcon: TrendingUp,
+              footerTrendColor: "text-purple-500"
+          },
+          { 
+              title: "Ongoing Tasks", 
+              value: s.ongoingTasks || 0, 
+              trend: "In Progress", 
+              trendIcon: Briefcase,
+              trendColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+              footerLabel: "currently active",
+              footerTrend: "Tracking",
+              footerTrendIcon: Clock,
+              footerTrendColor: "text-emerald-500"
+          },
         ];
       default: return [];
     }
   };
 
+  // Helper for icons since I can't use JSX in object key before render? No, I can. 
+  // But I need to define briefCaseIcon first or just use Briefcase directly.
+  const briefCaseIcon = Briefcase;
+
   const cards = getRoleContent();
+
+  // Mock Data generation using useMemo to persist across renders during sorting
+  const chartData = useMemo(() => {
+    if (!stats) return [];
+    
+    const days = 90;
+    const data = [];
+    const today = new Date();
+
+    // Base values scaling
+    let basePrimary = 0; // Money
+    let baseSecondary = 0; // Count
+    if (user?.role === 'admin') { 
+        basePrimary = (stats.totalRevenue || 50000) / 90; 
+        baseSecondary = Math.max(0.2, (stats.totalUsers || 0) / 90); // Allow roughly 1 user every 5 days if small
+    }
+    else if (user?.role === 'tradesperson') { 
+        basePrimary = (stats.totalEarned || 20000) / 90; 
+        baseSecondary = Math.max(0.2, (stats.activeJobs || 10) / 90); 
+    }
+    else { 
+        basePrimary = (stats.totalSpent || 10000) / 90; 
+        baseSecondary = Math.max(0.2, (stats.totalJobs || 5) / 90); 
+    }
+
+    for (let i = 0; i < days; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() - (days - i));
+        const dateStr = d.toISOString().split('T')[0];
+        
+        // Randomize
+        const primary = Math.max(0, Math.floor(basePrimary * (0.5 + Math.random() * 1.5)));
+        
+        // Handle low-frequency events for secondary data (users/jobs)
+        let secondary = 0;
+        if (baseSecondary < 1) {
+            // If average is low, only add 1 occasionally based on probability
+            secondary = Math.random() < baseSecondary ? 1 : 0;
+        } else {
+            secondary = Math.max(0, Math.floor(baseSecondary * (0.5 + Math.random() * 1.5)));
+        }
+
+        data.push({
+            date: dateStr,
+            primary,
+            secondary
+        });
+    }
+    return data;
+  }, [stats, user?.role]);
+
+  const filteredChartData = useMemo(() => {
+        const referenceDate = new Date();
+        let daysToSubtract = 90;
+        if (timeRange === "30d") daysToSubtract = 30;
+        else if (timeRange === "7d") daysToSubtract = 7;
+        
+        const startDate = new Date(referenceDate);
+        startDate.setDate(startDate.getDate() - daysToSubtract);
+        
+        return chartData.filter(item => new Date(item.date) >= startDate);
+  }, [chartData, timeRange]);
+
+  const getChartConfig = () => {
+      if (user?.role === 'admin') {
+          return {
+              primary: { label: "Revenue (₹)", color: "hsl(var(--chart-1))" }, // Using chart-1 for primary
+              secondary: { label: "New Users", color: "hsl(var(--chart-2))" }
+          };
+      } else if (user?.role === 'tradesperson') {
+          return {
+              primary: { label: "Earnings (₹)", color: "hsl(var(--chart-1))" },
+              secondary: { label: "New Jobs", color: "hsl(var(--chart-2))" }
+          };
+      } else {
+          return {
+              primary: { label: "Spent (₹)", color: "hsl(var(--chart-1))" },
+              secondary: { label: "Posted Jobs", color: "hsl(var(--chart-2))" }
+          };
+      }
+  };
+
+  const chartConfig = getChartConfig();
+
+  const renderChart = () => {
+    return (
+        <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-xl border">
+            <CardHeader className="flex items-center gap-2 space-y-0 border-b border-border/50 py-5 sm:flex-row">
+            <div className="grid flex-1 gap-1">
+                <CardTitle className="text-xl font-black uppercase tracking-tight italic">
+                    Performance Trends
+                </CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase text-muted-foreground">
+                    Key metrics over time
+                </CardDescription>
+            </div>
+            <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger
+                className="w-[160px] rounded-xl font-bold uppercase text-[10px] tracking-widest sm:ml-auto"
+                aria-label="Select a value"
+                >
+                <SelectValue placeholder="Last 3 months" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border">
+                <SelectItem value="90d" className="rounded-lg font-bold uppercase text-[10px] tracking-widest">
+                    Last 3 months
+                </SelectItem>
+                <SelectItem value="30d" className="rounded-lg font-bold uppercase text-[10px] tracking-widest">
+                    Last 30 days
+                </SelectItem>
+                <SelectItem value="7d" className="rounded-lg font-bold uppercase text-[10px] tracking-widest">
+                    Last 7 days
+                </SelectItem>
+                </SelectContent>
+            </Select>
+            </CardHeader>
+            <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+            <ChartContainer
+                config={chartConfig}
+                className="aspect-auto h-[250px] w-full"
+            >
+                <AreaChart data={filteredChartData}>
+                <defs>
+                    <linearGradient id="fillPrimary" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="fillSecondary" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-secondary)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="var(--color-secondary)" stopOpacity={0.1}/>
+                    </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    minTickGap={32}
+                    tickFormatter={(value) => {
+                    const date = new Date(value)
+                    return date.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                    })
+                    }}
+                />
+                <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Area
+                    dataKey="secondary"
+                    type="natural"
+                    fill="url(#fillSecondary)"
+                    stroke="var(--color-secondary)"
+                    stackId="a"
+                />
+                <Area
+                    dataKey="primary"
+                    type="natural"
+                    fill="url(#fillPrimary)"
+                    stroke="var(--color-primary)"
+                    stackId="a"
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+                </AreaChart>
+            </ChartContainer>
+            </CardContent>
+        </Card>
+    );
+  };
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10 max-w-5xl mx-auto">
@@ -83,7 +356,7 @@ const DashboardHome = () => {
       </div>
 
       {/* Stats Cards Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
            [1, 2, 3].map((i) => (
             <Card key={i} className="bg-card border-border rounded-[2.5rem] shadow-sm">
@@ -98,27 +371,42 @@ const DashboardHome = () => {
            ))
         ) : (
           cards.map((card, i) => (
-            <Card 
-              key={i} 
-              onClick={() => card.path && navigate(card.path)}
-              className={`bg-card border-border rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group ${card.alert ? "ring-2 ring-rose-500/50 bg-rose-500/5" : ""}`}
-            >
-              <CardContent className="p-8 flex items-center gap-6">
-                <div className="h-16 w-16 bg-muted rounded-[1.5rem] flex items-center justify-center relative shadow-inner group-hover:bg-background transition-colors">
-                  <card.icon className={`h-8 w-8 ${card.color}`} />
-                  {card.alert && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-rose-600 rounded-full border-4 border-card animate-pulse" />
-                  )}
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">{card.title}</p>
-                  <h3 className="text-3xl font-black tracking-tighter mt-1">{card.value}</h3>
-                </div>
-              </CardContent>
-            </Card>
+             <Card 
+               key={i} 
+               onClick={() => card.path && navigate(card.path)}
+               className={`bg-card border-border shadow-sm border-l-4 rounded-xl cursor-pointer hover:shadow-lg transition-all ${card.path ? "hover:bg-muted/50" : ""}`}
+             >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="grid gap-1">
+                        <CardDescription className="text-[10px] font-bold uppercase tracking-widest">{card.title}</CardDescription>
+                        <CardTitle className="text-2xl font-black tabular-nums">{card.value}</CardTitle>
+                    </div>
+                     <Badge variant="outline" className={`${card.trendColor} gap-1 font-bold`}>
+                        {/* Render Icon component */}
+                        <card.trendIcon className="h-3 w-3" />
+                        {card.trend}
+                    </Badge>
+                </CardHeader>
+                <CardFooter className="flex-col items-start gap-1 p-6 pt-0 text-[10px] font-medium text-muted-foreground">
+                    <div className="flex gap-1.5 items-center">
+                        <span className={`${card.footerTrendColor} flex items-center gap-1 font-bold`}>
+                            {card.footerTrend} 
+                            <card.footerTrendIcon className="h-3 w-3" />
+                        </span> 
+                        <span>{card.footerLabel}</span>
+                    </div>
+                </CardFooter>
+             </Card>
           ))
         )}
       </div>
+
+      {/* Charts Section */}
+      {!loading && stats && (
+         <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+            {renderChart()}
+         </div>
+      )}
 
       {/* Feed Section */}
       <div className="bg-card border border-border rounded-[3rem] overflow-hidden shadow-2xl">

@@ -46,9 +46,9 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/[0.03] blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/3 blur-[120px] pointer-events-none -z-10" />
 
-      <Card className="w-full max-w-[420px] border-border bg-card rounded-[1.5rem] shadow-2xl overflow-hidden">
+      <Card className="w-full max-w-105 border-border bg-card rounded-3xl shadow-2xl overflow-hidden">
         <CardHeader className="pt-12 text-center">
           <div className="mx-auto h-12 w-12 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-600/20">
             <ShieldCheck className="h-6 w-6 text-blue-600" />

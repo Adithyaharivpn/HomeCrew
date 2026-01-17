@@ -96,7 +96,7 @@ const SignUp = () => {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4 pt-24 pb-20">
-      <Card className="w-full max-w-[550px] border-border bg-card rounded-[1.5rem] shadow-2xl overflow-hidden">
+      <Card className="w-full max-w-137.5 border-border bg-card rounded-3xl shadow-2xl overflow-hidden">
         <CardHeader className="pt-10 text-center text-foreground">
           <CardTitle className="text-3xl font-black  uppercase tracking-tighter">Create Entity</CardTitle>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 ">Initialize Global Profile</p>
@@ -106,7 +106,7 @@ const SignUp = () => {
           {error && <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-[10px] font-black uppercase text-destructive text-center tracking-widest">{error}</div>}
           
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Label className="group cursor-pointer border-2 border-dashed border-border rounded-[1.5rem] p-8 flex flex-col items-center hover:bg-muted/50 transition-all bg-muted/20">
+            <Label className="group cursor-pointer border-2 border-dashed border-border rounded-3xl p-8 flex flex-col items-center hover:bg-muted/50 transition-all bg-muted/20">
               <CloudUpload className="h-8 w-8 text-blue-500 mb-2 group-hover:scale-110 transition-transform" />
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
                   {profilePicture ? profilePicture.name : "Establish Biometric ID (Profile Photo)"}
@@ -133,7 +133,7 @@ const SignUp = () => {
             </Select>
 
             {formData.role === "tradesperson" && (
-                <div className="p-6 bg-muted/30 rounded-[2rem] border border-border space-y-4 animate-in slide-in-from-top-4">
+                <div className="p-6 bg-muted/30 rounded-4xl border border-border space-y-4 animate-in slide-in-from-top-4">
                     <Select onValueChange={(val) => handleSelectChange("tradeCategory", val)}>
                         <SelectTrigger className="bg-background rounded-xl h-12 border-none shadow-input font-bold text-sm">
                             <SelectValue placeholder="Specialization Category" />

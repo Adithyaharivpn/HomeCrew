@@ -11,11 +11,18 @@ const getDashboardStats = async (req, res) => {
         const totalCustomers = await User.countDocuments({ role: 'customer' });
         const totalJobs = await Job.countDocuments();
 
+        const totalRevenueAgg = await mongoose.connection.collection('transactions').aggregate([
+            { $match: { status: 'success' } },
+            { $group: { _id: null, total: { $sum: '$amount' } } }
+        ]).toArray();
+        const totalRevenue = (totalRevenueAgg[0] && totalRevenueAgg[0].total) || 0;
+
         res.json({
             totalUsers,
             totalTradespeople,
             totalCustomers,
             totalJobs,
+            totalRevenue
         });
     } catch (err) {
         logger.error(`Error fetching dashboard stats: ${err.message}`);

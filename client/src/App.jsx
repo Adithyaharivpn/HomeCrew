@@ -15,7 +15,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // Dashboard & Layout
 import DashboardLayout from "./components/Hompage/DashboardLayout";
-import AdminOverview from "./components/Admin/AdminDashboard";
 
 // User & Job Components
 import JobPosting from "./components/User/JobPosting";

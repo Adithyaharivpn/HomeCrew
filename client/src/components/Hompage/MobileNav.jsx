@@ -18,7 +18,7 @@ const MobileNav = ({ user }) => {
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[240px] bg-slate-900 text-white border-r-slate-800">
+      <SheetContent side="left" className="w-60 bg-slate-900 text-white border-r-slate-800">
         <SheetHeader>
           <SheetTitle className="text-white text-left">Pages</SheetTitle>
         </SheetHeader>

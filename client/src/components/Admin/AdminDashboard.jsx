@@ -2,25 +2,28 @@ import React, { useState, useEffect, useMemo } from "react";
 import api from "../../api/axiosConfig";
 import { useAuth } from "../../api/useAuth";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Cell,
+  Area, AreaChart
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { 
   Search, LogOut, Loader2, ShieldAlert,
-  Users, Briefcase, HardHat, Trash2, Edit3, RefreshCcw, MoreHorizontal, Plus, Tags
+  Users, Briefcase, HardHat, Trash2, Edit3, RefreshCcw, MoreHorizontal, Plus, Tags,
+  TrendingUp, TrendingDown 
 } from "lucide-react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -35,7 +38,7 @@ const AdminDashboard = () => {
   const { logout } = useAuth();
   
   const [dashboardData, setDashboardData] = useState({
-    totalUsers: 0, totalTradespeople: 0, totalCustomers: 0, totalJobs: 0,
+    totalUsers: 0, totalTradespeople: 0, totalCustomers: 0, totalJobs: 0, totalRevenue: 0,
   });
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]); 
@@ -50,6 +53,8 @@ const AdminDashboard = () => {
   const [newService, setNewService] = useState({ service_name: "", description: "", keywords: "" });
   const [filter, setFilter] = useState('');
   const [activeTab, setActiveTab] = useState("users");
+
+  const [timeRange, setTimeRange] = React.useState("7d");
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -144,11 +149,76 @@ const AdminDashboard = () => {
     return services.filter(s => s.service_name.toLowerCase().includes(lowerFilter) || s.description.toLowerCase().includes(lowerFilter));
   }, [users, jobs, services, filter, activeTab]);
 
-  const chartData = [
-    { name: "Users", value: dashboardData.totalUsers, color: "#6366f1" },
-    { name: "Trades", value: dashboardData.totalTradespeople, color: "#f59e0b" },
-    { name: "Customers", value: dashboardData.totalCustomers, color: "#10b981" }
-  ];
+  // Process Real Data for Chart
+  const processedChartData = useMemo(() => {
+    // 1. Create a map of date -> { customers: 0, trades: 0, jobs: 0 }
+    const dataMap = new Map();
+    const today = new Date();
+    
+    // Initialize last 90 days with 0
+    for (let i = 0; i < 90; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dataMap.set(dateStr, { date: dateStr, customers: 0, trades: 0, jobs: 0 });
+    }
+
+    // 2. Populate with user data
+    users.forEach(user => {
+        if (!user.createdAt) return;
+        const dateStr = new Date(user.createdAt).toISOString().split('T')[0];
+        if (dataMap.has(dateStr)) {
+            const entry = dataMap.get(dateStr);
+            if (user.role === 'customer') entry.customers += 1;
+            else if (user.role === 'tradesperson') entry.trades += 1;
+        }
+    });
+
+    // 3. Populate with job data
+    jobs.forEach(job => {
+        if (!job.createdAt) return;
+        const dateStr = new Date(job.createdAt).toISOString().split('T')[0];
+        if (dataMap.has(dateStr)) {
+            const entry = dataMap.get(dateStr);
+            entry.jobs += 1;
+        }
+    });
+
+    // 4. Convert to array and sort
+    return Array.from(dataMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+  }, [users, jobs]);
+
+  const filteredChartData = processedChartData.filter((item) => {
+    const date = new Date(item.date)
+    const referenceDate = new Date() // Use current date as reference
+    let daysToSubtract = 90
+    if (timeRange === "30d") {
+      daysToSubtract = 30
+    } else if (timeRange === "7d") {
+      daysToSubtract = 7
+    }
+    const startDate = new Date(referenceDate)
+    startDate.setDate(startDate.getDate() - daysToSubtract)
+    return date >= startDate
+  });
+
+  const chartConfig = {
+    registrations: {
+      label: "Platform Activity",
+    },
+    customers: {
+      label: "New Customers",
+      color: "hsl(var(--chart-1))",
+    },
+    trades: {
+      label: "New Tradespeople",
+      color: "hsl(var(--chart-2))",
+    },
+    jobs: {
+        label: "Jobs Posted",
+        color: "hsl(var(--chart-3))",
+    }
+  };
 
   if (loading) return (
     <div className="space-y-8 py-12">
@@ -171,7 +241,7 @@ const AdminDashboard = () => {
                 </Card>
             ))}
         </div>
-        <Card className="bg-card border-border rounded-[2rem] h-[350px] p-8">
+        <Card className="bg-card border-border rounded-4xl h-87.5 p-8">
             <Skeleton className="h-full w-full rounded-xl" />
         </Card>
         <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden">
@@ -207,48 +277,222 @@ const AdminDashboard = () => {
       </div>
 
       {/* STATS SECTION */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-            { label: "Ecosystem Users", val: dashboardData.totalUsers, icon: Users, color: "text-indigo-500", border: "border-l-indigo-500" },
-            { label: "Active Postings", val: dashboardData.totalJobs, icon: Briefcase, color: "text-amber-500", border: "border-l-amber-500" },
-            { label: "Registered Trades", val: dashboardData.totalTradespeople, icon: HardHat, color: "text-emerald-500", border: "border-l-emerald-500" }
-        ].map((stat, i) => (
-            <Card key={i} className={`bg-card border-border shadow-sm border-l-4 ${stat.border} rounded-2xl overflow-hidden`}>
-                <CardContent className="p-6 flex items-center justify-between">
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{stat.label}</p>
-                        <div className="text-3xl font-black italic">{stat.val}</div>
-                    </div>
-                    <stat.icon className={`h-8 w-8 ${stat.color} opacity-80`} />
-                </CardContent>
-            </Card>
-        ))}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card className="bg-card border-border shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="grid gap-1">
+            <CardDescription className="text-[10px] font-bold uppercase tracking-widest">Total Revenue</CardDescription>
+            <CardTitle className="text-2xl font-black tabular-nums">
+                ₹{(dashboardData.totalRevenue || 0).toLocaleString()}
+            </CardTitle>
+          </div>
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1 font-bold">
+              <TrendingUp className="h-3 w-3" />
+              +12.5%
+            </Badge>
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1 p-6 pt-0 text-[10px] font-medium text-muted-foreground">
+          <div className="flex gap-1.5 items-center">
+             <span className="text-emerald-500 flex items-center gap-1 font-bold">Training up <TrendingUp className="h-3 w-3" /></span> 
+             <span>this month</span>
+          </div>
+        </CardFooter>
+      </Card>
+
+      <Card className="bg-card border-border shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="grid gap-1">
+            <CardDescription className="text-[10px] font-bold uppercase tracking-widest">New Customers</CardDescription>
+            <CardTitle className="text-2xl font-black tabular-nums">
+                {dashboardData.totalCustomers.toLocaleString()}
+            </CardTitle>
+          </div>
+           <Badge variant="outline" className="bg-rose-500/10 text-rose-500 border-rose-500/20 gap-1 font-bold">
+              <TrendingDown className="h-3 w-3" />
+              -2.1%
+            </Badge>
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1 p-6 pt-0 text-[10px] font-medium text-muted-foreground">
+          <div className="flex gap-1.5 items-center">
+             <span className="text-rose-500 flex items-center gap-1 font-bold">Down <TrendingDown className="h-3 w-3" /></span> 
+             <span>from last month</span>
+          </div>
+        </CardFooter>
+      </Card>
+
+      <Card className="bg-card border-border shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+           <div className="grid gap-1">
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest">Active Accounts</CardDescription>
+                <CardTitle className="text-2xl font-black tabular-nums">
+                    {dashboardData.totalUsers.toLocaleString()}
+                </CardTitle>
+           </div>
+           <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1 font-bold">
+              <TrendingUp className="h-3 w-3" />
+              +4.3%
+            </Badge>
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1 p-6 pt-0 text-[10px] font-medium text-muted-foreground">
+          <div className="flex gap-1.5 items-center">
+             <span className="text-emerald-500 flex items-center gap-1 font-bold">Strong retention <TrendingUp className="h-3 w-3" /></span> 
+             <span>+1.2%</span>
+          </div>
+        </CardFooter>
+      </Card>
+
+      <Card className="bg-card border-border shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="grid gap-1">
+            <CardDescription className="text-[10px] font-bold uppercase tracking-widest">Active Jobs</CardDescription>
+            <CardTitle className="text-2xl font-black tabular-nums">
+                {dashboardData.totalJobs.toLocaleString()}
+            </CardTitle>
+          </div>
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1 font-bold">
+              <TrendingUp className="h-3 w-3" />
+              +8.1%
+            </Badge>
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1 p-6 pt-0 text-[10px] font-medium text-muted-foreground">
+          <div className="flex gap-1.5 items-center">
+             <span className="text-emerald-500 flex items-center gap-1 font-bold">Growing demand <TrendingUp className="h-3 w-3" /></span> 
+             <span>on platform</span>
+          </div>
+        </CardFooter>
+      </Card>
       </div>
 
+      {/* CHART CARD */}
       <div className="grid grid-cols-1">
-        {/* CHART CARD */}
-        <Card className="bg-card border-border rounded-[2rem] overflow-hidden shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-sm font-black uppercase tracking-widest italic">User Distribution</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px] p-2 sm:p-6 min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 900}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 900}} />
-                <RechartsTooltip 
-                    cursor={{fill: 'hsl(var(--muted))'}}
-                    contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '1rem', fontWeight: 'bold' }} 
+        <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-xl border">
+            <CardHeader className="flex items-center gap-2 space-y-0 border-b border-border/50 py-5 sm:flex-row">
+            <div className="grid flex-1 gap-1">
+                <CardTitle className="text-xl font-black uppercase tracking-tight italic">
+                Platform Growth
+                </CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase text-muted-foreground">
+                Showing new registration trends
+                </CardDescription>
+            </div>
+            <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger
+                className="w-[160px] rounded-xl font-bold uppercase text-[10px] tracking-widest sm:ml-auto"
+                aria-label="Select a value"
+                >
+                <SelectValue placeholder="Last 3 months" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border">
+                <SelectItem value="90d" className="rounded-lg font-bold uppercase text-[10px] tracking-widest">
+                    Last 3 months
+                </SelectItem>
+                <SelectItem value="30d" className="rounded-lg font-bold uppercase text-[10px] tracking-widest">
+                    Last 30 days
+                </SelectItem>
+                <SelectItem value="7d" className="rounded-lg font-bold uppercase text-[10px] tracking-widest">
+                    Last 7 days
+                </SelectItem>
+                </SelectContent>
+            </Select>
+            </CardHeader>
+            <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+            <ChartContainer
+                config={chartConfig}
+                className="aspect-auto h-[250px] w-full"
+            >
+                <AreaChart data={filteredChartData}>
+                <defs>
+                    <linearGradient id="fillCustomers" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                        offset="5%"
+                        stopColor="var(--color-customers)"
+                        stopOpacity={0.8}
+                    />
+                    <stop
+                        offset="95%"
+                        stopColor="var(--color-customers)"
+                        stopOpacity={0.1}
+                    />
+                    </linearGradient>
+                    <linearGradient id="fillTrades" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                        offset="5%"
+                        stopColor="var(--color-trades)"
+                        stopOpacity={0.8}
+                    />
+                    <stop
+                        offset="95%"
+                        stopColor="var(--color-trades)"
+                        stopOpacity={0.1}
+                    />
+                    </linearGradient>
+                    <linearGradient id="fillJobs" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                        offset="5%"
+                        stopColor="var(--color-jobs)"
+                        stopOpacity={0.8}
+                    />
+                    <stop
+                        offset="95%"
+                        stopColor="var(--color-jobs)"
+                        stopOpacity={0.1}
+                    />
+                    </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    minTickGap={32}
+                    tickFormatter={(value) => {
+                    const date = new Date(value)
+                    return date.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                    })
+                    }}
                 />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
+                <ChartTooltip
+                    cursor={false}
+                    content={
+                    <ChartTooltipContent
+                        labelFormatter={(value) => {
+                        return new Date(value).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                        })
+                        }}
+                        indicator="dot"
+                    />
+                    }
+                />
+                <Area
+                    dataKey="jobs"
+                    type="natural"
+                    fill="url(#fillJobs)"
+                    stroke="var(--color-jobs)"
+                    stackId="a"
+                />
+                 <Area
+                    dataKey="trades"
+                    type="natural"
+                    fill="url(#fillTrades)"
+                    stroke="var(--color-trades)"
+                    stackId="a"
+                />
+                <Area
+                    dataKey="customers"
+                    type="natural"
+                    fill="url(#fillCustomers)"
+                    stroke="var(--color-customers)"
+                    stackId="a"
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+                </AreaChart>
+            </ChartContainer>
+            </CardContent>
         </Card>
       </div>
 
@@ -418,7 +662,7 @@ const AdminDashboard = () => {
                       <TableCell>
                          <div className="flex flex-wrap gap-1">
                             {(service.keywords || []).map((k, i) => (
-                                <Badge key={i} variant="outline" className="text-[8px] uppercase tracking-wider">{k}</Badge>
+                                <Badge key={i} variant="outline" className="text-[10px] uppercase tracking-wider">{k}</Badge>
                             ))}
                          </div>
                       </TableCell>

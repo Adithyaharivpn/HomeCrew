@@ -34,7 +34,7 @@ const PopularJobs = () => {
       
       {/* Background Decoration Blob */}
       <div className={`absolute -top-24 -right-24 h-96 w-96 rounded-full opacity-70 blur-3xl z-0 pointer-events-none transition-all duration-700 ${
-        isDark ? "bg-gradient-to-tr from-blue-900/20 to-purple-900/20" : "bg-gradient-to-tr from-blue-100 to-purple-100"
+        isDark ? "bg-linear-to-tr from-blue-900/20 to-purple-900/20" : "bg-linear-to-tr from-blue-100 to-purple-100"
       }`} />
 
       <div className="container relative z-10 mx-auto px-4">
@@ -63,15 +63,15 @@ const PopularJobs = () => {
               className="group block relative"
             >
               <div className={`flex flex-col items-center p-6 rounded-3xl border backdrop-blur-sm transition-all duration-500 hover:bg-blue-600 hover:border-blue-600 hover:shadow-[0_20px_50px_rgba(37,99,235,0.3)] hover:-translate-y-3 cursor-pointer overflow-hidden isolate ${
-                isDark ? "!bg-zinc-900/50 !border-zinc-800" : "!bg-white/80 !border-slate-200"
+                isDark ? "bg-zinc-900/50! border-zinc-800!" : "bg-white/80! border-slate-200!"
               }`}>
                 
                 {/* Hover Background Accent */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                <div className="absolute inset-0 bg-linear-to-br from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
                 {/* Icon Container using Glass effect */}
                 <div className={`mb-5 flex h-20 w-20 items-center justify-center rounded-2xl transition-all duration-500 group-hover:bg-white/20 group-hover:text-white group-hover:scale-110 shadow-sm border relative ${
-                  isDark ? "!bg-zinc-800 !border-zinc-700/50 !text-blue-400" : "!bg-blue-50 !border-blue-100/50 !text-blue-600"
+                  isDark ? "bg-zinc-800! border-zinc-700/50! text-blue-400!" : "bg-blue-50! border-blue-100/50! text-blue-600!"
                 }`}>
                   {service.icon}
                   <div className="absolute -top-2 -right-2 bg-blue-600 text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">

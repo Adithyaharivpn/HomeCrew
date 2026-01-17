@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../api/useAuth"; 
-import api from "../../api/axiosConfig"; 
 import { useTheme } from "../Utils/Themeprovider";
 
 // UI Components
@@ -17,7 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 
 // Icons
 import { 
@@ -30,32 +28,15 @@ import {
   CheckCheck, 
   Zap 
 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import NotificationBell from "../User/NotificationBell";
 
-// --- Helper Function for Time Formatting ---
-const timeAgo = (dateString) => {
-  if (!dateString) return "Just now";
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now - date) / 1000);
-  if (seconds < 60) return "Just now";
-  let interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + "h ago";
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + "m ago";
-  return "Just now";
-};
 
 const NavBar = () => {
   const { theme } = useTheme();
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  
   const [isScrolled, setIsScrolled] = useState(false);
-
-  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const isHomePage = location.pathname === "/";
   const isSolid = !isHomePage || isScrolled;
 
