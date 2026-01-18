@@ -184,14 +184,14 @@ const SignUp = () => {
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/3 blur-[120px] pointer-events-none -z-10" />
 
       <Card
-        className="w-full max-w-4xl bg-card rounded-xl shadow-2xl overflow-hidden transition-all duration-300 dark:shadow-[0_0_50px_-5px_rgba(255,255,255,0.05)]"
+        className="w-full max-w-4xl bg-card rounded-xl shadow-2xl overflow-hidden transition-all duration-300 dark:shadow-[0_0_50px_-5px_rgba(255,255,255,0.15)]"
         style={{ border: `1px solid ${borderColor}` }}
       >
         <CardHeader className="pt-8 text-center text-foreground pb-2">
           <CardTitle className="text-3xl font-bold">Join The Network</CardTitle>
 
-          <div className="max-w-md mx-auto mt-6 mb-4 space-y-3">
-            <div className="flex justify-between px-1">
+          <div className="w-full px-10 mx-auto mt-8 mb-6 space-y-4">
+            <div className="flex justify-between px-2">
               {["Role Selection", "Personal Info", "Finalize"].map(
                 (label, index) => {
                   const stepNum = index + 1;
@@ -200,7 +200,7 @@ const SignUp = () => {
                   return (
                     <span
                       key={label}
-                      className={`text-xs font-bold transition-colors duration-300 ${
+                      className={`text-sm font-bold transition-colors duration-300 ${
                         isCurrent
                           ? "text-blue-600 scale-105"
                           : isActive
@@ -214,7 +214,7 @@ const SignUp = () => {
                 },
               )}
             </div>
-            <Progress value={progress} className="h-1.5" />
+            <Progress value={progress} className="h-2" />
           </div>
         </CardHeader>
 
