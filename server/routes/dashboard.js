@@ -20,11 +20,22 @@ router.get('/recent-activity', authMiddleware, async (req, res) => {
             .sort({ updatedAt: -1 })
             .limit(5);
 
-        const activities = recentJobs.map(job => ({
-            type: "status_update",
-            message: `Job "${job.title}" shifted to ${job.status.toUpperCase()}`,
-            createdAt: job.updatedAt
-        }));
+        const activities = recentJobs.map(job => {
+            const statusMap = {
+                'pending': 'Pending',
+                'assigned': 'Assigned',
+                'in_progress': 'In Progress',
+                'completed': 'Completed',
+                'cancelled': 'Cancelled'
+            };
+            const friendlyStatus = statusMap[job.status] || job.status;
+            
+            return {
+                type: "status_update",
+                message: `Job "${job.title}" is now ${friendlyStatus}`,
+                createdAt: job.updatedAt
+            };
+        });
 
         res.json(activities);
     } catch (err) {

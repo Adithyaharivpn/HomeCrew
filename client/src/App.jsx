@@ -36,6 +36,7 @@ import TransactionHistory from "./components/Payment/TransactionHistory";
 import PaymentPage from "./components/Payment/PaymentPage";
 import AdminVerification from "./components/Admin/AdminVerification";
 import AdminReports from "./components/Admin/AdminReports";
+import AdminTransactionHistory from "./components/Admin/AdminTransactionHistory";
 import { ThemeProvider } from "./components/Utils/Themeprovider";
 import DashboardHome from "./components/Hompage/DashboardHome";
 
@@ -52,25 +53,54 @@ const HomePage = () => (
 
 function App() {
   return (
-<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <div className="min-h-screen bg-background text-foreground flex flex-col">
         <Routes>
           {/* 1. PUBLIC ROUTES */}
-          <Route path="/" element={<><NavBar /><HomePage /><Footer /></>} />
-          <Route path="/signup" element={<><NavBar /><SignUp /><Footer /></>} />
-          <Route path="/login" element={<><NavBar /><Login /><Footer /></>} />
+          <Route
+            path="/"
+            element={
+              <>
+                <NavBar />
+                <HomePage />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <>
+                <NavBar />
+                <SignUp />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <>
+                <NavBar />
+                <Login />
+                <Footer />
+              </>
+            }
+          />
 
           {/* 2. PROTECTED DASHBOARD AREA (Sidebar Visible) */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={["customer", "tradesperson", "admin"]}>
+              <ProtectedRoute
+                allowedRoles={["customer", "tradesperson", "admin"]}
+              >
                 <DashboardLayout />
               </ProtectedRoute>
             }
           >
             <Route index element={<DashboardHome />} />
-            
+
             {/* Shared */}
             <Route path="jobs" element={<JobsPage />} />
             <Route path="job/:jobId" element={<ViewDetails />} />
@@ -97,9 +127,31 @@ function App() {
             <Route path="system-logs" element={<SystemLogs />} />
             <Route path="verifications" element={<AdminVerification />} />
             <Route path="reports" element={<AdminReports />} />
+            <Route
+              path="admin-payments"
+              element={<AdminTransactionHistory />}
+            />
           </Route>
-          <Route path="/chat/:roomId" element={<ProtectedRoute allowedRoles={["customer", "tradesperson", "admin"]}><ChatBox /></ProtectedRoute>} />
-          <Route path="/job/:jobId" element={<ProtectedRoute allowedRoles={["customer", "tradesperson", "admin"]}><ViewDetails /></ProtectedRoute>} />
+          <Route
+            path="/chat/:roomId"
+            element={
+              <ProtectedRoute
+                allowedRoles={["customer", "tradesperson", "admin"]}
+              >
+                <ChatBox />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/job/:jobId"
+            element={
+              <ProtectedRoute
+                allowedRoles={["customer", "tradesperson", "admin"]}
+              >
+                <ViewDetails />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />

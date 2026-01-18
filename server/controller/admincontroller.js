@@ -170,6 +170,25 @@ const changeVerificationStatus = async (req, res) => {
 const getRoleDashboardStats = async (req, res) => {
     try {
         const role = req.user.role;
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+        // Helper for filling gaps in dates
+        const fillDates = (data, valueKey) => {
+            const result = [];
+            const map = new Map(data.map(item => [item._id, item[valueKey]]));
+            for (let d = new Date(ninetyDaysAgo); d <= new Date(); d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                result.push({
+                    date: dateStr,
+                    value: map.get(dateStr) || 0
+                });
+            }
+            return result;
+        };
+
+        let chartDataRawPrimary = [];
+        let chartDataRawSecondary = [];
 
         if (role === 'admin') {
             const totalRevenueAgg = await mongoose.connection.collection('transactions').aggregate([
@@ -187,21 +206,52 @@ const getRoleDashboardStats = async (req, res) => {
                 verificationStatus: 'pending' 
             });
 
+            // CHART DATA: Revenue vs New Users
+            chartDataRawPrimary = await mongoose.connection.collection('transactions').aggregate([
+                { $match: { status: 'success', date: { $gte: ninetyDaysAgo } } },
+                { $group: { 
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, 
+                    total: { $sum: '$amount' } 
+                }},
+                { $sort: { _id: 1 } }
+            ]).toArray();
+
+            chartDataRawSecondary = await User.aggregate([
+                { $match: { createdAt: { $gte: ninetyDaysAgo } } },
+                { $group: { 
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, 
+                    count: { $sum: 1 } 
+                }},
+                { $sort: { _id: 1 } }
+            ]);
+
+            const primarySeries = fillDates(chartDataRawPrimary, 'total');
+            const secondarySeries = fillDates(chartDataRawSecondary, 'count');
+            
+            const chartData = primarySeries.map((item, index) => ({
+                date: item.date,
+                primary: item.value, // Revenue
+                secondary: secondarySeries[index].value // New Users
+            }));
+
             return res.json({ 
                 totalRevenue: (totalRevenueAgg[0] && totalRevenueAgg[0].total) || 0, 
                 totalUsers,
                 totalTradespeople,
                 totalCustomers,
                 totalJobs,
-                pendingVerifications 
+                pendingVerifications,
+                chartData
             });
         }
 
 
         if (role === 'tradesperson') {
             const tradespersonId = req.user.id;
+            const tradespersonObjectId = new mongoose.Types.ObjectId(tradespersonId);
+
             const earningsAgg = await mongoose.connection.collection('transactions').aggregate([
-                { $match: { tradesperson: new mongoose.Types.ObjectId(tradespersonId), status: 'success' } },
+                { $match: { tradesperson: tradespersonObjectId, status: 'success' } },
                 { $group: { _id: null, totalEarnings: { $sum: '$amount' } } }
             ]).toArray();
 
@@ -217,17 +267,48 @@ const getRoleDashboardStats = async (req, res) => {
                 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
                 : 0;
 
+            // CHART DATA: Earnings vs New Jobs Assigned
+            chartDataRawPrimary = await mongoose.connection.collection('transactions').aggregate([
+                { $match: { tradesperson: tradespersonObjectId, status: 'success', date: { $gte: ninetyDaysAgo } } },
+                { $group: { 
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, 
+                    total: { $sum: '$amount' } 
+                }},
+                { $sort: { _id: 1 } }
+            ]).toArray();
+
+            chartDataRawSecondary = await Job.aggregate([
+                { $match: { assignedTo: tradespersonObjectId, createdAt: { $gte: ninetyDaysAgo } } },
+                { $group: { 
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, 
+                    count: { $sum: 1 } 
+                }},
+                { $sort: { _id: 1 } }
+            ]);
+
+            const primarySeries = fillDates(chartDataRawPrimary, 'total');
+            const secondarySeries = fillDates(chartDataRawSecondary, 'count');
+            
+            const chartData = primarySeries.map((item, index) => ({
+                date: item.date,
+                primary: item.value, // Earnings
+                secondary: secondarySeries[index].value // New Jobs
+            }));
+
             return res.json({ 
                 totalEarned, 
                 activeJobs,
-                rating: parseFloat(averageRating.toFixed(1)) 
+                rating: parseFloat(averageRating.toFixed(1)),
+                chartData
             });
         }
 
         if (role === 'customer') {
             const customerId = req.user.id;
+            const customerObjectId = new mongoose.Types.ObjectId(customerId);
+
             const spentAgg = await mongoose.connection.collection('transactions').aggregate([
-                { $match: { user: new mongoose.Types.ObjectId(customerId), status: 'success' } },
+                { $match: { user: customerObjectId, status: 'success' } },
                 { $group: { _id: null, totalSpent: { $sum: '$amount' } } }
             ]).toArray();
 
@@ -238,10 +319,39 @@ const getRoleDashboardStats = async (req, res) => {
             });
             const totalJobs = await Job.countDocuments({ user: customerId });
 
+            // CHART DATA: Spending vs Jobs Posted
+            chartDataRawPrimary = await mongoose.connection.collection('transactions').aggregate([
+                { $match: { user: customerObjectId, status: 'success', date: { $gte: ninetyDaysAgo } } },
+                { $group: { 
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, 
+                    total: { $sum: '$amount' } 
+                }},
+                { $sort: { _id: 1 } }
+            ]).toArray();
+
+            chartDataRawSecondary = await Job.aggregate([
+                { $match: { user: customerObjectId, createdAt: { $gte: ninetyDaysAgo } } },
+                { $group: { 
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, 
+                    count: { $sum: 1 } 
+                }},
+                { $sort: { _id: 1 } }
+            ]);
+
+            const primarySeries = fillDates(chartDataRawPrimary, 'total');
+            const secondarySeries = fillDates(chartDataRawSecondary, 'count');
+            
+            const chartData = primarySeries.map((item, index) => ({
+                date: item.date,
+                primary: item.value, // Spending
+                secondary: secondarySeries[index].value // Jobs Posted
+            }));
+
             return res.json({ 
                 totalSpent, 
                 ongoingTasks,
-                totalJobs
+                totalJobs,
+                chartData
             });
         }
 

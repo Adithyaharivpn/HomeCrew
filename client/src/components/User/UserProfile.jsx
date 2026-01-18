@@ -19,7 +19,7 @@ import {
   Loader2,
   Calendar,
   ArrowLeft,
-  Phone
+  Phone,
 } from "lucide-react";
 
 // UI Components
@@ -76,11 +76,17 @@ const UserProfile = () => {
   const handleFileChange = (e) => {
     setNewProfilePicture(e.target.files[0]);
   };
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSave = async () => {
+    if (isSaving) return;
+
     if (profileData.phoneNumber && profileData.phoneNumber.length < 10) {
-        toast.error("Phone number must be at least 10 digits");
-        return;
+      toast.error("Phone number must be at least 10 digits");
+      return;
     }
+
+    setIsSaving(true);
     const data = new FormData();
     data.append("name", profileData.name);
     data.append("phoneNumber", profileData.phoneNumber); // Added
@@ -99,6 +105,8 @@ const UserProfile = () => {
       toast.success("Profile updated successfully!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update profile.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -222,24 +230,24 @@ const UserProfile = () => {
               <div className="space-y-8 max-w-2xl animate-in fade-in slide-in-from-top-4">
                 <div className="grid gap-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                    <Label className="text-xs font-semibold text-muted-foreground">
                       Full Name
                     </Label>
                     <Input
                       name="name"
-                      className="h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold"
+                      className="h-14 rounded-xl"
                       value={profileData.name}
                       onChange={handleChange}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                    <Label className="text-xs font-semibold text-muted-foreground">
                       Phone Number
                     </Label>
                     <Input
                       name="phoneNumber"
                       type="tel"
-                      className="h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold"
+                      className="h-14 rounded-xl"
                       value={profileData.phoneNumber}
                       onChange={handleChange}
                     />
@@ -248,36 +256,36 @@ const UserProfile = () => {
                   {profileData.role === "tradesperson" && (
                     <div className="grid gap-6">
                       <div className="space-y-2">
-                        <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                        <Label className="text-xs font-semibold text-muted-foreground">
                           Trade Category
                         </Label>
                         <Input
                           name="tradeCategory"
-                          className="h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold"
+                          className="h-14 rounded-xl"
                           value={profileData.tradeCategory}
                           onChange={handleChange}
                         />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                          <Label className="text-xs font-semibold text-muted-foreground">
                             Experience (Years)
                           </Label>
                           <Input
                             type="number"
                             name="experience"
-                            className="h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold"
+                            className="h-14 rounded-xl"
                             value={profileData.experience}
                             onChange={handleChange}
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                          <Label className="text-xs font-semibold text-muted-foreground">
                             Location
                           </Label>
                           <Input
                             name="location"
-                            className="h-14 bg-muted/30 border-border rounded-2xl text-lg font-bold"
+                            className="h-14 rounded-xl"
                             value={profileData.location}
                             onChange={handleChange}
                           />
@@ -297,9 +305,15 @@ const UserProfile = () => {
                   </Button>
                   <Button
                     onClick={handleSave}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl h-12 px-10 shadow-lg shadow-blue-500/20"
+                    disabled={isSaving}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl h-12 px-10 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Save className="mr-2 h-4 w-4" /> Save Changes
+                    {isSaving ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               </div>
@@ -309,7 +323,7 @@ const UserProfile = () => {
                 <div className="lg:col-span-4 space-y-6">
                   {profileData.role === "tradesperson" && (
                     <div className="bg-muted/30 p-8 rounded-[2rem] border border-border space-y-6">
-                      <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest">
+                      <h3 className="text-sm font-bold text-muted-foreground">
                         Professional Info
                       </h3>
 
@@ -318,10 +332,10 @@ const UserProfile = () => {
                           <Briefcase className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <span className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                          <span className="block text-[10px] font-bold text-muted-foreground">
                             Trade
                           </span>
-                          <span className="font-bold text-lg">
+                          <span className="font-bold text-lg text-foreground">
                             {profileData.tradeCategory || "General"}
                           </span>
                         </div>
@@ -332,10 +346,10 @@ const UserProfile = () => {
                           <Clock className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <span className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                          <span className="block text-[10px] font-bold text-muted-foreground">
                             Experience
                           </span>
-                          <span className="font-bold text-lg">
+                          <span className="font-bold text-lg text-foreground">
                             {profileData.experience
                               ? `${profileData.experience} Years`
                               : "Experienced"}
@@ -348,52 +362,52 @@ const UserProfile = () => {
                           <MapPin className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <span className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                          <span className="block text-[10px] font-bold text-muted-foreground">
                             Location
                           </span>
-                          <span className="font-bold text-lg">
+                          <span className="font-bold text-lg text-foreground">
                             {profileData.location || "Not set"}
                           </span>
                         </div>
                       </div>
                     </div>
                   )}
-                  <div className="flex items-center justify-center lg:justify-start gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest ml-4">
+                  <div className="flex items-center justify-center lg:justify-start gap-2 text-xs font-bold text-muted-foreground ml-4">
                     <Calendar className="h-4 w-4 text-blue-600" />
                     <span>
                       Joined{" "}
                       {new Date(
-                        profileData.createdAt || Date.now()
+                        profileData.createdAt || Date.now(),
                       ).getFullYear()}
                     </span>
                   </div>
 
                   {/* Contact Info (Self Only) */}
                   {isSelfView && (
-                      <div className="bg-muted/30 p-8 rounded-[2rem] border border-border space-y-6">
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest">
-                          Contact Info (Private)
-                        </h3>
-                        <div className="flex items-center gap-4 group">
-                          <div className="p-3 bg-blue-600/10 rounded-2xl">
-                            <Phone className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <span className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                              Phone Number
-                            </span>
-                            <span className="font-bold text-lg">
-                              {profileData.phoneNumber || "Not set"}
-                            </span>
-                          </div>
+                    <div className="bg-muted/30 p-8 rounded-[2rem] border border-border space-y-6">
+                      <h3 className="text-sm font-bold text-muted-foreground">
+                        Contact Info (Private)
+                      </h3>
+                      <div className="flex items-center gap-4 group">
+                        <div className="p-3 bg-blue-600/10 rounded-2xl">
+                          <Phone className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <span className="block text-[10px] font-bold text-muted-foreground">
+                            Phone Number
+                          </span>
+                          <span className="font-bold text-lg text-foreground">
+                            {profileData.phoneNumber || "Not set"}
+                          </span>
                         </div>
                       </div>
+                    </div>
                   )}
                 </div>
 
                 {/* RESTORED: Conditional Review Visibility */}
                 <div className="lg:col-span-8 space-y-8">
-                  <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">
+                  <h3 className="text-2xl font-bold text-foreground">
                     Recent Feedback
                   </h3>
 
@@ -421,7 +435,7 @@ const UserProfile = () => {
                     /* FULL VIEW FOR OTHERS */
                     <div className="space-y-6">
                       {reviews.length === 0 ? (
-                        <div className="bg-muted/20 border-2 border-dashed border-border rounded-[2rem] p-16 text-center italic text-muted-foreground">
+                        <div className="bg-muted/20 border-2 border-dashed border-border rounded-[2rem] p-16 text-center text-muted-foreground">
                           No feedback received yet.
                         </div>
                       ) : (
@@ -457,12 +471,12 @@ const UserProfile = () => {
                                     ))}
                                   </div>
                                 </div>
-                                <p className="text-sm text-foreground/80 leading-relaxed italic">
-                                  "{review.comment}"
+                                <p className="text-sm text-foreground/80 leading-relaxed">
+                                  {review.comment}
                                 </p>
-                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                                <p className="text-xs font-semibold text-muted-foreground">
                                   {new Date(
-                                    review.createdAt
+                                    review.createdAt,
                                   ).toLocaleDateString()}
                                 </p>
                               </div>

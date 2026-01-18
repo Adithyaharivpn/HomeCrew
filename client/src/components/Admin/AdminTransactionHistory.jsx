@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axiosConfig";
 import InvoiceModal from "../Payment/InvoiceModel";
-
-// Icons
 import { Eye, ReceiptText, Loader2, IndianRupee } from "lucide-react";
-
-// UI Components
 import {
   Table,
   TableBody,
@@ -18,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-const TransactionHistory = () => {
+const AdminTransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTx, setSelectedTx] = useState(null);
@@ -27,7 +23,7 @@ const TransactionHistory = () => {
   useEffect(() => {
     const fetchTx = async () => {
       try {
-        const res = await api.get("/api/transactions/my-transactions");
+        const res = await api.get("/api/transactions/all-transactions");
         setTransactions(res.data);
       } catch (err) {
         console.error("Failed to load transactions");
@@ -60,10 +56,10 @@ const TransactionHistory = () => {
         </div>
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Billing History
+            All System Payments
           </h1>
           <p className="text-xs font-semibold text-muted-foreground mt-1">
-            Manage your payments and invoices
+            Global transaction monitoring
           </p>
         </div>
       </div>
@@ -77,7 +73,13 @@ const TransactionHistory = () => {
                   Date
                 </TableHead>
                 <TableHead className="font-bold text-xs text-muted-foreground">
-                  Job Title
+                  Job
+                </TableHead>
+                <TableHead className="font-bold text-xs text-muted-foreground">
+                  Payer (Customer)
+                </TableHead>
+                <TableHead className="font-bold text-xs text-muted-foreground">
+                  Payee (Provider)
                 </TableHead>
                 <TableHead className="font-bold text-xs text-muted-foreground">
                   Amount
@@ -94,7 +96,7 @@ const TransactionHistory = () => {
               {transactions.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={7}
                     className="h-48 text-center text-muted-foreground font-bold text-sm"
                   >
                     No transactions found yet.
@@ -111,11 +113,27 @@ const TransactionHistory = () => {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </TableCell>
                     <TableCell>
                       <span className="text-foreground font-bold text-sm">
                         {tx.job?.title || "Direct Payment"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium text-xs">
+                      {tx.user?.name || "Unknown"}
+                      <br />
+                      <span className="text-muted-foreground text-[10px]">
+                        {tx.user?.email}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium text-xs">
+                      {tx.tradesperson?.name || "Unknown"}
+                      <br />
+                      <span className="text-muted-foreground text-[10px]">
+                        {tx.tradesperson?.email}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -163,4 +181,4 @@ const TransactionHistory = () => {
   );
 };
 
-export default TransactionHistory;
+export default AdminTransactionHistory;

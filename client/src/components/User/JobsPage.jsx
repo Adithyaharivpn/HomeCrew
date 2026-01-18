@@ -101,7 +101,7 @@ const JobsPage = () => {
     if (category) {
       setCategoryFilter(category);
     }
-    
+
     if (search) {
       setSearchTerm(search);
     }
@@ -171,56 +171,62 @@ const JobsPage = () => {
   useEffect(() => {
     const userId = user?._id || user?.id;
     if (!userId) return;
-    
+
     // Use a single socket connection
     const socket = io(import.meta.env.VITE_API_BASE_URL);
-    socket.emit("addUser", userId); 
-    
+    socket.emit("addUser", userId);
+
     socket.on("job_review_prompt", (data) => {
-        setReviewDialog({
-            open: true,
-            jobId: data.jobId,
-            targetId: data.targetId
-        });
-        toast.info("Job Completed! Please leave a review.");
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
+      setReviewDialog({
+        open: true,
+        jobId: data.jobId,
+        targetId: data.targetId,
+      });
+      toast.info("Job Completed! Please leave a review.");
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
     });
 
     socket.on("job_created", () => {
-        console.log("Socket: job_created received");
-        fetchDataRef.current(); // Use ref
-        if (user.role === 'tradesperson') {
-            toast.info("New job available!");
-        }
+      console.log("Socket: job_created received");
+      fetchDataRef.current(); // Use ref
+      if (user.role === "tradesperson") {
+        toast.info("New job available!");
+      }
     });
 
     socket.on("job_updated", () => {
-        console.log("Socket: job_updated received");
-        fetchDataRef.current(); // Use ref
+      console.log("Socket: job_updated received");
+      fetchDataRef.current(); // Use ref
     });
-    
+
     return () => {
-        socket.disconnect();
+      socket.disconnect();
     };
   }, [user?._id || user?.id]); // Removed fetchData from deps
 
   const handleContactCustomer = async (job) => {
     // If Customer is clicking "Chat/Pay", handle separately or correct IDs
-    const isCustomer = user.role === 'customer';
-    
-    if (!isCustomer && user.role === 'tradesperson' && !user.isVerified) {
-        toast.error("Account pending verification.", { description: "You cannot initiate chats until approved." });
-        return;
+    const isCustomer = user.role === "customer";
+
+    if (!isCustomer && user.role === "tradesperson" && !user.isVerified) {
+      toast.error("Account pending verification.", {
+        description: "You cannot initiate chats until approved.",
+      });
+      return;
     }
 
     try {
       const payload = {
-          jobId: job._id,
-          customerId: isCustomer ? (user._id || user.id) : (job.user?._id || job.user),
-          tradespersonId: isCustomer ? (job.assignedTo?._id || job.assignedTo) : (user._id || user.id)
+        jobId: job._id,
+        customerId: isCustomer
+          ? user._id || user.id
+          : job.user?._id || job.user,
+        tradespersonId: isCustomer
+          ? job.assignedTo?._id || job.assignedTo
+          : user._id || user.id,
       };
-      
+
       const res = await api.post("/api/chat/initiate", payload);
       navigate(`/dashboard/chat/${res.data._id}`);
     } catch (err) {
@@ -261,14 +267,14 @@ const JobsPage = () => {
       setShowConfetti(true);
       setVerifyDialog({ open: false, jobId: null, customerId: null });
       toast.success("Job Completed!");
-      
+
       // Auto-open review dialog
-      setReviewDialog({ 
-        open: true, 
-        jobId: verifyDialog.jobId, 
-        targetId: verifyDialog.customerId 
+      setReviewDialog({
+        open: true,
+        jobId: verifyDialog.jobId,
+        targetId: verifyDialog.customerId,
       });
-      
+
       setTimeout(() => setShowConfetti(false), 3000);
     } catch (err) {
       toast.error("Invalid Code");
@@ -316,7 +322,7 @@ const JobsPage = () => {
       return jobs.filter((j) => j.status === "open").length;
     if (tabType === "active")
       return source.filter((j) =>
-        ["assigned", "in_progress"].includes(j.status)
+        ["assigned", "in_progress"].includes(j.status),
       ).length;
     if (tabType === "history")
       return source.filter((j) => ["completed", "cancelled"].includes(j.status))
@@ -325,27 +331,30 @@ const JobsPage = () => {
   };
 
   const sortedJobs = [...getFilteredJobs()].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
   );
 
   if (loading)
     return (
       <div className="w-full px-2 py-12 space-y-10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="space-y-4 w-full md:w-auto">
-                <Skeleton className="h-10 w-64 rounded-xl" />
-                <Skeleton className="h-4 w-40 rounded-lg" />
-            </div>
-            <Skeleton className="h-14 w-48 rounded-2xl" />
+          <div className="space-y-4 w-full md:w-auto">
+            <Skeleton className="h-10 w-64 rounded-xl" />
+            <Skeleton className="h-4 w-40 rounded-lg" />
+          </div>
+          <Skeleton className="h-14 w-48 rounded-2xl" />
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
-            <Skeleton className="h-14 flex-1 rounded-2xl" />
-            <Skeleton className="h-14 w-full sm:w-[250px] rounded-2xl" />
+          <Skeleton className="h-14 flex-1 rounded-2xl" />
+          <Skeleton className="h-14 w-full sm:w-[250px] rounded-2xl" />
         </div>
         <Skeleton className="h-16 w-full rounded-[1.5rem]" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <Card key={i} className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-md flex flex-col h-[400px]">
+            <Card
+              key={i}
+              className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-md flex flex-col h-[400px]"
+            >
               <div className="p-8 space-y-4">
                 <Skeleton className="h-8 w-3/4 rounded-lg" />
                 <div className="flex gap-2">
@@ -354,13 +363,13 @@ const JobsPage = () => {
                 </div>
               </div>
               <div className="px-8 flex-1 space-y-3">
-                 <Skeleton className="h-3 w-full" />
-                 <Skeleton className="h-3 w-5/6" />
-                 <Skeleton className="h-3 w-4/6" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-5/6" />
+                <Skeleton className="h-3 w-4/6" />
               </div>
               <div className="p-6 bg-muted/10 border-t border-border mt-auto space-y-3">
-                 <Skeleton className="h-12 w-full rounded-2xl" />
-                 <Skeleton className="h-10 w-full rounded-xl" />
+                <Skeleton className="h-12 w-full rounded-2xl" />
+                <Skeleton className="h-10 w-full rounded-xl" />
               </div>
             </Card>
           ))}
@@ -381,10 +390,10 @@ const JobsPage = () => {
       <div className="w-full px-2">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
           <div className="space-y-1">
-            <h1 className="text-4xl font-black uppercase tracking-tight text-foreground ">
+            <h1 className="text-4xl font-bold text-foreground">
               {user?.role === "customer" ? "My Projects" : "Job Market"}
             </h1>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-xs font-semibold text-muted-foreground">
               {activeTab === "open"
                 ? "Browse Available Jobs"
                 : "Track Ongoing Progress"}
@@ -394,7 +403,7 @@ const JobsPage = () => {
             <MovingBorderButton
               onClick={() => navigate("/dashboard/post-job")}
               borderRadius="1rem"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-widest border-none"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs border-none"
               containerClassName="h-14 w-48 shadow-xl shadow-blue-600/20"
             >
               <Plus className="mr-2 h-5 w-5" /> New Job
@@ -410,21 +419,18 @@ const JobsPage = () => {
             className="h-14 rounded-xl px-6 font-bold"
           />
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-full sm:w-[250px] h-14 rounded-xl font-black uppercase text-[10px] tracking-widest px-6 shadow-input border-none">
+            <SelectTrigger className="w-full sm:w-[250px] h-14 rounded-xl font-bold text-xs px-6 shadow-input border-none">
               <SelectValue placeholder="Categories" />
             </SelectTrigger>
             <SelectContent className="bg-card border-border rounded-xl">
-              <SelectItem
-                value="All"
-                className="font-black uppercase text-[10px]"
-              >
+              <SelectItem value="All" className="font-bold text-xs">
                 All Trades
               </SelectItem>
               {categoryOptions.map((cat) => (
                 <SelectItem
                   key={cat._id}
                   value={cat.service_name}
-                  className="font-black uppercase text-[10px]"
+                  className="font-bold text-xs"
                 >
                   {cat.service_name}
                 </SelectItem>
@@ -435,10 +441,7 @@ const JobsPage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-10">
           <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1.5 rounded-[1.5rem] h-16 border border-border">
-            <TabsTrigger
-              value="open"
-              className="rounded-xl font-black uppercase text-[10px] tracking-widest"
-            >
+            <TabsTrigger value="open" className="rounded-xl font-bold text-xs">
               Available{" "}
               <Badge
                 variant="secondary"
@@ -449,7 +452,7 @@ const JobsPage = () => {
             </TabsTrigger>
             <TabsTrigger
               value="active"
-              className="rounded-xl font-black uppercase text-[10px] tracking-widest"
+              className="rounded-xl font-bold text-xs"
             >
               Active{" "}
               <Badge variant="secondary" className="ml-2">
@@ -458,7 +461,7 @@ const JobsPage = () => {
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="rounded-xl font-black uppercase text-[10px] tracking-widest"
+              className="rounded-xl font-bold text-xs"
             >
               History{" "}
               <Badge variant="secondary" className="ml-2">
@@ -480,7 +483,7 @@ const JobsPage = () => {
                 <div className="flex justify-between items-start gap-4">
                   <h3
                     onClick={() => navigate(`/dashboard/job/${job._id}`)}
-                    className="text-2xl font-black uppercase leading-tight cursor-pointer hover:text-blue-600 line-clamp-1  tracking-tighter flex-1"
+                    className="text-2xl font-bold leading-tight cursor-pointer hover:text-blue-600 line-clamp-1 flex-1"
                   >
                     {job.title}
                   </h3>
@@ -499,16 +502,16 @@ const JobsPage = () => {
                   )}
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Badge className="bg-blue-600 text-white border-none font-black uppercase text-[9px] px-3 py-1 tracking-widest">
+                  <Badge className="bg-blue-600 text-white border-none font-bold text-[10px] px-3 py-1">
                     {job.category}
                   </Badge>
                   <Badge
-                    className={`text-[9px] font-black uppercase border-none text-white px-3 py-1 tracking-widest ${
+                    className={`text-[10px] font-bold border-none text-white px-3 py-1 ${
                       job.status === "completed"
                         ? "bg-slate-500"
                         : job.status === "assigned"
-                        ? "bg-amber-500"
-                        : "bg-emerald-600"
+                          ? "bg-amber-500"
+                          : "bg-emerald-600"
                     }`}
                   >
                     {job.status}
@@ -520,7 +523,7 @@ const JobsPage = () => {
                 <p className="text-foreground/80 text-sm font-medium leading-relaxed line-clamp-3">
                   {job.description}
                 </p>
-                <div className="mt-8 flex justify-between items-center text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                <div className="mt-8 flex justify-between items-center text-xs font-bold text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-blue-600" /> {job.city}
                   </div>
@@ -535,7 +538,7 @@ const JobsPage = () => {
                   {user?.role === "tradesperson" &&
                   job.status === "assigned" ? (
                     <Button
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black h-14 rounded-2xl uppercase text-[10px] border-none shadow-lg shadow-amber-500/20"
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold h-14 rounded-2xl text-xs border-none shadow-lg shadow-amber-500/20"
                       onClick={() =>
                         setVerifyDialog({
                           open: true,
@@ -554,10 +557,10 @@ const JobsPage = () => {
                       onViewCode={() =>
                         setCodeDialog({ open: true, code: job.completionCode })
                       }
-                      onReschedule={() => 
+                      onReschedule={() =>
                         setRescheduleDialog({ open: true, jobId: job._id })
                       }
-                      onCancel={() => 
+                      onCancel={() =>
                         setCancelDialog({ open: true, jobId: job._id })
                       }
                       onReview={() => {
@@ -571,7 +574,7 @@ const JobsPage = () => {
                           targetId,
                         });
                       }}
-                    suppressDefaultDetails={true}
+                      suppressDefaultDetails={true}
                     />
                   )}
                   <MovingBorderButton
@@ -598,25 +601,25 @@ const JobsPage = () => {
       >
         <DialogContent className="bg-card border-border rounded-[2.5rem] p-10 max-w-md shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black uppercase text-center tracking-tight">
+            <DialogTitle className="text-2xl font-bold text-center">
               Reschedule
             </DialogTitle>
           </DialogHeader>
           <div className="relative mt-6">
-              <Input
-                type="datetime-local"
-                style={{ colorScheme: "dark" }}
-                className="h-16 rounded-xl bg-background px-5 font-bold text-lg [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-              />
-              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <CalendarDays className="h-6 w-6 text-muted-foreground" />
-              </div>
+            <Input
+              type="datetime-local"
+              style={{ colorScheme: "dark" }}
+              className="h-16 rounded-xl bg-background px-5 font-bold text-lg [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+              value={newDate}
+              onChange={(e) => setNewDate(e.target.value)}
+            />
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+              <CalendarDays className="h-6 w-6 text-muted-foreground" />
+            </div>
           </div>
           <Button
             onClick={handleRescheduleSubmit}
-            className="w-full bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl font-black text-lg uppercase mt-6"
+            className="w-full bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl font-bold text-lg mt-6"
           >
             Confirm
           </Button>
@@ -630,15 +633,15 @@ const JobsPage = () => {
       >
         <DialogContent className="sm:max-w-md bg-card border-border rounded-[2.5rem] p-10 text-center">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase">
+            <DialogTitle className="text-2xl font-bold">
               Completion Code
             </DialogTitle>
           </DialogHeader>
           <div className="bg-muted/30 rounded-2xl p-6 my-6 border border-border">
-            <p className="text-xs font-black uppercase text-muted-foreground tracking-widest mb-3">
+            <p className="text-xs font-bold text-muted-foreground mb-3">
               Your Code
             </p>
-            <p className="text-3xl font-mono font-black tracking-[0.3em] text-blue-600 break-all">
+            <p className="text-3xl font-mono font-bold tracking-[0.3em] text-blue-600 break-all">
               {codeDialog.code || "N/A"}
             </p>
           </div>
@@ -647,7 +650,7 @@ const JobsPage = () => {
               navigator.clipboard.writeText(codeDialog.code);
               toast.success("Code copied!");
             }}
-            className="w-full bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl font-black text-lg uppercase"
+            className="w-full bg-blue-600 hover:bg-blue-700 h-14 rounded-2xl font-bold text-lg"
           >
             Copy Code
           </Button>
@@ -661,7 +664,7 @@ const JobsPage = () => {
       >
         <DialogContent className="sm:max-w-md bg-card border-border rounded-[2.5rem] p-10 text-center">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase">
+            <DialogTitle className="text-2xl font-bold">
               Enter Verify Code
             </DialogTitle>
           </DialogHeader>
@@ -674,7 +677,7 @@ const JobsPage = () => {
           />
           <Button
             onClick={handleVerifySubmit}
-            className="w-full bg-blue-600 h-14 rounded-2xl font-bold text-lg uppercase"
+            className="w-full bg-blue-600 h-14 rounded-2xl font-bold text-lg"
           >
             Verify & Finish
           </Button>
@@ -688,7 +691,7 @@ const JobsPage = () => {
       >
         <DialogContent className="sm:max-w-lg bg-card border-border rounded-[2.5rem] p-10 text-center">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold uppercase">
+            <DialogTitle className="text-2xl font-bold">
               Rate Experience
             </DialogTitle>
           </DialogHeader>
@@ -715,7 +718,7 @@ const JobsPage = () => {
           </div>
           <Button
             onClick={handleSubmitReview}
-            className="bg-blue-600 w-full h-14 rounded-2xl font-bold text-lg uppercase"
+            className="bg-blue-600 w-full h-14 rounded-2xl font-bold text-lg"
           >
             Submit Feedback
           </Button>
@@ -729,20 +732,21 @@ const JobsPage = () => {
       >
         <AlertDialogContent className="bg-card border-border rounded-[2.5rem] p-10 max-w-md shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-black uppercase text-center tracking-tight">
+            <AlertDialogTitle className="text-2xl font-bold text-center">
               Delete Project?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-center text-muted-foreground font-medium py-4">
-              This action cannot be undone. This will permanently remove the job posting and any active bids.
+              This action cannot be undone. This will permanently remove the job
+              posting and any active bids.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-4 mt-4">
-            <AlertDialogCancel className="h-14 rounded-2xl border-border bg-muted/30 font-black uppercase text-xs tracking-widest flex-1">
+            <AlertDialogCancel className="h-14 rounded-2xl border-border bg-muted/30 font-bold text-xs flex-1">
               Keep Project
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancelJob}
-              className="h-14 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-black uppercase text-xs tracking-widest flex-1 border-none"
+              className="h-14 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs flex-1 border-none"
             >
               Delete now
             </AlertDialogAction>

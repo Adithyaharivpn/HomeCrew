@@ -39,6 +39,7 @@ import NotificationBell from "../User/NotificationBell";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
+import VerifiedBadge from "../Utils/VerifiedBadge";
 
 const Logo = () => {
   return (
@@ -112,6 +113,11 @@ const DashboardLayout = () => {
         label: "Reports",
         href: "/dashboard/reports",
         icon: <AlertTriangle className="h-5 w-5 shrink-0 text-foreground" />,
+      },
+      {
+        label: "Payments",
+        href: "/dashboard/admin-payments",
+        icon: <Wallet className="h-5 w-5 shrink-0 text-foreground" />,
       },
       {
         label: "Market",
@@ -232,7 +238,7 @@ const DashboardLayout = () => {
                         display: open ? "inline-block" : "none",
                         opacity: open ? 1 : 0,
                       }}
-                      className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0 flex-1"
+                      className="text-foreground text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0 flex-1"
                     >
                       Theme
                     </motion.span>
@@ -279,80 +285,31 @@ const DashboardLayout = () => {
 
               {/* BOTTOM SECTION: Fixed User Profile */}
               <div className="mt-auto pt-4 pb-4">
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <div className="flex items-center gap-2 p-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer transition-colors group">
-                      <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage
-                          src={user?.profilePictureUrl}
-                          alt={user?.name}
-                        />
-                        <AvatarFallback className="rounded-lg">
-                          {user?.name?.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {open && (
-                        <>
-                          <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                            <span className="truncate font-semibold">
-                              {user?.name}
-                            </span>
-                            <span className="truncate text-xs text-muted-foreground">
-                              {user?.email}
-                            </span>
-                          </div>
-                          <ChevronsUpDown className="ml-auto size-4" />
-                        </>
-                      )}
+                <Link
+                  to="/dashboard/profile"
+                  className="flex items-center gap-2 p-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer transition-colors group"
+                >
+                  <Avatar className="h-8 w-8 rounded-full">
+                    <AvatarImage
+                      src={user?.profilePictureUrl}
+                      alt={user?.name}
+                    />
+                    <AvatarFallback className="rounded-full">
+                      {user?.name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {open && (
+                    <div className="grid flex-1 text-left text-sm leading-tight ml-2">
+                      <span className="truncate font-semibold text-foreground flex items-center">
+                        {user?.name}
+                        <VerifiedBadge isVerified={user?.isVerified} />
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {user?.email}
+                      </span>
                     </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg bg-card border-border mb-2 z-[9999]"
-                    align="start"
-                    sideOffset={4}
-                  >
-                    <DropdownMenuLabel className="p-0 font-normal">
-                      <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                        <Avatar className="h-8 w-8 rounded-lg">
-                          <AvatarImage
-                            src={user?.profilePictureUrl}
-                            alt={user?.name}
-                          />
-                          <AvatarFallback className="rounded-lg">
-                            {user?.name?.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="grid flex-1 text-left text-sm leading-tight">
-                          <span className="truncate font-semibold">
-                            {user?.name}
-                          </span>
-                          <span className="truncate text-xs text-muted-foreground">
-                            {user?.email}
-                          </span>
-                        </div>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem>
-                      <BadgeCheck className="mr-2 h-5 w-5 text-foreground" />
-                      Account
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <CreditCard className="mr-2 h-5 w-5 text-foreground" />
-                      Billing
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Bell className="mr-2 h-5 w-5 text-foreground" />
-                      Notifications
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={logout}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <LogOut className="mr-2 h-5 w-5 text-foreground" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  )}
+                </Link>
               </div>
             </div>
           </div>

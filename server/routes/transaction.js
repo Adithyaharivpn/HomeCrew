@@ -19,4 +19,21 @@ router.get('/my-transactions', auth, async (req, res) => {
     }
 });
 
+router.get('/all-transactions', auth, async (req, res) => {
+  try {
+      if (req.user.role !== 'admin') {
+          return res.status(403).json({ message: 'Access denied' });
+      }
+      const transactions = await Transaction.find()
+      .populate('job', 'title')
+      .populate('tradesperson', 'name email')
+      .populate('user', 'name email')
+      .sort({ date: -1 });
+
+      res.json(transactions);
+  } catch (err) {
+      res.status(500).json({ message: 'Server Error' });
+  }
+});
+
 module.exports = router;

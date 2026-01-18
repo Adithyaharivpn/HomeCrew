@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../../api/useAuth"; 
+import { useAuth } from "../../api/useAuth";
 import api from "../../api/axiosConfig"; // Using your custom instance
 
 // UI Components
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react"; 
+import { Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -17,7 +17,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useAuth(); 
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     if (error) setError("");
@@ -35,7 +35,7 @@ const Login = () => {
 
       if (response.data.token) {
         await login(response.data.token);
-        navigate('/dashboard'); // Direct to unified dashboard
+        navigate("/dashboard"); // Direct to unified dashboard
       }
     } catch (err) {
       setError(err.response?.data?.error || "Invalid Credentials");
@@ -48,7 +48,7 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/3 blur-[120px] pointer-events-none -z-10" />
 
-      <Card className="w-full max-w-105 border-border bg-card rounded-3xl shadow-2xl overflow-hidden">
+      <Card className="w-full max-w-105 border-border bg-card rounded-3xl shadow-2xl overflow-hidden dark:border-white/20 dark:shadow-[0_0_50px_-5px_rgba(255,255,255,0.15)] transition-all duration-300">
         <CardHeader className="pt-12 text-center">
           <div className="mx-auto h-12 w-12 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-600/20">
             <ShieldCheck className="h-6 w-6 text-blue-600" />
@@ -56,7 +56,9 @@ const Login = () => {
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground leading-none">
             Secure Login
           </CardTitle>
-          <p className="text-sm text-muted-foreground mt-4">Platform Authentication Required</p>
+          <p className="text-sm text-muted-foreground mt-4">
+            Platform Authentication Required
+          </p>
         </CardHeader>
 
         <CardContent className="pb-12 px-10 space-y-6">
@@ -68,7 +70,9 @@ const Login = () => {
             )}
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Email Address</Label>
+              <Label className="text-xs font-semibold ml-1 text-muted-foreground">
+                Email Address
+              </Label>
               <div className="relative group">
                 <Mail className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                 <Input
@@ -84,7 +88,9 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold ml-1 text-muted-foreground">Password</Label>
+              <Label className="text-xs font-semibold ml-1 text-muted-foreground">
+                Password
+              </Label>
               <div className="relative group">
                 <Lock className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
                 <Input
@@ -101,13 +107,25 @@ const Login = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground z-10"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-14 rounded-xl text-sm tracking-wide border-none shadow-lg" disabled={isLoading}>
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-14 rounded-xl text-sm tracking-wide border-none shadow-lg"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
         </CardContent>

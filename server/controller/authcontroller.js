@@ -27,8 +27,13 @@ const signup = async (req, res) => {
       isVerified: false,
     };
 
-    if (req.file) {
-      userData.profilePictureUrl = req.file.path; 
+    if (req.files) {
+      if (req.files['profilePicture']) {
+        userData.profilePictureUrl = req.files['profilePicture'][0].path;
+      }
+      if (req.files['documents']) {
+        userData.verificationDocuments = req.files['documents'].map(doc => doc.path);
+      }
     }
 
     if (role === "tradesperson") {
