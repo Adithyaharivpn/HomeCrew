@@ -427,10 +427,6 @@ const DashboardHome = () => {
               {user?.name?.split(" ")[0]}
             </span>
           </h2>
-          <p className="text-xs font-bold text-muted-foreground mt-4 ml-1">
-            System Access Level:{" "}
-            <span className="text-foreground">{user?.role}</span>
-          </p>
         </div>
       </div>
 

@@ -10,10 +10,11 @@ const JobSchema = new mongoose.Schema({
     lng: { type: Number }
   },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, enum: ['open', 'assigned', 'completed','cancelled'], default: 'open' },
+  status: { type: String, enum: ['open', 'assigned', 'in_progress', 'completed','cancelled'], default: 'open' },
   proposals: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   price: { type: Number },
+  fundsDeposited: { type: Boolean, default: false }, // Simulates Escrow
   isPaid: { type: Boolean, default: false },
   paymentId: { type: String },
   completionCode: { type: String, select: false },

@@ -9,7 +9,13 @@ import CheckoutForm from "./CheckoutForm";
 import { ShieldCheck, Loader2, IndianRupee } from "lucide-react";
 
 // UI Components
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 
 import { useTheme } from "../Utils/Themeprovider";
@@ -43,37 +49,42 @@ const PaymentPage = () => {
   const handleSuccess = async (paymentId) => {
     try {
       if (type === "escrow" && jobId) {
-        await api.put(`/api/jobs/${jobId}/pay`, { paymentId });
-        toast.success("Payment Secured! Code Generated.");
+        // Use the new deposit endpoint for Escrow logic
+        await api.put(`/api/jobs/${jobId}/deposit`, { paymentId });
+        toast.success("Funds Deposited to Escrow! Job Started.");
       }
 
       setTimeout(() => {
         navigate("/dashboard/jobs");
-      }, 2000); 
+      }, 2000);
     } catch (err) {
       console.error("Payment update failed", err);
-      toast.error("Payment succeeded but server update failed. Please contact support.");
+      toast.error(
+        "Payment succeeded but server update failed. Please contact support.",
+      );
     }
   };
 
-  const options = { 
-    clientSecret, 
-    appearance: { 
-      theme: theme === 'dark' ? 'night' : 'stripe',
+  const options = {
+    clientSecret,
+    appearance: {
+      theme: theme === "dark" ? "night" : "stripe",
       variables: {
-        colorPrimary: '#2563eb', // Matches blue-600
-        colorBackground: theme === 'dark' ? '#0f172a' : '#ffffff', // Optional: match slate-950
-        colorText: theme === 'dark' ? '#f8fafc' : '#0f172a',
-      }
-    } 
+        colorPrimary: "#2563eb", // Matches blue-600
+        colorBackground: theme === "dark" ? "#0f172a" : "#ffffff", // Optional: match slate-950
+        colorText: theme === "dark" ? "#f8fafc" : "#0f172a",
+      },
+    },
   };
 
   if (!amount)
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            <p className="text-muted-foreground font-medium">Initializing Secure Checkout...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-muted-foreground font-medium">
+            Initializing Secure Checkout...
+          </p>
         </div>
       </div>
     );
@@ -81,15 +92,16 @@ const PaymentPage = () => {
   return (
     <div className="container max-w-lg mx-auto py-20 px-4">
       <Card className="shadow-xl border-border bg-card overflow-hidden">
-        
         {/* Header Section */}
         <CardHeader className="bg-muted/30 border-b border-border text-center py-8">
           <div className="flex justify-center mb-3">
-             <div className="p-3 bg-blue-500/10 rounded-full">
-                <ShieldCheck className="h-8 w-8 text-blue-600" />
-             </div>
+            <div className="p-3 bg-blue-500/10 rounded-full">
+              <ShieldCheck className="h-8 w-8 text-blue-600" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">Secure Payment</CardTitle>
+          <CardTitle className="text-2xl font-bold text-foreground">
+            Secure Payment
+          </CardTitle>
           <CardDescription className="text-muted-foreground">
             Escrow protection active for this transaction
           </CardDescription>
@@ -100,8 +112,8 @@ const PaymentPage = () => {
           <div className="flex items-center justify-between bg-blue-500/5 p-4 rounded-lg mb-8 border border-blue-500/10">
             <span className="text-blue-600 font-medium">Total Amount Due</span>
             <div className="flex items-center text-2xl font-black text-foreground">
-                <IndianRupee className="h-5 w-5 mr-1" />
-                {amount}
+              <IndianRupee className="h-5 w-5 mr-1" />
+              {amount}
             </div>
           </div>
 
@@ -114,16 +126,16 @@ const PaymentPage = () => {
             </div>
           ) : (
             <div className="space-y-4 py-4">
-                <div className="h-10 bg-muted animate-pulse rounded" />
-                <div className="h-10 bg-muted animate-pulse rounded w-3/4" />
-                <div className="h-12 bg-muted/50 animate-pulse rounded mt-6" />
+              <div className="h-10 bg-muted animate-pulse rounded" />
+              <div className="h-10 bg-muted animate-pulse rounded w-3/4" />
+              <div className="h-12 bg-muted/50 animate-pulse rounded mt-6" />
             </div>
           )}
 
           <div className="mt-8 text-center">
             <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <ShieldCheck className="h-3 w-3" />
-                Powered by Stripe • PCI DSS Compliant
+              <ShieldCheck className="h-3 w-3" />
+              Powered by Stripe • PCI DSS Compliant
             </p>
           </div>
         </CardContent>

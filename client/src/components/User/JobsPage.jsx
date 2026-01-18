@@ -182,6 +182,7 @@ const JobsPage = () => {
         jobId: data.jobId,
         targetId: data.targetId,
       });
+      fetchDataRef.current(); // Refresh data to update status to completed
       toast.info("Job Completed! Please leave a review.");
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
@@ -275,6 +276,8 @@ const JobsPage = () => {
         targetId: verifyDialog.customerId,
       });
 
+      fetchData(); // Refresh the list so status updates
+
       setTimeout(() => setShowConfetti(false), 3000);
     } catch (err) {
       toast.error("Invalid Code");
@@ -291,6 +294,8 @@ const JobsPage = () => {
       });
       toast.success("Review submitted!");
       setReviewDialog({ open: false, jobId: null, targetId: null });
+      setRating(0);
+      setComment("");
     } catch {
       toast.error("Failed");
     }
@@ -511,7 +516,9 @@ const JobsPage = () => {
                         ? "bg-slate-500"
                         : job.status === "assigned"
                           ? "bg-amber-500"
-                          : "bg-emerald-600"
+                          : job.status === "in_progress"
+                            ? "bg-blue-600 animate-pulse"
+                            : "bg-emerald-600"
                     }`}
                   >
                     {job.status}
@@ -536,7 +543,8 @@ const JobsPage = () => {
               <CardFooter className="p-6 bg-muted/20 border-t border-border/50">
                 <div className="w-full flex flex-col gap-3">
                   {user?.role === "tradesperson" &&
-                  job.status === "assigned" ? (
+                  (job.status === "assigned" ||
+                    job.status === "in_progress") ? (
                     <Button
                       className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold h-14 rounded-2xl text-xs border-none shadow-lg shadow-amber-500/20"
                       onClick={() =>

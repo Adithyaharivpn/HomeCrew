@@ -37,7 +37,7 @@ import { useTheme } from "../Utils/Themeprovider";
 import { useNotifications } from "../../api/NotificationProvider";
 import NotificationBell from "../User/NotificationBell";
 import { motion } from "framer-motion";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import VerifiedBadge from "../Utils/VerifiedBadge";
 
@@ -87,69 +87,69 @@ const DashboardLayout = () => {
       {
         label: "Overview",
         href: "/dashboard",
-        icon: <LayoutDashboard className="h2 w-5 shrink-0 text-foreground" />,
+        icon: <LayoutDashboard className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Users",
         href: "/dashboard/admin-panel",
-        icon: <Users className="h-4 w-5 shrink-0 text-foreground" />,
+        icon: <Users className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Notifications",
-        icon: <Bell className="h-4 w-5 shrink-0 text-foreground" />,
+        icon: <Bell className="h-6 w-6 shrink-0 text-foreground" />,
         badge: unreadCount,
       },
       {
         label: "System Logs",
         href: "/dashboard/system-logs",
-        icon: <Terminal className="h-4 w-5 shrink-0 text-foreground" />,
+        icon: <Terminal className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Verify",
         href: "/dashboard/verifications",
-        icon: <ShieldCheck className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <ShieldCheck className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Reports",
         href: "/dashboard/reports",
-        icon: <AlertTriangle className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <AlertTriangle className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Payments",
         href: "/dashboard/admin-payments",
-        icon: <Wallet className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <Wallet className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Market",
         href: "/dashboard/jobs",
-        icon: <List className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <List className="h-6 w-6 shrink-0 text-foreground" />,
       },
     ],
     tradesperson: [
       {
         label: "Overview",
         href: "/dashboard",
-        icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <LayoutDashboard className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Notifications",
-        icon: <Bell className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <Bell className="h-6 w-6 shrink-0 text-foreground" />,
         badge: unreadCount,
       },
       {
         label: "Market",
         href: "/dashboard/jobs",
-        icon: <List className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <List className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Map",
         href: "/dashboard/map",
-        icon: <MapIcon className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <MapIcon className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Wallet",
         href: "/dashboard/billing",
-        icon: <Wallet className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <Wallet className="h-6 w-6 shrink-0 text-foreground" />,
       },
       ...(!user?.isVerified
         ? [
@@ -157,7 +157,7 @@ const DashboardLayout = () => {
               label: "Verify",
               href: "/dashboard/get-verified",
               icon: (
-                <ShieldCheck className="h-5 w-5 shrink-0 text-foreground" />
+                <ShieldCheck className="h-6 w-6 shrink-0 text-foreground" />
               ),
             },
           ]
@@ -167,27 +167,27 @@ const DashboardLayout = () => {
       {
         label: "Overview",
         href: "/dashboard",
-        icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <LayoutDashboard className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Notifications",
-        icon: <Bell className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <Bell className="h-6 w-6 shrink-0 text-foreground" />,
         badge: unreadCount,
       },
       {
         label: "Market",
         href: "/dashboard/jobs",
-        icon: <List className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <List className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Post Job",
         href: "/dashboard/post-job",
-        icon: <Briefcase className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <Briefcase className="h-6 w-6 shrink-0 text-foreground" />,
       },
       {
         label: "Payments",
         href: "/dashboard/billing",
-        icon: <CreditCard className="h-5 w-5 shrink-0 text-foreground" />,
+        icon: <CreditCard className="h-6 w-6 shrink-0 text-foreground" />,
       },
     ],
   };
@@ -229,9 +229,9 @@ const DashboardLayout = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center justify-start gap-2 group/sidebar py-2 cursor-pointer w-full">
-                    <div className="h-5 w-5 flex-shrink-0 relative">
-                      <Sun className="h-5 w-5 absolute rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
-                      <Moon className="h-5 w-5 absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
+                    <div className="h-6 w-6 flex-shrink-0 relative">
+                      <Sun className="h-6 w-6 absolute rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
+                      <Moon className="h-6 w-6 absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
                     </div>
                     <motion.span
                       animate={{
@@ -277,7 +277,7 @@ const DashboardLayout = () => {
                     label: "Log Out",
                     href: "#",
                     icon: (
-                      <LogOut className="h-5 w-5 flex-shrink-0 text-foreground" />
+                      <LogOut className="h-7 w-7 flex-shrink-0 text-foreground" />
                     ),
                   }}
                 />
@@ -287,28 +287,33 @@ const DashboardLayout = () => {
               <div className="mt-auto pt-4 pb-4">
                 <Link
                   to="/dashboard/profile"
-                  className="flex items-center gap-2 p-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer transition-colors group"
+                  className="flex items-center gap-2 py-2 w-full cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors group/sidebar"
                 >
-                  <Avatar className="h-8 w-8 rounded-full">
+                  <Avatar className="h-7 w-7 rounded-full flex-shrink-0 overflow-hidden">
                     <AvatarImage
                       src={user?.profilePictureUrl}
                       alt={user?.name}
+                      className="object-cover h-full w-full"
                     />
-                    <AvatarFallback className="rounded-full">
+                    <AvatarFallback className="rounded-full bg-muted font-bold text-[10px]">
                       {user?.name?.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  {open && (
-                    <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                      <span className="truncate font-semibold text-foreground flex items-center">
-                        {user?.name}
-                        <VerifiedBadge isVerified={user?.isVerified} />
-                      </span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {user?.email}
-                      </span>
-                    </div>
-                  )}
+                  <motion.div
+                    animate={{
+                      display: open ? "flex" : "none",
+                      opacity: open ? 1 : 0,
+                    }}
+                    className="flex-col flex-1 text-left text-sm leading-tight ml-2 group-hover/sidebar:translate-x-1 transition duration-150"
+                  >
+                    <span className="truncate font-semibold text-foreground flex items-center gap-1">
+                      {user?.name}
+                      <VerifiedBadge isVerified={user?.isVerified} />
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.email}
+                    </span>
+                  </motion.div>
                 </Link>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../api/useAuth";
-import api from "../../api/axiosConfig"; // Using your custom instance
+import api from "../../api/axiosConfig"; 
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { useTheme } from "../Utils/Themeprovider"; // Assuming this is where your theme state is
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -18,6 +19,7 @@ const Login = () => {
 
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { theme } = useTheme(); // Get the current theme (light/dark)
 
   const handleChange = (e) => {
     if (error) setError("");
@@ -30,12 +32,10 @@ const Login = () => {
     setError("");
 
     try {
-      // Use 'api' instance instead of raw axios
       const response = await api.post("/api/auth/login", formData);
-
       if (response.data.token) {
         await login(response.data.token);
-        navigate("/dashboard"); // Direct to unified dashboard
+        navigate("/dashboard"); 
       }
     } catch (err) {
       setError(err.response?.data?.error || "Invalid Credentials");
@@ -44,11 +44,17 @@ const Login = () => {
     }
   };
 
+  // Hardcoded border color logic
+  const borderColor = theme === "dark" ? "rgba(255, 255, 255, 0.2)" : "#e5e5e5";
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/3 blur-[120px] pointer-events-none -z-10" />
 
-      <Card className="w-full max-w-105 border-border bg-card rounded-3xl shadow-2xl overflow-hidden dark:border-white/20 dark:shadow-[0_0_50px_-5px_rgba(255,255,255,0.15)] transition-all duration-300">
+      <Card 
+        className="w-full max-w-105 bg-card rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 dark:shadow-[0_0_50px_-5px_rgba(255,255,255,0.15)]"
+        style={{ border: `1px solid ${borderColor}` }} // HARDCODED BORDER
+      >
         <CardHeader className="pt-12 text-center">
           <div className="mx-auto h-12 w-12 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-600/20">
             <ShieldCheck className="h-6 w-6 text-blue-600" />

@@ -128,8 +128,11 @@ const JobPosting = () => {
 
   return (
     /* ADJUSTED: Removed pt-32 for better alignment in DashboardLayout */
-    <div className="flex justify-center items-start min-h-full bg-background text-foreground pt-6 pb-20 px-4">
-      <Card className="w-full max-w-2xl border-border bg-card shadow-2xl rounded-[1.5rem] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex justify-center items-start min-h-full bg-background text-foreground pt-6 pb-20 px-4 relative overflow-hidden">
+      {/* Atmosphere Background */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/3 blur-[120px] pointer-events-none -z-10" />
+
+      <Card className="w-full max-w-3xl border-border bg-card shadow-2xl rounded-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
         <CardHeader className="pt-10 pb-2">
           <CardTitle className="text-3xl font-bold tracking-tight text-center leading-none">
             Post a New Job

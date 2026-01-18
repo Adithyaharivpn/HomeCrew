@@ -29,6 +29,12 @@ const postJob = async (req, res) => {
     const io = req.app.get('io');
     if (io) {
         io.emit('job_created', newJob);
+        // Create notification for interested users (simulated broadcasting to all for now or handled by frontend socket listener)
+        // Ideally, we might want to creating a persistent notification for relevant tradespeople here if we had a matching logic.
+        // For now, the socket event 'job_created' triggers a toast on the frontend.
+        // If we want a persistent notification in the bell:
+        // We would need to identify WHO to notify (e.g. all tradespeople in that city/category).
+        // Skipping broadcasting DB notifications to avoid spamming DB for every job post.
     }
 
     res.status(201).json({ message: 'Job posted successfully!', job: newJob });
@@ -218,6 +224,11 @@ const markJobAsPaid = async (req, res) => {
         job.isPaid = true;
         job.paymentId = paymentId;
         job.completionCode = Math.floor(100000 + Math.random() * 900000).toString();
+        // If funds were already deposited (escrow), ensure status is completed here or kept as is? 
+        // Actually, if paid via external stripe flow, we proceed as usual. 
+        // But for escrow, we use a different flow typically. 
+        // We'll keep this for direct payments.
+        
         await job.save();
         
         logger.info(`Payment Transaction Saved: ${newTransaction._id}`);
@@ -233,6 +244,47 @@ const markJobAsPaid = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
+const depositJobFunds = async (req, res) => {
+  try {
+      const job = await Job.findById(req.params.id);
+      if (!job) return res.status(404).json({ message: 'Job not found' });
+      
+      const currentUserId = req.user.id.toString();
+      if (job.user.toString() !== currentUserId) {
+        return res.status(403).json({ message: 'Not authorized' });
+      }
+
+      job.fundsDeposited = true;
+      job.status = 'in_progress'; // Move to in_progress from assigned
+      
+      // Generate code NOW since funds are secured
+      job.completionCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Create a "Pending/Escrow" transaction record
+      const escrowTx = new Transaction({
+        user: job.user,
+        tradesperson: job.assignedTo,
+        job: job._id,
+        amount: job.price || 0,
+        status: 'pending', // Pending until released
+        stripePaymentId: `ESCROW_${Date.now()}` // Mock ID
+      });
+      await escrowTx.save();
+
+      await job.save();
+
+      const io = req.app.get('io');
+      if (io) io.emit('job_updated', job);
+
+      res.json({ success: true, message: "Funds Deposited to Escrow", job });
+
+  } catch (error) {
+      logger.error(`Error depositing funds: ${error.message}`);
+      res.status(500).json({ message: error.message });
+  }
+};
+
 
 const searchLocation = async (req, res) => {
     try {
@@ -347,7 +399,8 @@ module.exports = {
   markJobAsPaid, 
   searchLocation,
   cancelJob,
-  rescheduleJob
+  rescheduleJob,
+  depositJobFunds
 };
 // export getJobCode
 module.exports.getJobCode = getJobCode;

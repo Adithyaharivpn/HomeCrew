@@ -40,7 +40,7 @@ router.post('/initiate', authMiddleware, async (req, res) => {
         recipient: customerId, 
         sender: tradespersonId,
         message: `New Proposal received for your job: "${job.title}"`,
-        link: `/my-job-proposals/${jobId}` 
+        link: `/dashboard/my-job-proposals/${jobId}` 
       });
       logger.info(`New Chat Proposal initiated for Job ${jobId} by Tradesperson ${tradespersonId}`, {
          meta: { type: 'chat_proposal', customerId }

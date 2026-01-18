@@ -6,6 +6,10 @@ dotenv.config();
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
+    winston.format((info) => {
+      delete info._id;
+      return info;
+    })(),
     winston.format.timestamp(),
     winston.format.json()
   ),

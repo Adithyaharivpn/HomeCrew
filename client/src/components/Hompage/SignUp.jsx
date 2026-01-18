@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../api/useAuth";
-import api from "../../api/axiosConfig"; // Strictly using your api instance
+import api from "../../api/axiosConfig";
+import { motion, AnimatePresence } from "framer-motion";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -16,12 +17,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Mail, User, CloudUpload, Upload } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { useTheme } from "../Utils/Themeprovider";
+import {
+  Loader2,
+  CloudUpload,
+  Upload,
+  User,
+  Hammer,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+} from "lucide-react";
 import LocationSearchInput from "./LocationSearchInput";
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { theme } = useTheme();
+  const [step, setStep] = useState(1);
+  const [progress, setProgress] = useState(33);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -29,7 +44,7 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
     phoneNumber: "",
-    role: "",
+    role: "", // "customer" | "tradesperson"
     tradeCategory: "",
     experience: "",
     location: "",
@@ -44,7 +59,7 @@ const SignUp = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // FETCH: Using 'api' instance
+  // FETCH Categories
   useEffect(() => {
     const fetchTradeCategories = async () => {
       try {
@@ -56,6 +71,13 @@ const SignUp = () => {
     };
     fetchTradeCategories();
   }, []);
+
+  // Update Progress Bar
+  useEffect(() => {
+    if (step === 1) setProgress(33);
+    if (step === 2) setProgress(66);
+    if (step === 3) setProgress(100);
+  }, [step]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -71,15 +93,48 @@ const SignUp = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
+  const handleNext = () => {
+    setError("");
+    // Basic Validation per step
+    if (step === 1) {
+      if (!formData.role) {
+        setError("Please select a role to continue.");
+        return;
+      }
+    }
+    if (step === 2) {
+      if (
+        !formData.name ||
+        !formData.email ||
+        !formData.phoneNumber ||
+        !formData.password ||
+        !formData.confirmPassword
+      ) {
+        setError("Please fill in all basic details.");
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+      if (formData.phoneNumber.length < 10) {
+        setError("Phone number must be at least 10 digits.");
+        return;
+      }
     }
 
-    if (formData.phoneNumber.length < 10) {
-      setError("Phone number must be at least 10 digits.");
+    setStep((prev) => prev + 1);
+  };
+
+  const handleBack = () => {
+    setStep((prev) => prev - 1);
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.agreeToTerms) {
+      setError("You must acknowledge the terms to proceed.");
       return;
     }
 
@@ -100,7 +155,6 @@ const SignUp = () => {
     }
 
     try {
-      // SUBMIT: Using 'api' instance
       const response = await api.post("/api/auth/signup", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -116,191 +170,336 @@ const SignUp = () => {
     }
   };
 
+  // Animation Variants
+  const variants = {
+    enter: { x: 100, opacity: 0 },
+    center: { x: 0, opacity: 1 },
+    exit: { x: -100, opacity: 0 },
+  };
+
+  const borderColor = theme === "dark" ? "rgba(255, 255, 255, 0.2)" : "#e5e5e5";
+
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4 pt-24 pb-20 overflow-hidden">
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/3 blur-[120px] pointer-events-none -z-10" />
 
-      <Card className="w-full max-w-137.5 border-border bg-card rounded-3xl shadow-2xl overflow-hidden dark:border-white/20 dark:shadow-[0_0_50px_-5px_rgba(255,255,255,0.15)] transition-all duration-300">
-        <CardHeader className="pt-10 text-center text-foreground">
-          <CardTitle className="text-3xl font-black  uppercase tracking-tighter">
-            Create Entity
-          </CardTitle>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mt-4 ">
-            Initialize Global Profile
-          </p>
+      <Card
+        className="w-full max-w-4xl bg-card rounded-xl shadow-2xl overflow-hidden transition-all duration-300 dark:shadow-[0_0_50px_-5px_rgba(255,255,255,0.05)]"
+        style={{ border: `1px solid ${borderColor}` }}
+      >
+        <CardHeader className="pt-8 text-center text-foreground pb-2">
+          <CardTitle className="text-3xl font-bold">Join The Network</CardTitle>
+
+          <div className="max-w-md mx-auto mt-6 mb-4 space-y-3">
+            <div className="flex justify-between px-1">
+              {["Role Selection", "Personal Info", "Finalize"].map(
+                (label, index) => {
+                  const stepNum = index + 1;
+                  const isActive = step >= stepNum;
+                  const isCurrent = step === stepNum;
+                  return (
+                    <span
+                      key={label}
+                      className={`text-xs font-bold transition-colors duration-300 ${
+                        isCurrent
+                          ? "text-blue-600 scale-105"
+                          : isActive
+                            ? "text-foreground"
+                            : "text-muted-foreground"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                  );
+                },
+              )}
+            </div>
+            <Progress value={progress} className="h-1.5" />
+          </div>
         </CardHeader>
 
-        <CardContent className="pb-10 space-y-6 px-10">
+        <CardContent className="pb-10 px-6 sm:px-16 min-h-[500px] flex flex-col justify-center relative">
           {error && (
-            <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-[10px] font-black uppercase text-destructive text-center tracking-widest">
+            <div className="mb-6 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-[10px] font-black uppercase text-destructive text-center tracking-widest animate-pulse">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <Label className="group cursor-pointer border-2 border-dashed border-border rounded-3xl p-8 flex flex-col items-center hover:bg-muted/50 transition-all bg-muted/20">
-              <CloudUpload className="h-8 w-8 text-blue-500 mb-2 group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
-                {profilePicture
-                  ? profilePicture.name
-                  : "Establish Biometric ID (Profile Photo)"}
-              </span>
-              <input
-                type="file"
-                hidden
-                onChange={(e) => setProfilePicture(e.target.files[0])}
-                accept="image/*"
-              />
-            </Label>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="name"
-                placeholder="Full Name"
-                className="h-14 rounded-xl"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                name="email"
-                type="email"
-                placeholder="Email Address"
-                className="h-14 rounded-xl"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                name="phoneNumber"
-                type="tel"
-                placeholder="Contact Phone"
-                className="h-14 rounded-xl md:col-span-2"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                name="password"
-                type="password"
-                placeholder="Password"
-                className="h-14 rounded-xl"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirm Password"
-                className="h-14 rounded-xl"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <Select
-              onValueChange={(val) => handleSelectChange("role", val)}
-              value={formData.role}
-            >
-              <SelectTrigger className="h-14 bg-background border-none rounded-xl font-black uppercase text-[10px] tracking-widest px-6 shadow-input">
-                <SelectValue placeholder="SELECT ROLE" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="customer">CUSTOMER (REQUESTER)</SelectItem>
-                <SelectItem value="tradesperson">
-                  TRADESPERSON (PROVIDER)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            {formData.role === "tradesperson" && (
-              <div className="p-6 bg-muted/30 rounded-4xl border border-border space-y-4 animate-in slide-in-from-top-4">
-                <Select
-                  onValueChange={(val) =>
-                    handleSelectChange("tradeCategory", val)
-                  }
+          <AnimatePresence mode="wait">
+            {/* STEP 1: ROLE SELECTION */}
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+              >
+                <div
+                  onClick={() => {
+                    setFormData({ ...formData, role: "customer" });
+                    setStep(2);
+                  }}
+                  className={`cursor-pointer group relative p-8 rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center space-y-4 hover:scale-[1.02] ${
+                    formData.role === "customer"
+                      ? "border-blue-500 bg-blue-500/5 shadow-[0_0_30px_-5px_rgba(59,130,246,0.3)]"
+                      : "border-border hover:border-blue-500/50 hover:bg-muted/50"
+                  }`}
                 >
-                  <SelectTrigger className="bg-background rounded-xl h-12 border-none shadow-input font-bold text-sm">
-                    <SelectValue placeholder="Specialization Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tradeCategories.map((c) => (
-                      <SelectItem key={c._id} value={c.service_name}>
-                        {c.service_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Input
-                  name="experience"
-                  type="number"
-                  placeholder="Years of Experience"
-                  className="h-14 rounded-xl"
-                  value={formData.experience}
-                  onChange={handleChange}
-                  min="0"
-                />
-
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
-                    Service Location
-                  </Label>
-                  <LocationSearchInput
-                    value={formData.location}
-                    onChange={handleChange}
-                    onLocationSelect={handleLocationSelect}
-                  />
-                  <p className="text-[9px] text-muted-foreground ml-1 uppercase tracking-wider">
-                    * Search or click map icon to pin location
-                  </p>
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2 shadow-lg group-hover:shadow-blue-500/50 transition-all">
+                    <User className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-bold">Customer</h3>
+                    <p className="text-xs text-muted-foreground font-medium mt-1">
+                      I want to hire professionals
+                    </p>
+                  </div>
+                  {formData.role === "customer" && (
+                    <div className="absolute top-4 right-4 text-blue-500">
+                      <CheckCircle2 className="h-6 w-6" />
+                    </div>
+                  )}
                 </div>
 
-                <Label className="cursor-pointer border border-border h-12 rounded-xl flex items-center justify-center bg-background hover:bg-muted text-[10px] font-black uppercase tracking-widest shadow-input">
-                  <Upload className="mr-2 h-4 w-4" />{" "}
-                  {verificationDocs.length > 0
-                    ? `${verificationDocs.length} Documents Staged`
-                    : "Identity / Trade Licenses"}
-                  <input
-                    type="file"
-                    multiple
-                    hidden
-                    onChange={(e) => setVerificationDocs(e.target.files)}
-                  />
-                </Label>
-              </div>
+                <div
+                  onClick={() => {
+                    setFormData({ ...formData, role: "tradesperson" });
+                    setStep(2);
+                  }}
+                  className={`cursor-pointer group relative p-8 rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center space-y-4 hover:scale-[1.02] ${
+                    formData.role === "tradesperson"
+                      ? "border-purple-500 bg-purple-500/5 shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)]"
+                      : "border-border hover:border-purple-500/50 hover:bg-muted/50"
+                  }`}
+                >
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2 shadow-lg group-hover:shadow-purple-500/50 transition-all">
+                    <Hammer className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-bold">Tradesperson</h3>
+                    <p className="text-xs text-muted-foreground font-medium mt-1">
+                      I want to find work
+                    </p>
+                  </div>
+                  {formData.role === "tradesperson" && (
+                    <div className="absolute top-4 right-4 text-purple-500">
+                      <CheckCircle2 className="h-6 w-6" />
+                    </div>
+                  )}
+                </div>
+              </motion.div>
             )}
 
-            <div className="flex items-center space-x-2 ml-1">
-              <Checkbox
-                id="terms"
-                checked={formData.agreeToTerms}
-                onCheckedChange={(val) =>
-                  setFormData({ ...formData, agreeToTerms: val })
-                }
-              />
-              <Label
-                htmlFor="terms"
-                className="text-xs font-bold cursor-pointer !text-black dark:!text-white"
+            {/* STEP 2: BASIC INFO */}
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                className="space-y-5"
               >
-                Acknowledge Terms & Protocols
-              </Label>
-            </div>
+                <div className="flex justify-center mb-6">
+                  <Label className="group cursor-pointer relative h-24 w-24 rounded-full border-2 border-dashed border-border flex items-center justify-center hover:border-foreground/50 transition-all overflow-hidden bg-muted/20">
+                    {profilePicture ? (
+                      <img
+                        src={URL.createObjectURL(profilePicture)}
+                        alt="Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center p-2 text-center">
+                        <CloudUpload className="h-6 w-6 text-muted-foreground mb-1" />
+                        <span className="text-[8px] uppercase font-bold text-muted-foreground">
+                          Upload Photo
+                        </span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) => setProfilePicture(e.target.files[0])}
+                      accept="image/*"
+                    />
+                  </Label>
+                </div>
 
-            <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black h-14 rounded-2xl shadow-xl uppercase text-[11px] tracking-widest border-none"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                "Initiate Profile"
-              )}
-            </Button>
-          </form>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    name="name"
+                    placeholder="Full Name"
+                    className="h-12 rounded-xl"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="Email Address"
+                    className="h-12 rounded-xl"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    name="phoneNumber"
+                    type="tel"
+                    placeholder="Phone Number"
+                    className="h-12 rounded-xl md:col-span-2"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    className="h-12 rounded-xl"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Confirm Password"
+                    className="h-12 rounded-xl"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* STEP 3: SPECIFIC DETAILS */}
+            {step === 3 && (
+              <motion.div
+                key="step3"
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                {formData.role === "tradesperson" ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Select
+                        onValueChange={(val) =>
+                          handleSelectChange("tradeCategory", val)
+                        }
+                      >
+                        <SelectTrigger className="bg-background rounded-xl h-12 border-input shadow-none">
+                          <SelectValue placeholder="Specialization" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tradeCategories.map((c) => (
+                            <SelectItem key={c._id} value={c.service_name}>
+                              {c.service_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        name="experience"
+                        type="number"
+                        placeholder="Years Experience"
+                        className="h-12 rounded-xl"
+                        value={formData.experience}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase tracking-wider ml-1 text-muted-foreground">
+                        Service Area
+                      </Label>
+                      <LocationSearchInput
+                        value={formData.location}
+                        onChange={handleChange}
+                        onLocationSelect={handleLocationSelect}
+                      />
+                    </div>
+                    <Label className="cursor-pointer border-2 border-dashed border-border h-16 rounded-xl flex items-center justify-center bg-muted/20 hover:bg-muted/40 transition-all text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      <Upload className="mr-2 h-4 w-4" />
+                      {verificationDocs.length > 0
+                        ? `${verificationDocs.length} Files Selected`
+                        : "Upload License / ID"}
+                      <input
+                        type="file"
+                        multiple
+                        hidden
+                        onChange={(e) => setVerificationDocs(e.target.files)}
+                      />
+                    </Label>
+                  </div>
+                ) : (
+                  <div className="text-center py-10 space-y-4">
+                    <div className="h-20 w-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500">
+                      <CheckCircle2 className="h-10 w-10" />
+                    </div>
+                    <h3 className="text-xl font-bold">Almost There!</h3>
+                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                      Just accept the terms below to create your customer
+                      account and start hiring.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-3 pt-4 border-t border-border">
+                  <Checkbox
+                    id="terms"
+                    checked={formData.agreeToTerms}
+                    onCheckedChange={(val) =>
+                      setFormData({ ...formData, agreeToTerms: val })
+                    }
+                  />
+                  <Label
+                    htmlFor="terms"
+                    className="text-xs font-medium cursor-pointer leading-tight"
+                  >
+                    I agree to the Terms of Service and Privacy Protocol.
+                  </Label>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="flex justify-between items-center mt-8 pt-4">
+            {step > 1 ? (
+              <Button
+                variant="ghost"
+                onClick={handleBack}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Button>
+            ) : (
+              <div /> // Spacer
+            )}
+
+            {step < 3 ? (
+              step !== 1 && ( // Hide Next on Step 1 because selection auto-advances
+                <Button onClick={handleNext} className="rounded-xl px-8">
+                  Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              )
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 shadow-lg shadow-blue-600/20"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

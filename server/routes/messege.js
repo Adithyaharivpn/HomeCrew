@@ -48,7 +48,7 @@ router.post('/', authMiddleware, async (req, res) => {
         recipient: receiverId,
         sender: senderId,
         message: `New message: ${text.substring(0, 30)}${text.length > 30 ? '...' : ''}`, 
-        link: `/chat/${roomId}`
+        link: `/dashboard/chat/${roomId}`
     });
 
     const io = req.app.get('io');
