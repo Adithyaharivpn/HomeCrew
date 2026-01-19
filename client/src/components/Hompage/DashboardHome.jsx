@@ -21,6 +21,8 @@ import {
   Badge as BadgeIcon,
   TrendingUp,
   TrendingDown,
+  MapPin,
+  Calendar,
 } from "lucide-react";
 import api from "../../api/axiosConfig";
 import { useAuth } from "../../api/useAuth";
@@ -49,6 +51,7 @@ const DashboardHome = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [activities, setActivities] = useState([]);
+  const [upcomingJobs, setUpcomingJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = React.useState("90d");
 
@@ -56,13 +59,38 @@ const DashboardHome = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const [statsRes, activityRes] = await Promise.all([
-          api.get("/api/dashboard/stats"),
-          api.get("/api/dashboard/recent-activity").catch(() => ({ data: [] })),
-        ]);
+
+        const promises = [api.get("/api/dashboard/stats")];
+        const isTradesperson = user?.role === "tradesperson";
+
+        if (isTradesperson) {
+          promises.push(
+            api
+              .get("/api/jobs/tradesperson/my-works")
+              .catch(() => ({ data: [] })),
+          );
+        } else {
+          promises.push(
+            api
+              .get("/api/dashboard/recent-activity")
+              .catch(() => ({ data: [] })),
+          );
+        }
+
+        const [statsRes, feedRes] = await Promise.all(promises);
 
         setStats(statsRes.data);
-        setActivities(activityRes.data || []);
+
+        if (isTradesperson) {
+          // Filter for active jobs (assigned/in_progress) for the dashboard view
+          const allJobs = feedRes.data || [];
+          const active = allJobs.filter((j) =>
+            ["assigned", "in_progress"].includes(j.status),
+          );
+          setUpcomingJobs(active);
+        } else {
+          setActivities(feedRes.data || []);
+        }
       } catch (err) {
         console.error("Dashboard data fetch failed", err);
       } finally {
@@ -496,15 +524,32 @@ const DashboardHome = () => {
       {/* Feed Section */}
       <div className="bg-card border border-border rounded-[3rem] overflow-hidden shadow-2xl">
         <div className="p-8 border-b border-border bg-muted/20 flex justify-between items-center">
-          <h3 className="text-sm font-bold flex items-center gap-3">
-            <Clock className="h-4 w-4 text-blue-600" /> Live Platform Feed
-          </h3>
-          <Badge
-            variant="outline"
-            className="font-bold text-xs px-3 border-border"
-          >
-            Real-time updates
-          </Badge>
+          {user?.role === "tradesperson" ? (
+            <>
+              <h3 className="text-sm font-bold flex items-center gap-3">
+                <Briefcase className="h-4 w-4 text-blue-600" /> Upcoming
+                Scheduled Jobs
+              </h3>
+              <Badge
+                variant="outline"
+                className="font-bold text-xs px-3 border-border"
+              >
+                {upcomingJobs.length} Active
+              </Badge>
+            </>
+          ) : (
+            <>
+              <h3 className="text-sm font-bold flex items-center gap-3">
+                <Clock className="h-4 w-4 text-blue-600" /> Live Platform Feed
+              </h3>
+              <Badge
+                variant="outline"
+                className="font-bold text-xs px-3 border-border"
+              >
+                Real-time updates
+              </Badge>
+            </>
+          )}
         </div>
 
         <div className="p-4 space-y-2">
@@ -524,6 +569,61 @@ const DashboardHome = () => {
                 <Skeleton className="h-2 w-12 ml-4" />
               </div>
             ))
+          ) : user?.role === "tradesperson" ? (
+            upcomingJobs.length > 0 ? (
+              upcomingJobs.map((job) => (
+                <div
+                  key={job._id}
+                  onClick={() => navigate(`/job/${job._id}`)}
+                  className="flex items-center justify-between p-5 hover:bg-muted/40 rounded-[2rem] transition-all group cursor-pointer"
+                >
+                  <div className="flex items-center gap-5 flex-1">
+                    <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center border border-blue-200 dark:border-blue-800 text-blue-600 group-hover:scale-110 transition-transform">
+                      <Briefcase className="h-5 w-5" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-black text-foreground line-clamp-1">
+                        {job.title}
+                      </h4>
+                      <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" /> {job.city || "Remote"}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />{" "}
+                          {new Date(job.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <Badge
+                    className={`uppercase text-[10px] font-black min-w-[80px] justify-center ${
+                      job.status === "in_progress"
+                        ? "bg-emerald-500"
+                        : "bg-blue-500"
+                    }`}
+                  >
+                    {job.status?.replace("_", " ") || "Active"}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-[2.5rem] m-4 bg-muted/5">
+                <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Briefcase className="h-6 w-6 text-muted-foreground opacity-20" />
+                </div>
+                <p className="text-xs font-bold text-muted-foreground">
+                  No upcoming jobs scheduled
+                </p>
+                <Button
+                  variant="link"
+                  onClick={() => navigate("/dashboard/jobs")}
+                  className="text-blue-600 font-bold mt-2"
+                >
+                  Find new work
+                </Button>
+              </div>
+            )
           ) : activities.length > 0 ? (
             activities.map((activity, idx) => (
               <div
@@ -563,14 +663,26 @@ const DashboardHome = () => {
             </div>
           )}
         </div>
-        {activities.length > 0 && !loading && (
+        {!loading && (
           <div className="p-6 bg-muted/10 border-t border-border flex justify-center">
-            <Button
-              variant="ghost"
-              className="text-xs font-bold text-blue-600 hover:bg-blue-600/10 rounded-xl h-10 px-8"
-            >
-              View Full Audit Log <ArrowRight className="ml-2 h-3 w-3" />
-            </Button>
+            {user?.role === "tradesperson" ? (
+              upcomingJobs.length > 0 && (
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/dashboard/active-works")}
+                  className="text-xs font-bold text-blue-600 hover:bg-blue-600/10 rounded-xl h-10 px-8"
+                >
+                  View All Active Works <ArrowRight className="ml-2 h-3 w-3" />
+                </Button>
+              )
+            ) : activities.length > 0 ? (
+              <Button
+                variant="ghost"
+                className="text-xs font-bold text-blue-600 hover:bg-blue-600/10 rounded-xl h-10 px-8"
+              >
+                View Full Audit Log <ArrowRight className="ml-2 h-3 w-3" />
+              </Button>
+            ) : null}
           </div>
         )}
       </div>
