@@ -177,6 +177,15 @@ const completeJob = async (req, res) => {
     job.status = 'completed';
     job.isCompleted = true;
     await job.save();
+
+    // Update Transaction status to success (Release Escrow)
+    const transaction = await Transaction.findOne({ job: jobId, status: 'pending' });
+    if (transaction) {
+        transaction.status = 'success';
+        await transaction.save();
+        logger.info(`Transaction released for Job ${jobId}`);
+    }
+
     logger.info(`Job successfully completed: ${jobId}`, { meta: { type: 'job_complete' } });
 
     const io = req.app.get('io');

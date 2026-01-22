@@ -433,7 +433,7 @@ const ChatBox = () => {
         <div className="p-6 border-b border-border bg-muted/20 backdrop-blur-md">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-black uppercase tracking-tighter italic leading-none">
+              <h2 className="text-xl font-black uppercase tracking-tighter leading-none">
                 {jobDetails?.title}
               </h2>
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-2">
@@ -642,6 +642,11 @@ const ChatBox = () => {
               </label>
               <Input
                 type="datetime-local"
+                min={new Date(
+                  new Date().getTime() - new Date().getTimezoneOffset() * 60000,
+                )
+                  .toISOString()
+                  .slice(0, 16)}
                 className="h-14 rounded-xl dark:text-white relative w-full pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 style={{ colorScheme: "dark" }}
                 value={appointmentDate}

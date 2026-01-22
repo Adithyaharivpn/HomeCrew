@@ -58,6 +58,7 @@ const SignUp = () => {
   const [tradeCategories, setTradeCategories] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isNextLoading, setIsNextLoading] = useState(false);
 
   // FETCH Categories
   useEffect(() => {
@@ -93,7 +94,7 @@ const SignUp = () => {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setError("");
     // Basic Validation per step
     if (step === 1) {
@@ -101,7 +102,9 @@ const SignUp = () => {
         setError("Please select a role to continue.");
         return;
       }
+      setStep((prev) => prev + 1);
     }
+
     if (step === 2) {
       if (
         !formData.name ||
@@ -121,9 +124,22 @@ const SignUp = () => {
         setError("Phone number must be at least 10 digits.");
         return;
       }
-    }
 
-    setStep((prev) => prev + 1);
+      // Check for uniqueness
+      setIsNextLoading(true);
+      try {
+        await api.post("/api/auth/check-unique", {
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+        });
+        // If successful (status 200), proceed
+        setStep((prev) => prev + 1);
+      } catch (err) {
+        setError(err.response?.data?.error || "Validation failed");
+      } finally {
+        setIsNextLoading(false);
+      }
+    }
   };
 
   const handleBack = () => {
@@ -220,7 +236,7 @@ const SignUp = () => {
 
         <CardContent className="pb-10 px-6 sm:px-16 min-h-[500px] flex flex-col justify-center relative">
           {error && (
-            <div className="mb-6 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-[10px] font-black uppercase text-destructive text-center tracking-widest animate-pulse">
+            <div className="mb-6 rounded-xl bg-destructive/10 border-2 border-destructive/20 p-4 text-sm font-black uppercase text-destructive text-center tracking-widest animate-pulse shadow-lg shadow-destructive/10">
               {error}
             </div>
           )}
@@ -413,16 +429,16 @@ const SignUp = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider ml-1 text-muted-foreground">
+                      <label className="text-xs font-bold uppercase tracking-wider ml-1 text-dark:!text-black">
                         Service Area
-                      </Label>
+                      </label>
                       <LocationSearchInput
                         value={formData.location}
                         onChange={handleChange}
                         onLocationSelect={handleLocationSelect}
                       />
                     </div>
-                    <Label className="cursor-pointer border-2 border-dashed border-border h-16 rounded-xl flex items-center justify-center bg-muted/20 hover:bg-muted/40 transition-all text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <label className="cursor-pointer border-2 border-dashed border-border h-16 rounded-xl flex items-center justify-center bg-muted/20 hover:bg-muted/40 transition-all text-xs font-bold uppercase tracking-widest text-dark:!text-black">
                       <Upload className="mr-2 h-4 w-4" />
                       {verificationDocs.length > 0
                         ? `${verificationDocs.length} Files Selected`
@@ -433,7 +449,7 @@ const SignUp = () => {
                         hidden
                         onChange={(e) => setVerificationDocs(e.target.files)}
                       />
-                    </Label>
+                    </label>
                   </div>
                 ) : (
                   <div className="text-center py-10 space-y-4">
@@ -456,12 +472,12 @@ const SignUp = () => {
                       setFormData({ ...formData, agreeToTerms: val })
                     }
                   />
-                  <Label
+                  <label
                     htmlFor="terms"
-                    className="text-xs font-medium cursor-pointer leading-tight"
+                    className="text-xs font-medium cursor-pointer leading-tight text-dark:!text-black peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     I agree to the Terms of Service and Privacy Protocol.
-                  </Label>
+                  </label>
                 </div>
               </motion.div>
             )}
@@ -472,6 +488,7 @@ const SignUp = () => {
               <Button
                 variant="ghost"
                 onClick={handleBack}
+                disabled={isLoading || isNextLoading}
                 className="text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -482,8 +499,18 @@ const SignUp = () => {
 
             {step < 3 ? (
               step !== 1 && ( // Hide Next on Step 1 because selection auto-advances
-                <Button onClick={handleNext} className="rounded-xl px-8">
-                  Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                <Button
+                  onClick={handleNext}
+                  disabled={isNextLoading}
+                  className="rounded-xl px-8"
+                >
+                  {isNextLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <>
+                      Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               )
             ) : (

@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosConfig";
+import LocationSearchInput from "../Hompage/LocationSearchInput";
 
 // Icons
-import {
-  MapPin,
-  Loader2,
-  Briefcase,
-  FileText,
-  ChevronRight,
-} from "lucide-react";
+import { Loader2, Briefcase, ChevronRight } from "lucide-react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -39,9 +34,6 @@ const JobPosting = () => {
 
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [locationOptions, setLocationOptions] = useState([]);
-  const [locationLoading, setLocationLoading] = useState(false);
   const [locationInputValue, setLocationInputValue] = useState("");
 
   const handleChange = (e) => {
@@ -55,34 +47,21 @@ const JobPosting = () => {
     setJobDetails({ ...jobDetails, category: value });
   };
 
-  const fetchLocations = async (query) => {
-    if (!query) return;
-    setLocationLoading(true);
-    try {
-      const res = await api.get(`/api/jobs/location-search?q=${query}`);
-      if (Array.isArray(res.data)) {
-        setLocationOptions(res.data);
-      } else {
-        setLocationOptions([]);
-      }
-    } catch (error) {
-      console.error("Location search failed", error);
-      setLocationOptions([]);
-    } finally {
-      setLocationLoading(false);
-    }
+  const handleLocationSelect = (locData) => {
+    setJobDetails((prev) => ({
+      ...prev,
+      city: locData.city || locData.fullAddress.split(",")[0],
+      location: {
+        lat: parseFloat(locData.lat),
+        lng: parseFloat(locData.lng),
+      },
+    }));
+    setLocationInputValue(locData.city || locData.fullAddress.split(",")[0]);
   };
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (locationInputValue.length > 2) {
-        fetchLocations(locationInputValue);
-      } else {
-        setLocationOptions([]);
-      }
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [locationInputValue]);
+  const handleLocationInputChange = (e) => {
+    setLocationInputValue(e.target.value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,7 +76,6 @@ const JobPosting = () => {
     try {
       await api.post("/api/jobs/", jobDetails);
       toast.success("Job posted successfully!");
-      // FIXED: Navigate to the correct dashboard path
       setTimeout(() => navigate("/dashboard/jobs"), 1500);
       setJobDetails({
         title: "",
@@ -127,9 +105,7 @@ const JobPosting = () => {
   }, []);
 
   return (
-    /* ADJUSTED: Removed pt-32 for better alignment in DashboardLayout */
     <div className="flex justify-center items-start min-h-full bg-background text-foreground pt-6 pb-20 px-4 relative overflow-hidden">
-      {/* Atmosphere Background */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full bg-blue-500/3 blur-[120px] pointer-events-none -z-10" />
 
       <Card className="w-full max-w-3xl border-border bg-card shadow-2xl rounded-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -144,8 +120,6 @@ const JobPosting = () => {
 
         <CardContent className="p-8 pt-4">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Job Title */}
-            {/* Job Title */}
             <div className="space-y-2">
               <Label
                 htmlFor="title"
@@ -167,8 +141,6 @@ const JobPosting = () => {
               </div>
             </div>
 
-            {/* Category */}
-            {/* Category */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold ml-1 text-muted-foreground">
                 Category
@@ -196,55 +168,17 @@ const JobPosting = () => {
               </Select>
             </div>
 
-            {/* Location */}
             <div className="space-y-2 relative">
               <Label className="text-xs font-semibold ml-1 text-muted-foreground">
                 Service Location
               </Label>
-              <div className="relative group">
-                <MapPin className="absolute z-10 left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
-                <Input
-                  placeholder="Search for your city..."
-                  className="pl-12 h-14 rounded-xl"
-                  value={locationInputValue}
-                  onChange={(e) => setLocationInputValue(e.target.value)}
-                  required
-                />
-                {locationLoading && (
-                  <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-blue-600" />
-                )}
-              </div>
-
-              {locationOptions.length > 0 && (
-                <ul className="absolute z-[100] mt-2 max-h-60 w-full overflow-auto rounded-xl border border-border bg-card py-2 shadow-xl text-sm">
-                  {locationOptions.map((option, index) => (
-                    <li
-                      key={index}
-                      className="cursor-pointer px-5 py-3 hover:bg-muted flex items-center gap-3 transition-colors border-b border-border/50 last:border-none"
-                      onClick={() => {
-                        setJobDetails((prev) => ({
-                          ...prev,
-                          city: option.display_name.split(",")[0],
-                          location: {
-                            lat: parseFloat(option.lat),
-                            lng: parseFloat(option.lon),
-                          },
-                        }));
-                        setLocationInputValue(option.display_name);
-                        setLocationOptions([]);
-                      }}
-                    >
-                      <MapPin className="h-4 w-4 text-blue-600 shrink-0" />
-                      <span className="truncate font-medium">
-                        {option.display_name}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <LocationSearchInput
+                value={locationInputValue}
+                onChange={handleLocationInputChange}
+                onLocationSelect={handleLocationSelect}
+              />
             </div>
 
-            {/* Description */}
             <div className="space-y-2">
               <Label
                 htmlFor="description"

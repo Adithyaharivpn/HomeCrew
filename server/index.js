@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Cors
-const allowedOrigins = ['https://college-project-git-feature-jobpage-adithyaharivpns-projects.vercel.app', 'http://localhost:3000' ,'http://localhost:5173' , 'https://college-project-git-shadcn-version-adithyaharivpns-projects.vercel.app' ]; 
+const allowedOrigins = ['https://college-project-eight-nu.vercel.app', 'http://localhost:3000' ,'http://localhost:5173' , 'https://college-project-git-shadcn-version-adithyaharivpns-projects.vercel.app' ]; 
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -103,7 +103,7 @@ io.on('connection', (socket) => {
       const realSenderId = data.senderId || (data.sender && data.sender._id) || data.sender;
 
       if (!realSenderId) {
-          logger.error(`❌ Socket Error: Sender ID is missing in data packet`);
+          logger.error(` Socket Error: Sender ID is missing in data packet`);
           return;
       }
 
@@ -113,6 +113,21 @@ io.on('connection', (socket) => {
         text: data.text,
         type: data.type || 'text',
       };
+
+      const room = await ChatRoom.findById(data.roomId).populate('jobId');
+      if (room && room.jobId) {
+          const job = room.jobId; 
+          if (['assigned', 'in_progress', 'completed', 'cancelled'].includes(job.status)) {
+             const isAssigned = job.assignedTo && job.assignedTo.toString() === realSenderId.toString();
+             const isCustomer = job.user.toString() === realSenderId.toString();
+
+             if (!isAssigned && !isCustomer) {
+                 logger.warn(`Chat blocked: User ${realSenderId} tried to message in Room ${data.roomId} but job is closed/assigned to another.`);
+                 return;
+             }
+          }
+      }
+
 
       if (data.price) msgPayload.price = Number(data.price);
       if (data.appointmentId) msgPayload.appointmentId = data.appointmentId;
@@ -127,7 +142,7 @@ io.on('connection', (socket) => {
       await savedMessage.populate('sender', 'name profilePictureUrl');
       io.to(data.roomId).emit('receiveMessage', savedMessage);
 
-      const room = await ChatRoom.findById(data.roomId);
+      // Re-using the 'room' variable fetched above for notifications
       if (room) {
           const receiverId = room.customerId.toString() === realSenderId.toString()
             ? room.tradespersonId 

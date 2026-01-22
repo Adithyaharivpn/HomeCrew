@@ -4,14 +4,47 @@ const User = require("../models/User");
 const cloudinary = require("../middleware/cloudinary");
 const logger = require('../utils/logger'); 
 
+const checkUserUnique = async (req, res) => {
+  const { email, phoneNumber } = req.body;
+  try {
+    const existingUser = await User.findOne({ 
+      $or: [
+        { email: email }, 
+        { phoneNumber: phoneNumber }
+      ] 
+    });
+
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+      if (existingUser.phoneNumber === phoneNumber) {
+         return res.status(400).json({ error: "Phone number already registered" });
+      }
+    }
+    return res.status(200).json({ message: "User is unique" });
+  } catch (error) {
+    logger.error(`Uniqueness check error: ${error.message}`);
+    // Don't block flow on server error, but maybe warn? 
+    // For now, let's treat server error as 'unknown, let them try signup' or return error.
+    return res.status(500).json({ error: "Unable to verify details" });
+  }
+};
+
 const signup = async (req, res) => {
   const { name, email, password, role, tradeCategory, experience, location, phoneNumber, lat, lng } = req.body;
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
     if (existingUser) {
-      logger.warn(`Signup failed: Email already registered ${email}`);
-      return res.status(400).json({ error: "Email already registered" });
+      if (existingUser.email === email) {
+        logger.warn(`Signup failed: Email already registered ${email}`);
+        return res.status(400).json({ error: "Email already registered" });
+      }
+      if (existingUser.phoneNumber === phoneNumber) {
+         logger.warn(`Signup failed: Phone already registered ${phoneNumber}`);
+         return res.status(400).json({ error: "Phone number already registered" });
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -131,4 +164,4 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, getMe };
+module.exports = { signup, login, getMe, checkUserUnique };

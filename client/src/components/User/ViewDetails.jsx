@@ -107,7 +107,7 @@ const ViewDetails = () => {
     if (query.length < 3) return setSuggestions([]);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=5`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=5`,
       );
       const data = await res.json();
       setSuggestions(data);
@@ -145,11 +145,13 @@ const ViewDetails = () => {
 
   const handleContact = async () => {
     try {
-      if (user.role === 'tradesperson' && !user.isVerified) {
-        toast.error("Account pending verification.", { description: "You cannot initiate chats until approved." });
+      if (user.role === "tradesperson" && !user.isVerified) {
+        toast.error("Account pending verification.", {
+          description: "You cannot initiate chats until approved.",
+        });
         return;
       }
-      
+
       const res = await api.post("/api/chat/initiate", {
         jobId: job._id,
         customerId: job.user._id,
@@ -277,47 +279,55 @@ const ViewDetails = () => {
                   <>
                     {/* OPEN JOB: Apply */}
                     {job.status === "open" && (
-                        <Button
-                            className={`h-14 px-8 rounded-2xl shadow-lg font-black w-full ${user.isVerified ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20" : "bg-muted text-muted-foreground shadow-none cursor-not-allowed"}`}
-                            onClick={handleContact}
-                            disabled={!user.isVerified}
-                        >
-                            {!user.isVerified ? (
-                                <>
-                                    <ShieldCheck className="mr-2 h-5 w-5" /> Verification Pending
-                                </>
-                            ) : (
-                                <>
-                                    <MessageCircle className="mr-2 h-5 w-5" /> Send Quote
-                                </>
-                            )}
-                        </Button>
+                      <Button
+                        className={`h-14 px-8 rounded-2xl shadow-lg font-black w-full ${user.isVerified ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20" : "bg-muted text-muted-foreground shadow-none cursor-not-allowed"}`}
+                        onClick={handleContact}
+                        disabled={!user.isVerified}
+                      >
+                        {!user.isVerified ? (
+                          <>
+                            <ShieldCheck className="mr-2 h-5 w-5" />{" "}
+                            Verification Pending
+                          </>
+                        ) : (
+                          <>
+                            <MessageCircle className="mr-2 h-5 w-5" /> Send
+                            Quote
+                          </>
+                        )}
+                      </Button>
                     )}
 
                     {/* ASSIGNED TO ME: Chat or Completed */}
-                    {(job.status === "assigned" || job.status === "in_progress") && job.assignedTo?._id === user._id && (
-                        job.isPaid === true ? (
-                            <Button
-                                className="h-14 px-8 rounded-2xl shadow-lg font-black w-full bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
-                                onClick={handleContact}
-                            >
-                                <MessageCircle className="mr-2 h-5 w-5" /> Open Chatroom
-                            </Button>
-                        ) : (
-                            <Button
-                                disabled
-                                className="h-14 px-8 rounded-2xl shadow-lg font-black w-full bg-amber-500/50 text-white cursor-not-allowed"
-                            >
-                                <Clock className="mr-2 h-5 w-5 animate-spin" /> Waiting for Payment
-                            </Button>
-                        )
-                    )}
+                    {(job.status === "assigned" ||
+                      job.status === "in_progress") &&
+                      job.assignedTo?._id === user._id &&
+                      (job.isPaid === true ? (
+                        <Button
+                          className="h-14 px-8 rounded-2xl shadow-lg font-black w-full bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
+                          onClick={handleContact}
+                        >
+                          <MessageCircle className="mr-2 h-5 w-5" /> Open
+                          Chatroom
+                        </Button>
+                      ) : (
+                        <Button
+                          disabled
+                          className="h-14 px-8 rounded-2xl shadow-lg font-black w-full bg-amber-500/50 text-white cursor-not-allowed"
+                        >
+                          <Clock className="mr-2 h-5 w-5 animate-spin" />{" "}
+                          Waiting for Payment
+                        </Button>
+                      ))}
 
-                     {/* CLOSED */}
-                    {(job.status === "completed" || job.status === "cancelled") && (
-                        <div className="w-full text-center p-4 bg-muted/30 rounded-2xl border border-border">
-                            <p className="text-xs font-black uppercase text-muted-foreground tracking-widest">Job is {job.status}</p>
-                        </div>
+                    {/* CLOSED */}
+                    {(job.status === "completed" ||
+                      job.status === "cancelled") && (
+                      <div className="w-full text-center p-4 bg-muted/30 rounded-2xl border border-border">
+                        <p className="text-xs font-black uppercase text-muted-foreground tracking-widest">
+                          Job is {job.status}
+                        </p>
+                      </div>
                     )}
                   </>
                 )}
@@ -451,15 +461,20 @@ const ViewDetails = () => {
                   <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.2em] mb-8">
                     Posted By
                   </p>
-                  <Avatar className="h-32 w-32 border-4 border-background shadow-2xl mb-6 mx-auto hover:scale-105 transition-transform duration-300">
-                    <AvatarImage src={job.user?.profilePictureUrl} />
-                    <AvatarFallback className="bg-blue-600 text-white text-3xl font-black">
-                      {job.user?.name?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h4 className="text-2xl font-black uppercase tracking-tight text-foreground">
-                    {job.user?.name}
-                  </h4>
+                  <Link
+                    to={`/dashboard/profile/${job.user?._id}`}
+                    className="block hover:opacity-80 transition-opacity"
+                  >
+                    <Avatar className="h-32 w-32 border-4 border-background shadow-2xl mb-6 mx-auto hover:scale-105 transition-transform duration-300">
+                      <AvatarImage src={job.user?.profilePictureUrl} />
+                      <AvatarFallback className="bg-blue-600 text-white text-3xl font-black">
+                        {job.user?.name?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h4 className="text-2xl font-black uppercase tracking-tight text-foreground">
+                      {job.user?.name}
+                    </h4>
+                  </Link>
                   <div className="flex items-center justify-center gap-2 text-[10px] font-black text-muted-foreground uppercase mt-4 tracking-widest">
                     <Calendar className="h-4 w-4 text-blue-600" /> Member since{" "}
                     {new Date(job.user?.createdAt || Date.now()).getFullYear()}
