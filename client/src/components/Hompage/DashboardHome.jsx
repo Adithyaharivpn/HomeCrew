@@ -467,7 +467,7 @@ const DashboardHome = () => {
                 className="bg-card border-border rounded-[2.5rem] shadow-sm"
               >
                 <CardContent className="p-8 flex items-center gap-6">
-                  <Skeleton className="h-16 w-16 rounded-[1.5rem]" />
+                  <Skeleton className="h-16 w-16 rounded-3xl" />
                   <div className="space-y-2 flex-1">
                     <Skeleton className="h-3 w-20" />
                     <Skeleton className="h-8 w-24" />
@@ -557,7 +557,7 @@ const DashboardHome = () => {
             [1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="flex items-center justify-between p-5 rounded-[2rem]"
+                className="flex items-center justify-between p-5 rounded-4xl"
               >
                 <div className="flex items-center gap-5 flex-1">
                   <Skeleton className="h-12 w-12 rounded-2xl" />
@@ -575,7 +575,7 @@ const DashboardHome = () => {
                 <div
                   key={job._id}
                   onClick={() => navigate(`/job/${job._id}`)}
-                  className="flex items-center justify-between p-5 hover:bg-muted/40 rounded-[2rem] transition-all group cursor-pointer"
+                  className="flex items-center justify-between p-5 hover:bg-muted/40 rounded-4xl transition-all group cursor-pointer"
                 >
                   <div className="flex items-center gap-5 flex-1">
                     <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center border border-blue-200 dark:border-blue-800 text-blue-600 group-hover:scale-110 transition-transform">
@@ -628,7 +628,7 @@ const DashboardHome = () => {
             activities.map((activity, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-5 hover:bg-muted/40 rounded-[2rem] transition-all group"
+                className="flex items-center justify-between p-5 hover:bg-muted/40 rounded-4xl transition-all group"
               >
                 <div className="flex items-center gap-5">
                   <div className="h-12 w-12 bg-background rounded-2xl flex items-center justify-center border border-border group-hover:scale-110 transition-transform">

@@ -47,7 +47,7 @@ const Logo = () => {
       to="/"
       className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20"
     >
-      <div className="h-5 w-6 bg-foreground dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0 flex items-center justify-center">
+      <div className="h-5 w-6 bg-foreground dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm shrink-0 flex items-center justify-center">
         <Zap className="h-3 w-3 text-background dark:text-black" />
       </div>
       <motion.span
@@ -67,7 +67,7 @@ const LogoIcon = () => {
       to="/"
       className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20"
     >
-      <div className="h-5 w-6 bg-foreground dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0 flex items-center justify-center">
+      <div className="h-5 w-6 bg-foreground dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm shrink-0 flex items-center justify-center">
         <Zap className="h-3 w-3 text-background dark:text-black" />
       </div>
     </Link>
@@ -229,7 +229,7 @@ const DashboardLayout = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center justify-start gap-2 group/sidebar py-2 cursor-pointer w-full">
-                    <div className="h-6 w-6 flex-shrink-0 relative">
+                    <div className="h-6 w-6 shrink-0 relative">
                       <Sun className="h-6 w-6 absolute rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
                       <Moon className="h-6 w-6 absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
                     </div>
@@ -238,7 +238,7 @@ const DashboardLayout = () => {
                         display: open ? "inline-block" : "none",
                         opacity: open ? 1 : 0,
                       }}
-                      className="text-foreground text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0 flex-1"
+                      className="text-foreground text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block p-0! m-0! flex-1"
                     >
                       Theme
                     </motion.span>
@@ -246,7 +246,7 @@ const DashboardLayout = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="ml-10 bg-card border-border z-[200]"
+                  className="ml-10 bg-card border-border z-200"
                 >
                   {" "}
                   <DropdownMenuItem
@@ -277,7 +277,7 @@ const DashboardLayout = () => {
                     label: "Log Out",
                     href: "#",
                     icon: (
-                      <LogOut className="h-7 w-7 flex-shrink-0 text-foreground" />
+                      <LogOut className="h-7 w-7 shrink-0 text-foreground" />
                     ),
                   }}
                 />
@@ -289,7 +289,7 @@ const DashboardLayout = () => {
                   to="/dashboard/profile"
                   className="flex items-center gap-2 py-2 w-full cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors group/sidebar"
                 >
-                  <Avatar className="h-7 w-7 rounded-full flex-shrink-0 overflow-hidden">
+                  <Avatar className="h-7 w-7 rounded-full shrink-0 overflow-hidden">
                     <AvatarImage
                       src={user?.profilePictureUrl}
                       alt={user?.name}
