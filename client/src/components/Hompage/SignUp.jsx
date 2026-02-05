@@ -171,9 +171,7 @@ const SignUp = () => {
     }
 
     try {
-      const response = await api.post("/api/auth/signup", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.post("/api/auth/signup", data);
 
       if (response.data.token) {
         await login(response.data.token);
@@ -264,7 +262,7 @@ const SignUp = () => {
                       : "border-border hover:border-blue-500/50 hover:bg-muted/50"
                   }`}
                 >
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2 shadow-lg group-hover:shadow-blue-500/50 transition-all">
+                  <div className="h-16 w-16 rounded-full bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2 shadow-lg group-hover:shadow-blue-500/50 transition-all">
                     <User className="h-8 w-8 text-white" />
                   </div>
                   <div className="text-center">
@@ -291,7 +289,7 @@ const SignUp = () => {
                       : "border-border hover:border-purple-500/50 hover:bg-muted/50"
                   }`}
                 >
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2 shadow-lg group-hover:shadow-purple-500/50 transition-all">
+                  <div className="h-16 w-16 rounded-full bg-linear-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2 shadow-lg group-hover:shadow-purple-500/50 transition-all">
                     <Hammer className="h-8 w-8 text-white" />
                   </div>
                   <div className="text-center">
