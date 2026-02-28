@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Cors
-const allowedOrigins = ['http://homecrew-nu.vercel.app/', 'http://localhost:3000' ,'http://localhost:5173' ]; 
+const allowedOrigins = ['http://homecrew-nu.vercel.app', 'http://localhost:3000' ,'http://localhost:5173' ]; 
 
 const corsOptions = {
   origin: (origin, callback) => {
