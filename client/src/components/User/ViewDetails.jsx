@@ -371,7 +371,7 @@ const ViewDetails = () => {
                   <h3 className="text-xs font-black uppercase text-muted-foreground tracking-[0.2em] ml-1">
                     Details
                   </h3>
-                  <div className="bg-muted/30 rounded-[1.5rem] p-8 border border-border/50">
+                  <div className="bg-muted/30 rounded-3xl p-8 border border-border/50">
                     {isEditing ? (
                       <Textarea
                         value={editDescription}
@@ -404,7 +404,7 @@ const ViewDetails = () => {
                             className="h-12 bg-muted/50 border-blue-600/30 rounded-xl"
                           />
                           {suggestions.length > 0 && (
-                            <div className="absolute top-full left-0 w-full bg-card border border-border z-[100] rounded-xl shadow-2xl mt-1 overflow-hidden">
+                            <div className="absolute top-full left-0 w-full bg-card border border-border z-100 rounded-xl shadow-2xl mt-1 overflow-hidden">
                               {suggestions.map((sug, i) => (
                                 <div
                                   key={i}

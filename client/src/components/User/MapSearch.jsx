@@ -96,7 +96,7 @@ const MapSearch = () => {
         <Card className="h-full w-full overflow-hidden relative shadow-none border-0 rounded-none">
             
             {/* Legend - Floating Top Right */}
-            <div className="absolute top-4 right-4 z-[1000] bg-white p-3 rounded-lg shadow-md border border-slate-200">
+            <div className="absolute top-4 right-4 z-1000 bg-white p-3 rounded-lg shadow-md border border-slate-200">
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">Map Legend</h4>
                 <div className="flex flex-col gap-2">
                     <Badge className="bg-blue-500 hover:bg-blue-600 text-white gap-2 px-2 py-1">

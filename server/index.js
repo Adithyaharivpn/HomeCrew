@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Cors
-const allowedOrigins = ['https://college-project-eight-nu.vercel.app', 'http://localhost:3000' ,'http://localhost:5173' , 'https://college-project-git-shadcn-version-adithyaharivpns-projects.vercel.app' ]; 
+const allowedOrigins = ['http://homecrew-nu.vercel.app/', 'http://localhost:3000' ,'http://localhost:5173' ]; 
 
 const corsOptions = {
   origin: (origin, callback) => {

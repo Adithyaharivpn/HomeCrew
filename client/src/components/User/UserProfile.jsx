@@ -322,7 +322,7 @@ const UserProfile = () => {
                 {/* Sidebar Professional Info */}
                 <div className="lg:col-span-4 space-y-6">
                   {profileData.role === "tradesperson" && (
-                    <div className="bg-muted/30 p-8 rounded-[2rem] border border-border space-y-6">
+                    <div className="bg-muted/30 p-8 rounded-4xl border border-border space-y-6">
                       <h3 className="text-sm font-bold text-muted-foreground">
                         Professional Info
                       </h3>
@@ -384,7 +384,7 @@ const UserProfile = () => {
 
                   {/* Contact Info (Self Only) */}
                   {isSelfView && (
-                    <div className="bg-muted/30 p-8 rounded-[2rem] border border-border space-y-6">
+                    <div className="bg-muted/30 p-8 rounded-4xl] border border-border space-y-6">
                       <h3 className="text-sm font-bold text-muted-foreground">
                         Contact Info (Private)
                       </h3>
@@ -413,7 +413,7 @@ const UserProfile = () => {
 
                   {isSelfView ? (
                     /* SUMMARY VIEW FOR SELF */
-                    <div className="bg-blue-600/5 border border-blue-600/20 rounded-[2rem] p-10 flex flex-col items-center text-center space-y-4">
+                    <div className="bg-blue-600/5 border border-blue-600/20 rounded-4xl p-10 flex flex-col items-center text-center space-y-4">
                       <div className="p-5 bg-blue-600/10 rounded-full">
                         <Star className="h-10 w-10 text-blue-600 fill-blue-600" />
                       </div>
@@ -435,14 +435,14 @@ const UserProfile = () => {
                     /* FULL VIEW FOR OTHERS */
                     <div className="space-y-6">
                       {reviews.length === 0 ? (
-                        <div className="bg-muted/20 border-2 border-dashed border-border rounded-[2rem] p-16 text-center text-muted-foreground">
+                        <div className="bg-muted/20 border-2 border-dashed border-border rounded-4xl p-16 text-center text-muted-foreground">
                           No feedback received yet.
                         </div>
                       ) : (
                         reviews.map((review) => (
                           <Card
                             key={review._id}
-                            className="bg-muted/10 border-border/50 rounded-[1.5rem] p-6"
+                            className="bg-muted/10 border-border/50 rounded-3xl p-6"
                           >
                             <div className="flex items-start gap-4">
                               <Avatar className="h-12 w-12 border border-border">

@@ -591,7 +591,7 @@ const ChatBox = () => {
                       className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
                     >
                       <div
-                        className={`p-4 rounded-[1.5rem] shadow-sm ${isMe ? "bg-blue-600 text-white rounded-tr-none" : "bg-muted text-foreground rounded-tl-none border border-border"}`}
+                        className={`p-4 rounded-3xl shadow-sm ${isMe ? "bg-blue-600 text-white rounded-tr-none" : "bg-muted text-foreground rounded-tl-none border border-border"}`}
                       >
                         {renderMessage(msg)}
                       </div>

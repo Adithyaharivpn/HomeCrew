@@ -353,7 +353,7 @@ const JobsPage = () => {
           <Skeleton className="h-14 flex-1 rounded-2xl" />
           <Skeleton className="h-14 w-full sm:w-[250px] rounded-2xl" />
         </div>
-        <Skeleton className="h-16 w-full rounded-[1.5rem]" />
+        <Skeleton className="h-16 w-full rounded-3xl" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <Card
@@ -388,7 +388,7 @@ const JobsPage = () => {
         <Confetti
           width={window.innerWidth}
           height={window.innerHeight}
-          className="z-[100]"
+          className="z-100"
         />
       )}
 
@@ -445,7 +445,7 @@ const JobsPage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-10">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1.5 rounded-[1.5rem] h-16 border border-border">
+          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1.5 rounded-3xl h-16 border border-border">
             <TabsTrigger value="open" className="rounded-xl font-bold text-xs">
               Available{" "}
               <Badge
